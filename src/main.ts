@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
   const options = new DocumentBuilder()
-    .setDescription("The  API description")
+    .setDescription("Дар APİ list")
     .setVersion("1.0")
     .build();
   const document = SwaggerModule.createDocument(app, options);
