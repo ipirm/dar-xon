@@ -43,7 +43,7 @@ export class CustomerService {
         Object.assign(createCustomerDto, { [key]: file.url });
       }
     }
-    return await this.customer.update(id, { ...createCustomerDto });
+    return await this.customer.update(id, this.customer.create(createCustomerDto));
   }
 
   async deleteCustomer(id: number): Promise<DeleteResult> {

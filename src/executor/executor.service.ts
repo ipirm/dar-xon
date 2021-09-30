@@ -41,7 +41,7 @@ export class ExecutorService {
       const file = await this.aws.uploadPublicFile(value[0]);
       Object.assign(createExecutorDto, { [key]: file.url });
     }
-    return await this.executor.update(id, { ...createExecutorDto });
+    return await this.executor.update(id, this.executor.create(createExecutorDto));
   }
 
   async deleteExecutor(id: number): Promise<DeleteResult> {

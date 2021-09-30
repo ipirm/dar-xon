@@ -9,6 +9,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
   const options = new DocumentBuilder()
+    .addBearerAuth()
     .setDescription("Дар APİ list")
     .setVersion("1.0")
     .build();

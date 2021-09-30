@@ -1,4 +1,4 @@
-import { BeforeUpdate, Column, Entity } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
@@ -12,10 +12,13 @@ export class Customer extends BaseEntity {
   @Column({ nullable: true })
   email: string;
 
+  @Column({ nullable: true })
+  avatar: string;
+
   @Column({ type: "varchar", nullable: true })
   phone: string;
 
-  @Column({ select: false, nullable: true })
+  @Column({ nullable: true,select:false })
   password: string;
 
   @BeforeUpdate()
