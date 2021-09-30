@@ -6,7 +6,7 @@ import { Pagination } from "nestjs-typeorm-paginate";
 import { DeleteResult, UpdateResult } from "typeorm";
 import { Customer } from "../database/entities/customer.entity";
 import { CreateCustomerDto } from "./dto/create-customer.dto";
-import { FilesInterceptor } from "@nestjs/platform-express";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 
 
 @ApiTags("Customer")
@@ -37,7 +37,9 @@ export class CustomerController {
   }
 
   @Post("")
-  @UseInterceptors(FilesInterceptor("files"))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: "avatar", maxCount: 1 }
+  ]))
   @ApiOperation({ summary: "Создать заказчика" })
   @ApiBody({ type: CreateCustomerDto })
   saveCustomer(
@@ -61,13 +63,17 @@ export class CustomerController {
   }
 
   @Put(":id")
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: "avatar", maxCount: 1 }
+  ]))
   @ApiOperation({ summary: "Обновить заказчика" })
   @ApiBody({ type: CreateCustomerDto })
   updateCustomer(
     @Param("id") id: number,
-    @Body() createCustomerDto: CreateCustomerDto
+    @Body() createCustomerDto: CreateCustomerDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<UpdateResult> {
-    return this.customer.updateCustomer(id, createCustomerDto);
+    return this.customer.updateCustomer(id, createCustomerDto, files);
   }
 
 

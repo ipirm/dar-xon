@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity } from "typeorm";
+import { BeforeUpdate, Column, Entity } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 
@@ -6,16 +6,22 @@ import * as bcrypt from "bcrypt";
 @Entity("executor")
 export class Executor extends BaseEntity {
 
-  @Column()
+  @Column({ nullable: true })
   fio: string;
 
-  @Column({ type: "varchar",nullable: true })
+  @Column({ type: "varchar", nullable: true })
   phone: string;
 
-  @Column({ select: true })
+  @Column({ nullable: true })
+  avatar: string;
+
+  @Column({ nullable: true })
+  email: string;
+
+  @Column({ select: false, nullable: true })
   password: string;
 
-  @BeforeInsert()
+  @BeforeUpdate()
   async generatePasswordHash(): Promise<void> {
     this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
@@ -23,19 +29,19 @@ export class Executor extends BaseEntity {
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
 
-  @Column()
+  @Column({ nullable: true })
   p_series: string;
 
-  @Column()
-  p_number: number;
+  @Column({ nullable: true })
+  p_number: string;
 
-  @Column()
+  @Column({ nullable: true })
   p_by: string;
 
-  @Column()
+  @Column({ nullable: true })
   p_issue_time: string;
 
-  @Column()
+  @Column({ nullable: true })
   p_birth_date: string;
 
   @Column({nullable: true})
@@ -43,4 +49,11 @@ export class Executor extends BaseEntity {
 
   @Column({nullable: true})
   p_pink: string;
+
+  @Column({ default: "123456", select: false })
+  confirmation: string;
+
+  @Column({ default: false, select: false })
+  confirmed: Boolean;
+
 }

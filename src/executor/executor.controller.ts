@@ -39,7 +39,8 @@ export class ExecutorController {
   @ApiOperation({ summary: "Создать исполнителя" })
   @UseInterceptors(FileFieldsInterceptor([
     { name: "p_scan", maxCount: 1 },
-    { name: "p_pink", maxCount: 1 }
+    { name: "p_pink", maxCount: 1 },
+    { name: "avatar", maxCount: 1 }
   ]))
   @ApiBody({ type: CreateExecutorDto })
   saveExecutor(
@@ -67,7 +68,8 @@ export class ExecutorController {
   @ApiBody({ type: CreateExecutorDto })
   @UseInterceptors(FileFieldsInterceptor([
     { name: "p_scan", maxCount: 1 },
-    { name: "p_pink", maxCount: 1 }
+    { name: "p_pink", maxCount: 1 },
+    { name: "avatar", maxCount: 1 }
   ]))
   updateExecutor(
     @Param("id") id: number,

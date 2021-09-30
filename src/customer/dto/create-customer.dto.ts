@@ -8,14 +8,14 @@ export class CreateCustomerDto {
 
   @IsString()
   @ApiProperty({ example: "Ильхам", description: "Имя", required: false })
-  name: string;
+  fio: string;
 
   @IsEmail()
   @ApiProperty({ example: "ilham.pirm@gmail.com", description: "почта", required: false })
   email: string;
 
   @IsString()
-  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: false })
+  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
   phone: string;
 
   @IsString()
@@ -40,6 +40,10 @@ export class CreateCustomerDto {
   inn: string;
 
   @IsString()
+  @ApiProperty({ example: "1489552", description: "БИК", required: false })
+  bik: string;
+
+  @IsString()
   @ApiProperty({ example: "AZ89AIIB410500C6434010168118", description: "ОГРН", required: false })
   ogrn: string;
 
@@ -61,6 +65,7 @@ export class CreateCustomerDto {
 
   @ApiModelProperty({
     enum: Object.keys(CustomerTypeEnum),
+    default: CustomerTypeEnum.SelfEmployed
   })
   customer_type: CustomerTypeEnum;
 }

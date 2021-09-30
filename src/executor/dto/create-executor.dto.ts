@@ -6,11 +6,10 @@ export class CreateExecutorDto {
 
   @IsString()
   @ApiProperty({ example: "Ильхам Пирмаммадов,Вугар", description: "ФИО", required: false })
-  name: string;
+  fio: string;
 
   @IsString()
-  @IsOptional()
-  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: false })
+  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
   phone: string;
 
   @IsString()
@@ -21,9 +20,9 @@ export class CreateExecutorDto {
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
   p_series: string;
 
-  @IsInt()
+  @IsString()
   @ApiProperty({ example: "14889522", description: "Номер паспорта", required: false })
-  p_number: number;
+  p_number: string;
 
   @IsString()
   @ApiProperty({ example: "ASAN1", description: "Кем выдан", required: false })
