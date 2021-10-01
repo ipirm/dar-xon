@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { ExecutorModule } from './executor/executor.module';
 import { AwsModule } from './aws/aws.module';
 import { CustomerModule } from './customer/customer.module';
+import { CategoryModule } from './category/category.module';
+import { TaskModule } from './task/task.module';
 import * as ormConfig from "./database/orm.config";
 
 
@@ -20,7 +22,9 @@ import * as ormConfig from "./database/orm.config";
     AuthModule,
     ExecutorModule,
     AwsModule,
-    CustomerModule
+    CustomerModule,
+    CategoryModule,
+    TaskModule
   ],
   controllers: [AppController],
   providers: [AppService]

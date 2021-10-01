@@ -22,7 +22,8 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({
     forbidUnknownValues: true,
-    skipMissingProperties: true
+    skipMissingProperties: true,
+    whitelist: true
   }));
   // app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();

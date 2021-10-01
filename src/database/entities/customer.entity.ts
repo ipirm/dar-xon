@@ -1,7 +1,8 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
+import { BeforeUpdate, Column, Entity, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
+import { Task } from "./task.entity";
 
 @Entity("customer")
 export class Customer extends BaseEntity {
@@ -70,4 +71,7 @@ export class Customer extends BaseEntity {
 
   @Column({ default: false, select: false })
   confirmed: Boolean;
+
+  @OneToMany(() => Task, c => c.created_by)
+  tasks: Task[];
 }

@@ -1,6 +1,8 @@
-import { BeforeUpdate, Column, Entity } from "typeorm";
+import { BeforeUpdate, Column, Entity, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
+import { TaskResponses } from "./taskResponses.entity";
+import { Task } from "./task.entity";
 
 
 @Entity("executor")
@@ -18,7 +20,7 @@ export class Executor extends BaseEntity {
   @Column({ nullable: true })
   email: string;
 
-  @Column({ select: false, nullable: true })
+  @Column({ select: true, nullable: true })
   password: string;
 
   @BeforeUpdate()
@@ -56,4 +58,9 @@ export class Executor extends BaseEntity {
   @Column({ default: false, select: false })
   confirmed: Boolean;
 
+  @OneToMany(type => TaskResponses, task => task.executor)
+  responses?: TaskResponses[];
+
+  @OneToMany(() => Task, c => c.executor)
+  tasks: Task[];
 }

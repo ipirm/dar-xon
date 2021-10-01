@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
 import { paginate, Pagination } from "nestjs-typeorm-paginate";
 import { Executor } from "../database/entities/executor.entity";
 import { CreateExecutorDto } from "./dto/create-executor.dto";
@@ -36,12 +36,15 @@ export class ExecutorService {
     return await this.executor.findOne(id);
   }
 
-  async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<UpdateResult> {
-    for (const [key, value] of Object.entries(files)) {
-      const file = await this.aws.uploadPublicFile(value[0]);
-      Object.assign(createExecutorDto, { [key]: file.url });
+  async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<any> {
+    if (files) {
+      for (const [key, value] of Object.entries(files)) {
+        const file = await this.aws.uploadPublicFile(value[0]);
+        Object.assign(createExecutorDto, { [key]: file.url });
+      }
     }
-    return await this.executor.update(id, this.executor.create(createExecutorDto));
+    await this.executor.update(id, this.executor.create(createExecutorDto));
+    return await this.executor.findOne(id);
   }
 
   async deleteExecutor(id: number): Promise<DeleteResult> {
