@@ -57,6 +57,8 @@ export class ExecutorService {
       .where("executor.email = :nickname OR executor.phone = :nickname", { nickname })
       .getOne();
 
+    console.log(user)
+
     if (!user)
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,

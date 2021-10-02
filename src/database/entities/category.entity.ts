@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { Task } from "./task.entity";
+import { Portfolio } from "./portfolio.entity";
 
 
 @Entity("category")
@@ -18,5 +19,8 @@ export class Category extends BaseEntity {
 
   @OneToMany(type => Task, t => t.category, { onDelete: "CASCADE" })
   tasks?: Task[];
+
+  @OneToMany(type => Portfolio, t => t.category)
+  portfolio: Portfolio[];
 
 }

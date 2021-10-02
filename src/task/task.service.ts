@@ -7,9 +7,10 @@ import { CreateTaskDto } from "./dto/create-task.dto";
 import { AwsService } from "../aws/aws.service";
 import { TaskResponses } from "../database/entities/taskResponses.entity";
 import { CreateResponseDto } from "./dto/create-response.dto";
-import { ExecutorTypeEnum } from "../enums/executorType.enum";
+import { ExecutorTypeTaskEnum } from "../enums/executorTypeTask.enum";
 import { StartTaskDto } from "./dto/start-task.dto";
 import { TaskStatusEnum } from "../enums/taskStatus.enum";
+import { CustomerTypeTaskEnum } from "../enums/customerTypeTask.enum";
 
 @Injectable()
 export class TaskService {
@@ -46,6 +47,7 @@ export class TaskService {
   }
 
   async executeTask(createResponseDto: CreateResponseDto, user): Promise<TaskResponses> {
+    const task = await this.task.findOne(createResponseDto.task);
     return await this.response.save(this.response.create({
       executor: user.id,
       task: createResponseDto.task,
@@ -53,7 +55,7 @@ export class TaskService {
     }));
   }
 
-  async startTask(startTaskDto: StartTaskDto, user): Promise<any> {
+  async startTask(startTaskDto: StartTaskDto, user): Promise<Task> {
     const task = await this.task.createQueryBuilder("task")
       .where("task.id = :id", { id: startTaskDto.task })
       .leftJoinAndSelect("task.executor", "executor")
@@ -80,7 +82,7 @@ export class TaskService {
     return task;
   }
 
-  async finishTask(startTaskDto: StartTaskDto, user): Promise<any> {
+  async finishTask(startTaskDto: StartTaskDto, user): Promise<Task> {
     const task = await this.task.createQueryBuilder("task")
       .where("task.id = :id", { id: startTaskDto.task })
       .leftJoinAndSelect("task.executor", "executor")
@@ -107,24 +109,114 @@ export class TaskService {
     return task;
   }
 
+  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search): Promise<Pagination<Task>> {
+    const searchText = decodeURI(search).toLowerCase();
 
-  async getAllExecutorTasks(user, state: ExecutorTypeEnum, page, limit): Promise<any> {
-    const data = this.task.createQueryBuilder("task");
+    const data = await this.task.createQueryBuilder("task")
+      .select([
+        "task.id",
+        "task.title",
+        "task.createdAt",
+        "task.finishedAt",
+        "task.files",
+        "task.description",
+        "task.site",
+        "task.status",
+        "created_by.id",
+        "created_by.fio",
+        "created_by.avatar",
+        "parent.id",
+        "parent.name",
+        "category.id",
+        "category.name",
+        "executor.id",
+        "responses.id",
+        "executor1.id"
+      ])
+      .leftJoin("task.created_by", "created_by")
+      .leftJoin("task.category", "category")
+      .leftJoin("category.parent", "parent")
+      .leftJoin("task.executor", "executor")
+      .leftJoin("task.responses", "responses")
+      .leftJoin("responses.executor", "executor1")
+      .andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` })
+      .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
     if (state === "execution") {
+      data.andWhere("task.status = :started", { started: "started" });
+      data.andWhere("executor.id = :executor", { executor: user.id });
+    }
 
-      
+    if (state === "consideration") {
+      data.andWhere("task.status = :started", { started: "started" });
+      data.andWhere("executor1.id = :executor1", { executor1: user.id });
+    }
+
+    if (state === "archive") {
+      data.andWhere("task.status = :archive", { started: "finished" });
+      data.andWhere("executor.id = :executor", { executor: user.id });
 
     }
-    return state;
+
+    if (state === "all") {
+      data.andWhere("task.status = :started", { started: "created" });
+    }
+
+    return paginate(data, { page, limit });
+  }
+
+  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search): Promise<Pagination<Task>> {
+    const searchText = decodeURI(search).toLowerCase();
+
+    const data = await this.task.createQueryBuilder("task")
+      .select([
+        "task.id",
+        "task.title",
+        "task.createdAt",
+        "task.finishedAt",
+        "task.files",
+        "task.description",
+        "task.site",
+        "task.status",
+        "created_by.id",
+        "created_by.fio",
+        "created_by.avatar",
+        "parent.id",
+        "parent.name",
+        "category.id",
+        "category.name"
+      ])
+      .leftJoin("task.created_by", "created_by")
+      .leftJoin("task.category", "category")
+      .leftJoin("category.parent", "parent")
+      .andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` })
+      .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
+
+    if (state === "active") {
+      data.andWhere("(task.status = :started OR task.status = :created) ", { started: "started", created: "created" });
+      data.andWhere("created_by.id = :created_by", { created_by: user.id });
+    }
+
+
+    if (state === "archive") {
+      data.andWhere("task.status = :archive", { archive: "archive" });
+      data.andWhere("created_by.id = :created_by", { created_by: user.id });
+    }
+
+    if (state === "all") {
+      data.andWhere("task.status = :started", { started: "created" });
+    }
+
+    return paginate(data, { page, limit });
+
   }
 
   async deleteTask(id: number): Promise<DeleteResult> {
     return await this.task.delete(id);
   }
 
-  async findOne(id: number): Promise<Task> {
-    const data = this.task.createQueryBuilder("task")
+  async findOne(id: number, user): Promise<any> {
+    let data = await this.task.createQueryBuilder("task")
       .select([
         "task.id",
         "task.title",
@@ -148,6 +240,41 @@ export class TaskService {
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .getOne();
 
+    if (data.created_by.id == user.id) {
+      data = await this.task.createQueryBuilder("task")
+        .select([
+          "task.id",
+          "task.title",
+          "task.createdAt",
+          "task.finishedAt",
+          "task.files",
+          "task.description",
+          "task.site",
+          "created_by.id",
+          "created_by.fio",
+          "created_by.avatar",
+          "parent.id",
+          "parent.name",
+          "category.id",
+          "category.name",
+          "responses.id",
+          "responses.comment",
+          "executor.id",
+          "executor.avatar",
+          "executor.fio",
+          "executor.rating"
+        ])
+        .where("task.id = :id", { id: id })
+        .leftJoin("task.created_by", "created_by")
+        .leftJoin("task.category", "category")
+        .leftJoin("category.parent", "parent")
+        .leftJoin("task.responses", "responses")
+        .leftJoin("responses.executor", "executor")
+        .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
+        .getOne();
+    }
+
     return data;
   }
+
 }

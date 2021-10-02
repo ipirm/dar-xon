@@ -60,7 +60,6 @@ export class AuthService {
     if (role === "executor")
       user = await this.executor.findOne(signInDto.nickname, signInDto.password);
 
-
     return {
       access_token: this.jwtService.sign({ ...user, role })
     };

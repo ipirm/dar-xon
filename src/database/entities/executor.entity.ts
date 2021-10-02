@@ -3,6 +3,7 @@ import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 import { TaskResponses } from "./taskResponses.entity";
 import { Task } from "./task.entity";
+import { Portfolio } from "./portfolio.entity";
 
 
 @Entity("executor")
@@ -20,7 +21,7 @@ export class Executor extends BaseEntity {
   @Column({ nullable: true })
   email: string;
 
-  @Column({ select: true, nullable: true })
+  @Column({ select: false, nullable: true })
   password: string;
 
   @BeforeUpdate()
@@ -30,6 +31,9 @@ export class Executor extends BaseEntity {
 
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
+
+  @Column({ type: "integer", default: 5 })
+  rating: number;
 
   @Column({ nullable: true })
   p_series: string;
@@ -58,9 +62,12 @@ export class Executor extends BaseEntity {
   @Column({ default: false, select: false })
   confirmed: Boolean;
 
-  @OneToMany(type => TaskResponses, task => task.executor)
+  @OneToMany(type => TaskResponses, t => t.executor)
   responses?: TaskResponses[];
 
   @OneToMany(() => Task, c => c.executor)
   tasks: Task[];
+
+  @OneToMany(type => Portfolio, t => t.executor)
+  portfolios?: Portfolio[];
 }

@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, Index, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { Customer } from "./customer.entity";
 import { TaskResponses } from "./taskResponses.entity";
@@ -11,6 +11,7 @@ import { TaskStatusEnum } from "../../enums/taskStatus.enum";
 export class Task extends BaseEntity {
 
   @Column({ nullable: true })
+  @Index({ fulltext: true })
   title: string;
 
   @Column({ nullable: true })

@@ -11,7 +11,7 @@ import {
   UseInterceptors
 } from "@nestjs/common";
 import { TaskService } from "./task.service";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { Task } from "../database/entities/task.entity";
@@ -24,9 +24,10 @@ import { Role } from "../enums/roles.enum";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { TaskResponses } from "../database/entities/taskResponses.entity";
 import { CreateResponseDto } from "./dto/create-response.dto";
-import { ExecutorTypeEnum } from "../enums/executorType.enum";
+import { ExecutorTypeTaskEnum } from "../enums/executorTypeTask.enum";
 import { StartTaskDto } from "./dto/start-task.dto";
 import { DeleteResult } from "typeorm";
+import { CustomerTypeTaskEnum } from "../enums/customerTypeTask.enum";
 
 
 @ApiTags("Task")
@@ -82,7 +83,6 @@ export class TaskController {
     @Body() createResponseDto: CreateResponseDto,
     @UserDecorator() user: any
   ): Promise<TaskResponses> {
-    console.log(createResponseDto);
     return this.task.executeTask(createResponseDto, user);
   }
 
@@ -101,15 +101,64 @@ export class TaskController {
     required: false,
     type: Number
   })
-  @ApiParam({ name: "state", enum: ExecutorTypeEnum })
+  @ApiImplicitQuery({
+    name: "state",
+    required: true,
+    enum: ExecutorTypeTaskEnum
+  })
+
+  @ApiImplicitQuery({
+    name: "search",
+    required: false,
+    type: String
+  })
+
   @ApiOperation({ summary: "Получить все задачи исполнителя" })
   getAllExecutorTasks(
     @UserDecorator() user: any,
-    @Param("state") state: ExecutorTypeEnum = ExecutorTypeEnum.Execution,
+    @Query("state") state: ExecutorTypeTaskEnum = ExecutorTypeTaskEnum.All,
     @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100
-  ): Promise<TaskResponses> {
-    return this.task.getAllExecutorTasks(user, state, page, limit);
+    @Query("limit") limit: number = 100,
+    @Query("search") search: number = 100
+  ): Promise<Pagination<Task>> {
+    return this.task.getAllExecutorTasks(user, state, page, limit, search);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Customer)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get("customer/list")
+  @ApiImplicitQuery({
+    name: "page",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "limit",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "state",
+    required: true,
+    enum: CustomerTypeTaskEnum
+  })
+
+  @ApiImplicitQuery({
+    name: "search",
+    required: false,
+    type: String
+  })
+
+  @ApiOperation({ summary: "Получить все задачи заказчика" })
+  getAllCustomerTasks(
+    @UserDecorator() user: any,
+    @Query("state") state: CustomerTypeTaskEnum = CustomerTypeTaskEnum.All,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100,
+    @Query("search") search: number = 100
+  ): Promise<Pagination<Task>> {
+    return this.task.getAllCustomerTasks(user, state, page, limit, search);
   }
 
   @ApiBearerAuth()
@@ -121,7 +170,7 @@ export class TaskController {
   startTask(
     @Body() startTaskDto: StartTaskDto,
     @UserDecorator() user: any
-  ): Promise<any> {
+  ): Promise<Task> {
     return this.task.startTask(startTaskDto, user);
   }
 
@@ -134,10 +183,12 @@ export class TaskController {
   finishTask(
     @Body() startTaskDto: StartTaskDto,
     @UserDecorator() user: any
-  ): Promise<any> {
+  ): Promise<Task> {
     return this.task.finishTask(startTaskDto, user);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get(":id")
   @ApiOperation({ summary: "Получить задачу по id" })
   @ApiImplicitQuery({
@@ -146,27 +197,13 @@ export class TaskController {
     type: Number
   })
   getOne(
-    @Param("id") id: number
-  ): Promise<Task> {
-    return this.task.findOne(id);
+    @Param("id") id: number,
+    @UserDecorator() user: any
+  ): Promise<any> {
+    console.log(user)
+    return this.task.findOne(id, user);
   }
 
-  // @Put(":id")
-  // @ApiOperation({ summary: "Обновить раздел" })
-  // @ApiBody({ type: CreateCategoryDto })
-  // @ApiImplicitQuery({
-  //   name: "id",
-  //   required: true,
-  //   type: Number
-  // })
-  // updateCustomer(
-  //   @Param("id") id: number,
-  //   @Body() createCategoryDto: CreateCategoryDto
-  // ): Promise<UpdateResult> {
-  //   return this.category.updateCategory(id, createCategoryDto);
-  // }
-  //
-  //
   @Delete(":id")
   @ApiOperation({ summary: "Удалить задачу" })
   deleteCustomer(

@@ -9,6 +9,6 @@ export class CreateResponseDto {
   comment: string;
 
   @IsNumber()
-  @ApiProperty({ example: 6, description: "id задачи", required: true })
+  @ApiProperty({ example: 8, description: "id задачи", required: true })
   task: any;
 }
