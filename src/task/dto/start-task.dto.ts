@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsString } from "class-validator";
+import { IsArray, IsNumber, IsString } from "class-validator";
 
 
 export class StartTaskDto {
 
-  @IsNumber()
-  @ApiProperty({ example: 10, description: "Исполнитель", required: false })
-  executor: any;
+  @IsArray()
+  @ApiProperty({ example: [1,2,3], description: "Исполнитель", required: false })
+  executors: any;
 
   @IsNumber()
   @ApiProperty({ example: 7, description: "Задача", required: true })

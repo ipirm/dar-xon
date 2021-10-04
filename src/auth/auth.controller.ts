@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { SignInDto } from "./dto/sign-in.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
@@ -7,6 +7,8 @@ import { UserDecorator } from "../decorators/user.decorator";
 import { Role } from "../enums/roles.enum";
 import { RegistrationDto } from "./dto/registration.dto";
 import { ConfirmDto } from "./dto/confirm.dto";
+import { RegistrationCustomerDto } from "./dto/registration-customer.dto";
+import { RegistrationExecutorDto } from "./dto/registration-executor.dto";
 
 
 @ApiTags("Auth")
@@ -15,20 +17,26 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {
   }
 
-  @ApiOperation({ summary: "Зарегестироваться" })
-  @ApiBody({ type: RegistrationDto })
-  @ApiParam({ name: "role", enum: Role })
-  @Post("registration/:role")
-  Registration(
-    @Body() registrationDto: RegistrationDto,
-    @Param("role") role: Role = Role.Customer
+  @ApiOperation({ summary: "Зарегестироваться как заказчик" })
+  @ApiCreatedResponse({ type: RegistrationCustomerDto })
+  @Post("registration/customer")
+  registrationCustomer(
+    @Body() registrationCustomerDto: RegistrationCustomerDto
   ): Promise<any> {
-    return this.auth.registration(registrationDto, role);
+    return this.auth.registrationCustomer(registrationCustomerDto);
   }
 
+  @ApiOperation({ summary: "Зарегестироваться как исполнитель" })
+  @ApiCreatedResponse({ type: RegistrationExecutorDto })
+  @Post("registration/executor")
+  registrationExecutor(
+    @Body() registrationExecutorDto: RegistrationExecutorDto
+  ): Promise<any> {
+    return this.auth.registrationExecutor(registrationExecutorDto);
+  }
 
   @ApiOperation({ summary: "Потвердить номер или почту" })
-  @ApiBody({ type: ConfirmDto })
+  @ApiCreatedResponse({ type: ConfirmDto })
   @ApiParam({ name: "role", enum: Role })
   @Post("confirm/:role")
   confirmNumber(
@@ -49,7 +57,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: "Войти" })
-  @ApiBody({ type: SignInDto })
+  @ApiCreatedResponse({ type: SignInDto })
   @ApiParam({ name: "role", enum: Role })
   @Post("login/:role")
   signIn(

@@ -11,7 +11,7 @@ import {
   UseInterceptors
 } from "@nestjs/common";
 import { TaskService } from "./task.service";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { Task } from "../database/entities/task.entity";
@@ -26,7 +26,7 @@ import { TaskResponses } from "../database/entities/taskResponses.entity";
 import { CreateResponseDto } from "./dto/create-response.dto";
 import { ExecutorTypeTaskEnum } from "../enums/executorTypeTask.enum";
 import { StartTaskDto } from "./dto/start-task.dto";
-import { DeleteResult } from "typeorm";
+import { DeleteResult, UpdateResult } from "typeorm";
 import { CustomerTypeTaskEnum } from "../enums/customerTypeTask.enum";
 
 
@@ -63,7 +63,7 @@ export class TaskController {
   @UseInterceptors(FilesInterceptor("files", 10))
   @Post("")
   @ApiOperation({ summary: "Создать задачу" })
-  @ApiBody({ type: CreateTaskDto })
+  @ApiCreatedResponse({ type: CreateTaskDto })
   saveCustomer(
     @Body() createTaskDto: CreateTaskDto,
     @UserDecorator() user: any,
@@ -77,7 +77,7 @@ export class TaskController {
   @hasRoles(Role.Executor)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post("response")
-  @ApiBody({ type: CreateResponseDto })
+  @ApiCreatedResponse({ type: CreateResponseDto })
   @ApiOperation({ summary: "Откликнуться на задачу" })
   executorTask(
     @Body() createResponseDto: CreateResponseDto,
@@ -165,7 +165,7 @@ export class TaskController {
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post("start")
-  @ApiBody({ type: StartTaskDto })
+  @ApiCreatedResponse({ type: StartTaskDto })
   @ApiOperation({ summary: "Выбрать исполнителя" })
   startTask(
     @Body() startTaskDto: StartTaskDto,
@@ -178,12 +178,12 @@ export class TaskController {
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post("finish")
-  @ApiBody({ type: StartTaskDto })
+  @ApiCreatedResponse({ type: StartTaskDto })
   @ApiOperation({ summary: "Завершить проект" })
   finishTask(
     @Body() startTaskDto: StartTaskDto,
     @UserDecorator() user: any
-  ): Promise<Task> {
+  ): Promise<UpdateResult> {
     return this.task.finishTask(startTaskDto, user);
   }
 
@@ -191,11 +191,7 @@ export class TaskController {
   @UseGuards(JwtAuthGuard)
   @Get(":id")
   @ApiOperation({ summary: "Получить задачу по id" })
-  @ApiImplicitQuery({
-    name: "id",
-    required: true,
-    type: Number
-  })
+  @ApiParam({ name: "id" })
   getOne(
     @Param("id") id: number,
     @UserDecorator() user: any

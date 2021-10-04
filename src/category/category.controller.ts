@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
-import { ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CategoryService } from "./category.service";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -35,7 +35,7 @@ export class CategoryController {
 
   @Post("")
   @ApiOperation({ summary: "Создать раздел" })
-  @ApiBody({ type: CreateCategoryDto })
+  @ApiCreatedResponse({ type: CreateCategoryDto })
   saveCustomer(
     @Body() createCategoryDto: CreateCategoryDto
   ): Promise<Category> {
@@ -57,7 +57,7 @@ export class CategoryController {
 
   @Put(":id")
   @ApiOperation({ summary: "Обновить раздел" })
-  @ApiBody({ type: CreateCategoryDto })
+  @ApiCreatedResponse({ type: CreateCategoryDto })
   @ApiImplicitQuery({
     name: "id",
     required: true,

@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { Customer } from "./customer.entity";
 import { TaskResponses } from "./taskResponses.entity";
@@ -20,6 +20,9 @@ export class Task extends BaseEntity {
   @Column({ nullable: true })
   site: string;
 
+  @Column({ default: 0 })
+  participants: number;
+
   @Column({ nullable: true })
   startedAt: Date;
 
@@ -38,8 +41,9 @@ export class Task extends BaseEntity {
   @ManyToOne(type => Category, category => category.tasks, { onDelete: "CASCADE" })
   category: Category;
 
-  @ManyToOne(() => Executor, c => c.tasks, { onDelete: "CASCADE" })
-  executor: Executor;
+  @ManyToMany(() => Executor, c => c.tasks, { onDelete: "CASCADE" })
+  @JoinTable()
+  executors: Executor[];
 
   @Column("enum", { enum: TaskStatusEnum, default: TaskStatusEnum.Created })
   status: TaskStatusEnum;

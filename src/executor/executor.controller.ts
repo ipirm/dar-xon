@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { ExecutorService } from "./executor.service";
-import { ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { CreateExecutorDto } from "./dto/create-executor.dto";
@@ -42,7 +42,7 @@ export class ExecutorController {
     { name: "p_pink", maxCount: 1 },
     { name: "avatar", maxCount: 1 }
   ]))
-  @ApiBody({ type: CreateExecutorDto })
+  @ApiCreatedResponse({ type: CreateExecutorDto })
   saveExecutor(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() createExecutorDto: CreateExecutorDto
@@ -65,7 +65,7 @@ export class ExecutorController {
 
   @Put(":id")
   @ApiOperation({ summary: "Обновить исполнителя" })
-  @ApiBody({ type: CreateExecutorDto })
+  @ApiCreatedResponse({ type: CreateExecutorDto })
   @UseInterceptors(FileFieldsInterceptor([
     { name: "p_scan", maxCount: 1 },
     { name: "p_pink", maxCount: 1 },

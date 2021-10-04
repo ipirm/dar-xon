@@ -4,8 +4,9 @@ import { SignInDto } from "./dto/sign-in.dto";
 import { CustomerService } from "../customer/customer.service";
 import { Role } from "../enums/roles.enum";
 import { ExecutorService } from "../executor/executor.service";
-import { RegistrationDto } from "./dto/registration.dto";
 import { ConfirmDto } from "./dto/confirm.dto";
+import { RegistrationExecutorDto } from "./dto/registration-executor.dto";
+import { RegistrationCustomerDto } from "./dto/registration-customer.dto";
 
 @Injectable()
 export class AuthService {
@@ -28,16 +29,15 @@ export class AuthService {
     return { ...loggedUser, ...{ role: user.role } };
   }
 
-  async registration(registrationDto: RegistrationDto, role: Role): Promise<any> {
-    let user: any = null;
 
-    if (role === "customer")
-      user = await this.customer.registrationCustomer(registrationDto);
+  async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<any> {
+    const user = await this.customer.registrationCustomer(registrationCustomerDto);
+    return { ...user, role: Role.Customer };
+  }
 
-    if (role === "executor")
-      user = await this.executor.registrationExecutor(registrationDto);
-
-    return { ...user, role: role };
+  async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<any> {
+    const user = await this.executor.registrationExecutor(registrationExecutorDto);
+    return { ...user, role: Role.Executor };
   }
 
   async confirmNumber(confirmDto: ConfirmDto, role: Role): Promise<any> {

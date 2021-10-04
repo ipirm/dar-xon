@@ -5,10 +5,11 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Task } from "../database/entities/task.entity";
 import { AwsModule } from "../aws/aws.module";
 import { TaskResponses } from "../database/entities/taskResponses.entity";
+import { Executor } from "../database/entities/executor.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Task, TaskResponses]),
+    TypeOrmModule.forFeature([Task, TaskResponses, Executor]),
     AwsModule
   ],
   providers: [TaskService],

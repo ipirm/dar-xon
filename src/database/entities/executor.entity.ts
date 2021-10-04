@@ -1,4 +1,4 @@
-import { BeforeUpdate, Column, Entity, OneToMany } from "typeorm";
+import { BeforeUpdate, Column, Entity, ManyToMany, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 import { TaskResponses } from "./taskResponses.entity";
@@ -65,7 +65,7 @@ export class Executor extends BaseEntity {
   @OneToMany(type => TaskResponses, t => t.executor)
   responses?: TaskResponses[];
 
-  @OneToMany(() => Task, c => c.executor)
+  @ManyToMany(() => Task, c => c.executors)
   tasks: Task[];
 
   @OneToMany(type => Portfolio, t => t.executor)

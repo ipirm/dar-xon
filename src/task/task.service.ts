@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { Task } from "../database/entities/task.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, Repository } from "typeorm";
+import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import { paginate, Pagination } from "nestjs-typeorm-paginate";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { AwsService } from "../aws/aws.service";
@@ -11,12 +11,14 @@ import { ExecutorTypeTaskEnum } from "../enums/executorTypeTask.enum";
 import { StartTaskDto } from "./dto/start-task.dto";
 import { TaskStatusEnum } from "../enums/taskStatus.enum";
 import { CustomerTypeTaskEnum } from "../enums/customerTypeTask.enum";
+import { Executor } from "../database/entities/executor.entity";
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(Task) private readonly task: Repository<Task>,
     @InjectRepository(TaskResponses) private readonly response: Repository<TaskResponses>,
+    @InjectRepository(Executor) private readonly executor: Repository<Executor>,
     private readonly aws: AwsService
   ) {
   }
@@ -47,7 +49,6 @@ export class TaskService {
   }
 
   async executeTask(createResponseDto: CreateResponseDto, user): Promise<TaskResponses> {
-    const task = await this.task.findOne(createResponseDto.task);
     return await this.response.save(this.response.create({
       executor: user.id,
       task: createResponseDto.task,
@@ -58,15 +59,8 @@ export class TaskService {
   async startTask(startTaskDto: StartTaskDto, user): Promise<Task> {
     const task = await this.task.createQueryBuilder("task")
       .where("task.id = :id", { id: startTaskDto.task })
-      .leftJoinAndSelect("task.executor", "executor")
       .leftJoinAndSelect("task.created_by", "created_by")
       .getOne();
-
-    if (task.executor)
-      throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
-        error: "У задачи уже есть исполнитель"
-      }, HttpStatus.FORBIDDEN);
 
     if (task.created_by.id !== user.id)
       throw new HttpException({
@@ -74,25 +68,32 @@ export class TaskService {
         error: "Вы не являетесь создателем данной задачи"
       }, HttpStatus.FORBIDDEN);
 
+    if (task.participants <= startTaskDto.executors.length)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `У задачи максимально ${task.participants} исполнителя`
+      }, HttpStatus.FORBIDDEN);
+
+    const executors = await this.executor.findByIds(startTaskDto.executors);
+
     await this.task.update(task.id, this.task.create({
-      executor: startTaskDto.executor,
       startedAt: new Date(),
       status: TaskStatusEnum.Started
     }));
-    return task;
+    return await this.task.save({ id: task.id, executors: executors });
   }
 
-  async finishTask(startTaskDto: StartTaskDto, user): Promise<Task> {
+  async finishTask(startTaskDto: StartTaskDto, user): Promise<UpdateResult> {
     const task = await this.task.createQueryBuilder("task")
       .where("task.id = :id", { id: startTaskDto.task })
-      .leftJoinAndSelect("task.executor", "executor")
+      .leftJoinAndSelect("task.executors", "executors")
       .leftJoinAndSelect("task.created_by", "created_by")
       .getOne();
 
-    if (task.executor)
+    if (!task.executors)
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
-        error: "У задачи уже есть исполнитель"
+        error: "У задачи нет исполнителей"
       }, HttpStatus.FORBIDDEN);
 
     if (task.created_by.id !== user.id)
@@ -101,12 +102,11 @@ export class TaskService {
         error: "Вы не являетесь создателем данной задачи"
       }, HttpStatus.FORBIDDEN);
 
-    await this.task.update(task.id, this.task.create({
-      executor: startTaskDto.executor,
-      status: TaskStatusEnum.Finished
-    }));
 
-    return task;
+
+    return  await this.task.update(task.id, this.task.create({
+      status: TaskStatusEnum.Finished
+    }));;
   }
 
   async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search): Promise<Pagination<Task>> {
@@ -270,6 +270,7 @@ export class TaskService {
         .leftJoin("category.parent", "parent")
         .leftJoin("task.responses", "responses")
         .leftJoin("responses.executor", "executor")
+        .leftJoinAndSelect("task.executors", "executors")
         .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
         .getOne();
     }

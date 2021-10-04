@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CustomerService } from "./customer.service";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -41,7 +41,7 @@ export class CustomerController {
     { name: "avatar", maxCount: 1 }
   ]))
   @ApiOperation({ summary: "Создать заказчика" })
-  @ApiBody({ type: CreateCustomerDto })
+  @ApiCreatedResponse({ type: CreateCustomerDto })
   saveCustomer(
     @Body() createCustomerDto: CreateCustomerDto,
     @UploadedFiles() files: Array<Express.Multer.File>
@@ -67,7 +67,7 @@ export class CustomerController {
     { name: "avatar", maxCount: 1 }
   ]))
   @ApiOperation({ summary: "Обновить заказчика" })
-  @ApiBody({ type: CreateCustomerDto })
+  @ApiCreatedResponse({ type: CreateCustomerDto })
   updateCustomer(
     @Param("id") id: number,
     @Body() createCustomerDto: CreateCustomerDto,

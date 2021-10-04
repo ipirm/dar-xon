@@ -6,8 +6,8 @@ import { Customer } from "../database/entities/customer.entity";
 import { CreateCustomerDto } from "./dto/create-customer.dto";
 import * as bcrypt from "bcrypt";
 import { AwsService } from "../aws/aws.service";
-import { RegistrationDto } from "../auth/dto/registration.dto";
 import { ConfirmDto } from "../auth/dto/confirm.dto";
+import { RegistrationCustomerDto } from "../auth/dto/registration-customer.dto";
 
 @Injectable()
 export class CustomerService {
@@ -82,18 +82,17 @@ export class CustomerService {
     return user;
   }
 
-  async registrationCustomer(registrationDto: RegistrationDto): Promise<Customer> {
+  async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<Customer> {
     let data = await this.customer.createQueryBuilder("customer")
       .addSelect(["customer.confirmed"])
-      .where("customer.email = :email OR customer.phone = :phone", {
-        email: registrationDto.email,
-        phone: registrationDto.phone
+      .where("customer.email = :email", {
+        email: registrationCustomerDto.email
       }).getOne();
 
     if (data)
       return data;
 
-    return await this.customer.save(this.customer.create(registrationDto));
+    return await this.customer.save(this.customer.create(registrationCustomerDto));
   }
 
   async confirmNumber(confirmDto: ConfirmDto): Promise<Customer> {

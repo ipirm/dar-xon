@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { PortfolioService } from "./portfolio.service";
 import { Portfolio } from "../database/entities/portfolio.entity";
@@ -61,7 +61,7 @@ export class PortfolioController {
     { name: "image", maxCount: 1 },
     { name: "files", maxCount: 10 }
   ]))
-  @ApiBody({ type: CreatePortfolioDto })
+  @ApiCreatedResponse({ type: CreatePortfolioDto })
   savePortfolio(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() createPortfolioDto: CreatePortfolioDto,
@@ -89,7 +89,7 @@ export class PortfolioController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(":id")
   @ApiOperation({ summary: "Обновить портфолио" })
-  @ApiBody({ type: CreatePortfolioDto })
+  @ApiCreatedResponse({ type: CreatePortfolioDto })
   @UseInterceptors(FileFieldsInterceptor([
     { name: "image", maxCount: 1 },
     { name: "files", maxCount: 10 }
