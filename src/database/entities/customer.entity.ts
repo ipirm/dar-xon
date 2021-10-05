@@ -1,4 +1,4 @@
-import { BeforeUpdate, Column, Entity, OneToMany } from "typeorm";
+import { BeforeUpdate, Column, Entity, Index, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
@@ -8,6 +8,7 @@ import { Task } from "./task.entity";
 export class Customer extends BaseEntity {
 
   @Column({ nullable: true })
+  @Index({ fulltext: true })
   fio: string;
 
   @Column({ nullable: true })
@@ -74,4 +75,11 @@ export class Customer extends BaseEntity {
 
   @OneToMany(() => Task, c => c.created_by)
   tasks: Task[];
+
+  @Column({ type: "boolean", default: false, select: false })
+  banned: Boolean;
+
+  @Column({ type: "boolean", default: false, select: false })
+  verified: Boolean;
+
 }

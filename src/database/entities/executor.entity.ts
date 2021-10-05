@@ -1,4 +1,4 @@
-import { BeforeUpdate, Column, Entity, ManyToMany, OneToMany } from "typeorm";
+import { BeforeUpdate, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 import { TaskResponses } from "./taskResponses.entity";
@@ -10,6 +10,7 @@ import { Portfolio } from "./portfolio.entity";
 export class Executor extends BaseEntity {
 
   @Column({ nullable: true })
+  @Index({ fulltext: true })
   fio: string;
 
   @Column({ type: "varchar", nullable: true })
@@ -70,4 +71,11 @@ export class Executor extends BaseEntity {
 
   @OneToMany(type => Portfolio, t => t.executor)
   portfolios?: Portfolio[];
+
+  @Column({ type: "boolean", default: false, select: false })
+  banned: Boolean;
+
+  @Column({ type: "boolean", default: false, select: false })
+  verified: Boolean;
+
 }

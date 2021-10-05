@@ -10,6 +10,7 @@ import { CustomerModule } from './customer/customer.module';
 import { CategoryModule } from './category/category.module';
 import { TaskModule } from './task/task.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
+import { AdminModule } from './admin/admin.module';
 import * as ormConfig from "./database/orm.config";
 
 
@@ -26,7 +27,8 @@ import * as ormConfig from "./database/orm.config";
     CustomerModule,
     CategoryModule,
     TaskModule,
-    PortfolioModule
+    PortfolioModule,
+    AdminModule
   ],
   controllers: [AppController],
   providers: [AppService]
