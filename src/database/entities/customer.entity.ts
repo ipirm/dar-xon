@@ -1,4 +1,4 @@
-import { BeforeUpdate, Column, Entity, Index, OneToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
@@ -17,13 +17,16 @@ export class Customer extends BaseEntity {
   @Column({ nullable: true })
   avatar: string;
 
+  @Column({ nullable: true })
+  login: string;
+
   @Column({ type: "varchar", nullable: true })
   phone: string;
 
-  @Column({ nullable: true,select:false })
+  @Column({ nullable: true, select: false })
   password: string;
 
-  @BeforeUpdate()
+  @BeforeInsert()
   async generatePasswordHash(): Promise<void> {
     this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
@@ -79,7 +82,7 @@ export class Customer extends BaseEntity {
   @Column({ type: "boolean", default: false, select: false })
   banned: Boolean;
 
-  @Column({ type: "boolean", default: false, select: false })
+  @Column({ type: "boolean", default: false})
   verified: Boolean;
 
 }

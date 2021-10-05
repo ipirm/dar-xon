@@ -128,9 +128,14 @@ export class AdminService {
     return paginate(data, { page, limit });
   }
 
+  async getOne(id: number): Promise<Admin> {
+    return await this.admin.findOne(id);
+  }
+
+
   async findOneSign(nickname: string, password: string): Promise<Admin> {
     const user = await this.admin.createQueryBuilder("a")
-      .addSelect(['a.password'])
+      .addSelect(["a.password"])
       .where("a.email = :nickname", { nickname })
       .getOne();
 

@@ -53,7 +53,7 @@ export class CustomerService {
   async findOne(nickname: string, password: string): Promise<Customer> {
     const user = await this.customer.createQueryBuilder("customer")
       .addSelect(["customer.password", "customer.confirmed"])
-      .where("customer.email = :nickname OR customer.phone = :nickname", { nickname })
+      .where("customer.email = :nickname OR customer.phone = :nickname OR customer.login = :nickname", { nickname })
       .getOne();
 
     if (!user)
@@ -71,26 +71,23 @@ export class CustomerService {
       }, HttpStatus.FORBIDDEN);
     }
 
-    if (!user.confirmed) {
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Логин не потверджен"
-      }, HttpStatus.CONFLICT);
-    }
-
-
     return user;
   }
 
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<Customer> {
     let data = await this.customer.createQueryBuilder("customer")
       .addSelect(["customer.confirmed"])
-      .where("customer.email = :email", {
-        email: registrationCustomerDto.email
+      .where("customer.email = :email OR customer.phone = :phone OR customer.login = :login", {
+        email: registrationCustomerDto.email,
+        phone: registrationCustomerDto.phone,
+        login: registrationCustomerDto.login
       }).getOne();
 
     if (data)
-      return data;
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный пользователь уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
 
     return await this.customer.save(this.customer.create(registrationCustomerDto));
   }

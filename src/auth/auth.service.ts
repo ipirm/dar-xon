@@ -22,11 +22,14 @@ export class AuthService {
   async profile(user: any): Promise<any> {
     let loggedUser: any = null;
 
-    if (user.role === "customer")
+    if (user.role === Role.Customer)
       loggedUser = await this.customer.getOne(user.id);
 
-    if (user.role === "executor")
+    if (user.role === Role.Executor)
       loggedUser = await this.executor.getOne(user.id);
+
+    if (user.role === Role.Admin)
+      loggedUser = await this.admin.getOne(user.id);
 
     return { ...loggedUser, ...{ role: user.role } };
   }
@@ -44,10 +47,11 @@ export class AuthService {
 
   async confirmNumber(confirmDto: ConfirmDto, role: Role): Promise<any> {
     let user: any = null;
-    if (role === "customer")
+
+    if (role === Role.Customer)
       user = await this.customer.confirmNumber(confirmDto);
 
-    if (role === "executor")
+    if (role === Role.Executor)
       user = await this.executor.confirmNumber(confirmDto);
 
     return { ...user, role: role };

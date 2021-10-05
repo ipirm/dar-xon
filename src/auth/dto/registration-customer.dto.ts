@@ -1,4 +1,4 @@
-import { IsEmail, IsEmpty, IsString } from "class-validator";
+import { IsEmail, IsString, Matches } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class RegistrationCustomerDto {
@@ -7,11 +7,15 @@ export class RegistrationCustomerDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: "+994503190044", description: "Почта, Хардкод-смс: 123456", required: false })
+  @ApiProperty({ example: "+994503190044", description: "Номер", required: false })
   @IsString()
   phone: string;
 
-  @ApiProperty({ example: "Ilham564/", description: "Почта, Хардкод-смс: 123456", required: false })
-  @IsEmpty()
+  @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
   password: string;
+
+  @ApiProperty({ example: "w33haaa", description: "Логин", required: false })
+  @IsString()
+  login: string;
 }

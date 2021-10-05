@@ -1,4 +1,4 @@
-import { BeforeUpdate, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 import { TaskResponses } from "./taskResponses.entity";
@@ -17,6 +17,9 @@ export class Executor extends BaseEntity {
   phone: string;
 
   @Column({ nullable: true })
+  login: string;
+
+  @Column({ nullable: true })
   avatar: string;
 
   @Column({ nullable: true })
@@ -25,7 +28,7 @@ export class Executor extends BaseEntity {
   @Column({ select: false, nullable: true })
   password: string;
 
-  @BeforeUpdate()
+  @BeforeInsert()
   async generatePasswordHash(): Promise<void> {
     this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
@@ -75,7 +78,7 @@ export class Executor extends BaseEntity {
   @Column({ type: "boolean", default: false, select: false })
   banned: Boolean;
 
-  @Column({ type: "boolean", default: false, select: false })
+  @Column({ type: "boolean", default: false })
   verified: Boolean;
 
 }

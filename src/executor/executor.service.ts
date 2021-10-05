@@ -52,9 +52,10 @@ export class ExecutorService {
   }
 
   async findOne(nickname: string, password: string): Promise<Executor> {
+    console.log(nickname)
     const user = await this.executor.createQueryBuilder("executor")
       .addSelect(["executor.password", "executor.confirmed"])
-      .where("executor.email = :nickname OR executor.phone = :nickname", { nickname })
+      .where("executor.phone = :nickname OR executor.login = :nickname", { nickname })
       .getOne();
 
     console.log(user)
@@ -74,12 +75,6 @@ export class ExecutorService {
       }, HttpStatus.FORBIDDEN);
     }
 
-    if (!user.confirmed) {
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Логин не потверджен"
-      }, HttpStatus.CONFLICT);
-    }
 
     return user;
   }
@@ -87,10 +82,16 @@ export class ExecutorService {
   async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<Executor> {
     let data = await this.executor.createQueryBuilder("executor")
       .addSelect(["executor.confirmed"])
-      .where("executor.phone = :phone", { phone: registrationExecutorDto.phone }).getOne();
+      .where("executor.phone = :phone OR executor.login = :login", {
+        phone: registrationExecutorDto.phone,
+        login: registrationExecutorDto.login
+      }).getOne();
 
     if (data)
-      return data;
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный пользователь уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
 
     return await this.executor.save(this.executor.create(registrationExecutorDto));
   }
