@@ -1,31 +1,41 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { DeleteResult, TreeRepository, UpdateResult } from "typeorm";
 import { Category } from "../database/entities/category.entity";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 
 @Injectable()
 export class CategoryService {
   constructor(
-    @InjectRepository(Category) private readonly category: Repository<Category>
+    @InjectRepository(Category) private readonly category: TreeRepository<Category>
   ) {
   }
 
-  async getAll(page, limit): Promise<any> {
-    return await this.category.createQueryBuilder("cat").getMany();
-
+  async getAll(): Promise<any> {
+    return await this.category.findTrees();
   }
 
-  async getChildren(parent: string, page, limit): Promise<any> {
-    console.log(parent);
-    return await this.category.createQueryBuilder("cat")
-      .leftJoinAndSelect("cat.children", "children")
-      .where("cat.id = :parent", { parent: parent })
-      .getOne();
+  async getChildren(parent: string): Promise<any> {
+    const cat = await this.category.findOne(parent);
+    if (!cat)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная Категори не найдена"
+      }, HttpStatus.CONFLICT);
+    return await this.category.findDescendantsTree(cat);
+  }
+
+  async getParent(): Promise<any> {
+    return await this.category.findRoots();
   }
 
   async createCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    return await this.category.save(this.category.create(createCategoryDto));
+    const cat = this.category.create({ name: createCategoryDto.name });
+    if (createCategoryDto.parent) {
+      const parent = await this.category.findOne(createCategoryDto.parent);
+      Object.assign(cat, { parent: parent });
+    }
+    return await this.category.save(cat);
   }
 
   async findOne(id: number): Promise<Category> {
@@ -33,12 +43,17 @@ export class CategoryService {
   }
 
   async updateCategory(id: number, createCategoryDto: CreateCategoryDto): Promise<UpdateResult> {
-    return await this.category.update(id, this.category.create(createCategoryDto));
+    const cat = this.category.create({ name: createCategoryDto.name });
+    if (createCategoryDto.parent) {
+      const parent = await this.category.findOne(createCategoryDto.parent);
+      Object.assign(cat, { parent: parent });
+      await this.category.save(cat);
+    }
+    return await this.category.update(id, cat);
   }
 
   async deleteCategory(id: number): Promise<DeleteResult> {
     return await this.category.delete(id);
   }
-
 
 }

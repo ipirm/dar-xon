@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CategoryService } from "./category.service";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -16,21 +16,8 @@ export class CategoryController {
 
   @Get("")
   @ApiOperation({ summary: "Получить все разделы" })
-  @ApiImplicitQuery({
-    name: "page",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "limit",
-    required: false,
-    type: Number
-  })
-  getAll(
-    @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100
-  ): Promise<Pagination<Category>> {
-    return this.category.getAll(page, limit);
+  getAll(): Promise<any> {
+    return this.category.getAll();
   }
 
   @Post("")
@@ -79,24 +66,18 @@ export class CategoryController {
     return this.category.deleteCategory(id);
   }
 
+  @Get("parent/roots")
+  @ApiOperation({ summary: "Получить все основные разделы" })
+  getParent(): Promise<any> {
+    return this.category.getParent();
+  }
+
   @Get("children/parent")
   @ApiOperation({ summary: "Получить саб разделы" })
-  @ApiImplicitQuery({
-    name: "page",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "limit",
-    required: false,
-    type: Number
-  })
   getChildren(
-    @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100,
     @Query("parent") parent: string = null
   ): Promise<Pagination<Category>> {
-    return this.category.getChildren(parent, page, limit);
+    return this.category.getChildren(parent);
   }
 
 }
