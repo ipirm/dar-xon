@@ -1,5 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { AdminService } from "./admin.service";
 import { CreateAdminDto } from "./dto/create-admin.dto";
@@ -12,6 +24,9 @@ import { Customer } from "../database/entities/customer.entity";
 import { CreateThemeDto } from "./dto/create-theme.dto";
 import { Mail } from "../database/entities/mail.entity";
 import { Role } from "../enums/roles.enum";
+import { hasRoles } from "../decorators/roles.decorator";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
 
 
 @ApiTags("Admin")
@@ -20,6 +35,9 @@ export class AdminController {
   constructor(private readonly admin: AdminService) {
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("main-page/:role")
   @ApiOperation({ summary: "Получить всех исполнителей/заказчиков" })
   @ApiImplicitQuery({
@@ -59,6 +77,9 @@ export class AdminController {
     return this.admin.getListUsers(page, limit, role, banned,search,date);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("customer/:id")
   @ApiOperation({ summary: "Получить заказчика по id" })
   @ApiImplicitQuery({
@@ -72,6 +93,9 @@ export class AdminController {
     return this.admin.getCustomer(id);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("executor/:id")
   @ApiOperation({ summary: "Получить исполнителя по id" })
   @ApiImplicitQuery({
@@ -85,6 +109,9 @@ export class AdminController {
     return this.admin.getExecutor(id);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("main-page")
   @ApiOperation({ summary: "Получить всех исполнителей и заказчиков" })
   @ApiImplicitQuery({
@@ -116,6 +143,9 @@ export class AdminController {
     return this.admin.getAllUsers(page, limit, search, date);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("")
   @ApiOperation({ summary: "Получить всех админов" })
   @ApiImplicitQuery({
@@ -135,6 +165,9 @@ export class AdminController {
     return this.admin.getAll(page, limit);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post("mail")
   @ApiOperation({ summary: "Отправить обращение" })
   @ApiCreatedResponse({ type: CreateThemeDto })
@@ -144,6 +177,9 @@ export class AdminController {
     return this.admin.sendTheme(createThemeDto);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("customer/verify/:id")
   @ApiOperation({ summary: "Потвердить заказчика" })
   @ApiImplicitQuery({
@@ -157,6 +193,9 @@ export class AdminController {
     return this.admin.updateCustomer(id);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("executor/verify/:id")
   @ApiOperation({ summary: "Потвердить исполнителя" })
   @ApiImplicitQuery({
@@ -170,6 +209,9 @@ export class AdminController {
     return this.admin.updateExecutor(id);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("customer/verify/:id")
   @ApiOperation({ summary: "Заблокировать заказчика" })
   @ApiImplicitQuery({
@@ -183,6 +225,9 @@ export class AdminController {
     return this.admin.bannedCustomer(id);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("executor/verify/:id")
   @ApiOperation({ summary: "Заблокировать исполнителя" })
   @ApiImplicitQuery({
@@ -196,7 +241,9 @@ export class AdminController {
     return this.admin.bannedExecutor(id);
   }
 
-
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post("")
   @ApiOperation({ summary: "Создать админа" })
   @ApiCreatedResponse({ type: CreateAdminDto })
@@ -210,6 +257,9 @@ export class AdminController {
     return this.admin.saveAdmin(createAdminDto, files);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get(":id")
   @ApiOperation({ summary: "Получить админа по id" })
   @ApiImplicitQuery({
@@ -223,6 +273,9 @@ export class AdminController {
     return this.admin.findOne(id);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(":id")
   @ApiOperation({ summary: "Обновить админа" })
   @UseInterceptors(FileFieldsInterceptor([
@@ -242,7 +295,9 @@ export class AdminController {
     return this.admin.updateAdmin(id, createAdminDto, files);
   }
 
-
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(":id")
   @ApiOperation({ summary: "Удалить админа" })
   deleteAdmin(
@@ -251,19 +306,5 @@ export class AdminController {
     return this.admin.deleteAdmin(id);
   }
 
-
-  // @Get("parent/roots")
-  // @ApiOperation({ summary: "Получить все основные разделы" })
-  // getParent(): Promise<any> {
-  //   return this.category.getParent();
-  // }
-  //
-  // @Get("children/parent")
-  // @ApiOperation({ summary: "Получить саб разделы" })
-  // getChildren(
-  //   @Query("parent") parent: string = null
-  // ): Promise<Pagination<Category>> {
-  //   return this.category.getChildren(parent);
-  // }
 
 }

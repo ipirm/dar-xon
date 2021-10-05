@@ -11,6 +11,9 @@ import { RolesGuard } from "./guards/roles.guard";
 import { CustomerService } from "../customer/customer.service";
 import { ExecutorService } from "../executor/executor.service";
 import { AwsModule } from "../aws/aws.module";
+import { Admin } from "../database/entities/admin.entity";
+import { AdminService } from "../admin/admin.service";
+import { Mail } from "../database/entities/mail.entity";
 
 @Module({
   imports: [
@@ -18,10 +21,10 @@ import { AwsModule } from "../aws/aws.module";
       secret: jwtConstants.secret,
       signOptions: { expiresIn: "286400s" }
     }),
-    TypeOrmModule.forFeature([Customer, Executor]),
+    TypeOrmModule.forFeature([Customer, Executor,Admin,Mail]),
     AwsModule
   ],
-  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard],
+  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard,AdminService],
   controllers: [AuthController]
 })
 export class AuthModule {}

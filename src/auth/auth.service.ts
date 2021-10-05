@@ -7,13 +7,15 @@ import { ExecutorService } from "../executor/executor.service";
 import { ConfirmDto } from "./dto/confirm.dto";
 import { RegistrationExecutorDto } from "./dto/registration-executor.dto";
 import { RegistrationCustomerDto } from "./dto/registration-customer.dto";
+import { AdminService } from "../admin/admin.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private customer: CustomerService,
-    private executor: ExecutorService
+    private executor: ExecutorService,
+    private admin: AdminService
   ) {
   }
 
@@ -54,11 +56,14 @@ export class AuthService {
   async signIn(signInDto: SignInDto, role: Role): Promise<any> {
     let user: any = null;
 
-    if (role === "customer")
+    if (role === Role.Customer)
       user = await this.customer.findOne(signInDto.nickname, signInDto.password);
 
-    if (role === "executor")
+    if (role === Role.Executor)
       user = await this.executor.findOne(signInDto.nickname, signInDto.password);
+
+    if (role === Role.Admin)
+      user = await this.admin.findOneSign(signInDto.nickname, signInDto.password);
 
     return {
       access_token: this.jwtService.sign({ ...user, role })

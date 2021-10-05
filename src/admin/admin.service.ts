@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Admin } from "../database/entities/admin.entity";
 import { paginate, Pagination } from "nestjs-typeorm-paginate";
@@ -10,6 +10,7 @@ import { Customer } from "../database/entities/customer.entity";
 import { Role } from "../enums/roles.enum";
 import { CreateThemeDto } from "./dto/create-theme.dto";
 import { Mail } from "../database/entities/mail.entity";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AdminService {
@@ -125,5 +126,30 @@ export class AdminService {
     }
     data.select(["e.id", "e.fio", "e.createdAt", "e.avatar"]);
     return paginate(data, { page, limit });
+  }
+
+  async findOneSign(nickname: string, password: string): Promise<Admin> {
+    const user = await this.admin.createQueryBuilder("a")
+      .addSelect(['a.password'])
+      .where("a.email = :nickname", { nickname })
+      .getOne();
+
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: "Учетная запись c таким логином не найдена"
+      }, HttpStatus.FORBIDDEN);
+
+    const valid = await bcrypt.compare(password, user.password);
+
+    if (!valid) {
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: "Неверный пароль"
+      }, HttpStatus.FORBIDDEN);
+    }
+
+
+    return user;
   }
 }
