@@ -14,8 +14,8 @@ export class Customer extends BaseEntity {
   @Column({ nullable: true })
   email: string;
 
-  @Column({ nullable: true })
-  avatar: string;
+  @Column("simple-json",{ nullable: true })
+  avatar: { name: string, url: string };
 
   @Column({ nullable: true })
   login: string;
@@ -64,8 +64,8 @@ export class Customer extends BaseEntity {
   @Column({ nullable: true })
   site: string;
 
-  @Column("simple-json", { default: null})
-  files: { url: string }[];
+  @Column("simple-json", { default: null })
+  files: { name: string, url: string }[];
 
   @Column("enum", { enum: CustomerTypeEnum, default: CustomerTypeEnum.SelfEmployed })
   customer_type: CustomerTypeEnum;

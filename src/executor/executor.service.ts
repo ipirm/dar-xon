@@ -26,7 +26,7 @@ export class ExecutorService {
     if (files) {
       for (const [key, value] of Object.entries(files)) {
         const file = await this.aws.uploadPublicFile(value[0]);
-        Object.assign(createExecutorDto, { [key]: file.url });
+        Object.assign(createExecutorDto, { [key]: { url: file.url, name: file.key } });
       }
     }
     return await this.executor.save(this.executor.create(createExecutorDto));
@@ -40,7 +40,7 @@ export class ExecutorService {
     if (files) {
       for (const [key, value] of Object.entries(files)) {
         const file = await this.aws.uploadPublicFile(value[0]);
-        Object.assign(createExecutorDto, { [key]: file.url });
+        Object.assign(createExecutorDto, { [key]: { name: file.key, url: file.url } });
       }
     }
     await this.executor.update(id, this.executor.create(createExecutorDto));

@@ -25,8 +25,22 @@ export class CustomerService {
   async saveCustomer(createCustomerDto: CreateCustomerDto, files: Express.Multer.File[] = undefined): Promise<Customer> {
     if (files) {
       for (const [key, value] of Object.entries(files)) {
-        const file = await this.aws.uploadPublicFile(value[0]);
-        Object.assign(createCustomerDto, { [key]: file.url });
+        if (key === "avatar") {
+          const file = await this.aws.uploadPublicFile(value[0]);
+          console.log(file);
+          Object.assign(createCustomerDto, { [key]: { name: file.key, url: file.url } });
+        } else {
+          const uploadedFiles = [];
+          // @ts-ignore
+          for (const item of value) {
+            const file = await this.aws.uploadPublicFile(item);
+            uploadedFiles.push({
+              name: file.key,
+              url: file.url
+            });
+          }
+          Object.assign(createCustomerDto, { [key]: uploadedFiles });
+        }
       }
     }
     return await this.customer.save(this.customer.create(createCustomerDto));
@@ -38,17 +52,23 @@ export class CustomerService {
 
   async updateCustomer(id: number, createCustomerDto: CreateCustomerDto, files: Express.Multer.File[]): Promise<UpdateResult> {
     if (files) {
-      let files = [];
       for (const [key, value] of Object.entries(files)) {
-        const file = await this.aws.uploadPublicFile(value[0]);
-        if (key == "files") {
-          files.push({
-            url: file.url
-          });
+        if (key === "avatar") {
+          const file = await this.aws.uploadPublicFile(value[0]);
+          console.log(file);
+          Object.assign(createCustomerDto, { avatar: { name: file.key, url: file.url } });
         } else {
-          Object.assign(createCustomerDto, { [key]: file.url });
+          const uploadedFiles = [];
+          // @ts-ignore
+          for (const item of value) {
+            const file = await this.aws.uploadPublicFile(item);
+            uploadedFiles.push({
+              name: file.key,
+              url: file.url
+            });
+          }
+          Object.assign(createCustomerDto, { files: uploadedFiles });
         }
-        Object.assign(createCustomerDto, { files: files });
       }
     }
     return await this.customer.update(id, this.customer.create(createCustomerDto));

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { ExecutorService } from "./executor.service";
-import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { CreateExecutorDto } from "./dto/create-executor.dto";
@@ -64,6 +64,7 @@ export class ExecutorController {
   }
 
   @Put(":id")
+  @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: "Обновить исполнителя" })
   @ApiCreatedResponse({ type: CreateExecutorDto })
   @UseInterceptors(FileFieldsInterceptor([

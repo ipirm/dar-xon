@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
+import { BeforeInsert, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 import { TaskResponses } from "./taskResponses.entity";
@@ -19,8 +19,8 @@ export class Executor extends BaseEntity {
   @Column({ nullable: true })
   login: string;
 
-  @Column({ nullable: true })
-  avatar: string;
+  @Column("simple-json", { nullable: true })
+  avatar: { name: string, url: string };
 
   @Column({ nullable: true })
   email: string;
@@ -54,11 +54,11 @@ export class Executor extends BaseEntity {
   @Column({ nullable: true })
   p_birth_date: string;
 
-  @Column({nullable: true})
-  p_scan: string;
+  @Column("simple-json", { nullable: true })
+  p_scan: { name: string, url: string };
 
-  @Column({nullable: true})
-  p_pink: string;
+  @Column("simple-json", { nullable: true })
+  p_pink: { name: string, url: string };
 
   @Column({ default: "123456", select: false })
   confirmation: string;

@@ -1,4 +1,4 @@
-import { IsEmpty, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from "class-validator";
+import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 
@@ -11,10 +11,6 @@ export class CreateExecutorDto {
   @IsString()
   @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
   phone: string;
-
-  @IsString()
-  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
-  avatar: string;
 
   @IsString()
   @ApiProperty({ example: "password112", description: "Пароль", required: false })
@@ -40,4 +36,12 @@ export class CreateExecutorDto {
   @ApiProperty({ example: "16.03.1998", description: "Дата рождения", required: false })
   p_birth_date: string;
 
+  @ApiProperty({ type: "string", format: "binary" })
+  avatar: any;
+
+  @ApiProperty({ type: "string", format: "binary" })
+  p_scan: any;
+
+  @ApiProperty({ type: "string", format: "binary" })
+  p_pink: any;
 }

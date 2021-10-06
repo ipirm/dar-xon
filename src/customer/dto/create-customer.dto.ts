@@ -68,4 +68,10 @@ export class CreateCustomerDto {
     default: CustomerTypeEnum.SelfEmployed
   })
   customer_type: CustomerTypeEnum;
+
+  @ApiProperty({ type: "array", items: { type: "string", format: "binary" }, required: false })
+  files?: any[];
+
+  @ApiProperty({ type: "string", format: "binary" })
+  avatar: any;
 }

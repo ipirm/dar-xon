@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CustomerService } from "./customer.service";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -63,6 +63,7 @@ export class CustomerController {
   }
 
   @Put(":id")
+  @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileFieldsInterceptor([
     { name: "avatar", maxCount: 1 },
     { name: "files", maxCount: 10 }
