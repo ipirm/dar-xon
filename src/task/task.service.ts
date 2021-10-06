@@ -134,7 +134,7 @@ export class TaskService {
         "parent.name",
         "category.id",
         "category.name",
-        "executor.id",
+        "executors.id",
         "responses.id",
         "executor1.id",
         "criteria.id"
@@ -142,7 +142,7 @@ export class TaskService {
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
-      .leftJoin("task.executor", "executor")
+      .leftJoin("task.executors", "executors")
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor1")
       .leftJoin("task.criteria", "criteria")
@@ -164,23 +164,23 @@ export class TaskService {
       data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat))", { cat: [...cat.split(",")] });
     }
 
-    if (state === "execution") {
+    if (state === ExecutorTypeTaskEnum.Execution) {
       data.andWhere("task.status = :started", { started: "started" });
-      data.andWhere("executor.id = :executor", { executor: user.id });
+      data.andWhere("executors.id IN (:...executor)", { executor: [user.id] });
     }
 
-    if (state === "consideration") {
+    if (state === ExecutorTypeTaskEnum.Сonsideration) {
       data.andWhere("task.status = :started", { started: "started" });
       data.andWhere("executor1.id = :executor1", { executor1: user.id });
     }
 
-    if (state === "archive") {
+    if (state === ExecutorTypeTaskEnum.Archive) {
       data.andWhere("task.status = :archive", { started: "finished" });
       data.andWhere("executor.id = :executor", { executor: user.id });
 
     }
 
-    if (state === "all") {
+    if (state === ExecutorTypeTaskEnum.All) {
       data.andWhere("task.status = :started", { started: "created" });
     }
 
