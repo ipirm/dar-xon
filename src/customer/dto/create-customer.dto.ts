@@ -10,6 +10,10 @@ export class CreateCustomerDto {
   @ApiProperty({ example: "Ильхам", description: "Имя", required: false })
   fio: string;
 
+  @IsString()
+  @ApiProperty({ example: "w33haa", description: "login", required: false })
+  login: string;
+
   @IsEmail()
   @ApiProperty({ example: "ilham.pirm@gmail.com", description: "почта", required: false })
   email: string;

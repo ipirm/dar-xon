@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, Index, OneToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
@@ -28,6 +28,11 @@ export class Customer extends BaseEntity {
 
   @BeforeInsert()
   async generatePasswordHash(): Promise<void> {
+    this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
+  }
+
+  @BeforeUpdate()
+  async generatePasswordHashUpdate(): Promise<void> {
     this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
 

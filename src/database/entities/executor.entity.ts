@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 import { TaskResponses } from "./taskResponses.entity";
@@ -30,6 +30,11 @@ export class Executor extends BaseEntity {
 
   @BeforeInsert()
   async generatePasswordHash(): Promise<void> {
+    this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
+  }
+
+  @BeforeUpdate()
+  async generatePasswordHashUpdate(): Promise<void> {
     this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
 

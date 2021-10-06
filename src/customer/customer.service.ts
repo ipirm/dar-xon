@@ -92,6 +92,7 @@ export class CustomerService {
 
     const valid = await bcrypt.compare(password, user.password);
 
+    console.log(user)
     if (!valid) {
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,

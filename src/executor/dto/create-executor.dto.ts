@@ -9,6 +9,10 @@ export class CreateExecutorDto {
   fio: string;
 
   @IsString()
+  @ApiProperty({ example: "w33haa", description: "login", required: false })
+  login: string;
+
+  @IsString()
   @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
   phone: string;
 
