@@ -6,6 +6,7 @@ import { Category } from "./category.entity";
 import { Executor } from "./executor.entity";
 import { TaskStatusEnum } from "../../enums/taskStatus.enum";
 import { CriteriaItem } from "./criteria-item.entity";
+import { TaskTypes } from "./task-types.entity";
 
 
 @Entity("task")
@@ -52,4 +53,7 @@ export class Task extends BaseEntity {
   @ManyToMany(() => CriteriaItem, c => c.tasks)
   @JoinTable()
   criteria: CriteriaItem[];
+
+  @ManyToOne(type => TaskTypes, c => c.tasks, { onDelete: "SET NULL" })
+  task_type: TaskTypes;
 }

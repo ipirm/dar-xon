@@ -1,13 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, TreeRepository, UpdateResult } from "typeorm";
+import { DeleteResult, Repository, TreeRepository, UpdateResult } from "typeorm";
 import { Category } from "../database/entities/category.entity";
 import { CreateCategoryDto } from "./dto/create-category.dto";
+import { CreateTypeDto } from "./dto/create-type.dto";
+import { TaskTypes } from "../database/entities/task-types.entity";
+import { paginate, Pagination } from "nestjs-typeorm-paginate";
 
 @Injectable()
 export class CategoryService {
   constructor(
-    @InjectRepository(Category) private readonly category: TreeRepository<Category>
+    @InjectRepository(Category) private readonly category: TreeRepository<Category>,
+    @InjectRepository(TaskTypes) private readonly taskType: Repository<TaskTypes>
   ) {
   }
 
@@ -43,6 +47,7 @@ export class CategoryService {
   }
 
   async updateCategory(id: number, createCategoryDto: CreateCategoryDto): Promise<UpdateResult> {
+    console.log(id);
     const cat = this.category.create({ name: createCategoryDto.name });
     if (createCategoryDto.parent) {
       const parent = await this.category.findOne(createCategoryDto.parent);
@@ -56,4 +61,21 @@ export class CategoryService {
     return await this.category.delete(id);
   }
 
+  async createType(createTypeDto: CreateTypeDto): Promise<TaskTypes> {
+    return await this.taskType.save(this.taskType.create(createTypeDto));
+  }
+
+  async deleteType(id: number): Promise<DeleteResult> {
+    return await this.taskType.delete(id);
+  }
+
+  async getAllTypes(page, limit, cat): Promise<Pagination<TaskTypes>> {
+    const data = this.taskType.createQueryBuilder("c")
+      .leftJoinAndSelect("c.category", "category");
+
+    if (cat)
+      data.andWhere("category.id = :cat", { cat: cat });
+
+    return await paginate(data, { page, limit });
+  }
 }

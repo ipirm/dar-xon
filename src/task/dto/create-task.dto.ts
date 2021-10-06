@@ -1,4 +1,4 @@
-import { IsDate, IsInt, IsString } from "class-validator";
+import { IsDate, IsNumber, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 
@@ -18,11 +18,19 @@ export class CreateTaskDto {
 
   @IsString()
   @ApiProperty({
-    example: 7,
+    example: 14,
     description: "Категория id нужно посылать самую нижнию по иерархие категоирию",
     required: true
   })
   category: any;
+
+  @IsString()
+  @ApiProperty({
+    example: 1,
+    description: "Тип задачи",
+    required: true
+  })
+  task_type: any;
 
   @IsDate()
   @Type(() => Date)

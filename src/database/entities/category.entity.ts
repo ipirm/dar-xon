@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, Tree, TreeChildren, TreeParent } from "typeo
 import { BaseEntity } from "./base.entity";
 import { Task } from "./task.entity";
 import { Portfolio } from "./portfolio.entity";
+import { TaskTypes } from "./task-types.entity";
 
 
 @Entity("categories")
@@ -14,13 +15,16 @@ export class Category extends BaseEntity {
   @TreeChildren()
   children: Category[];
 
-  @TreeParent()
+  @TreeParent({onDelete: "SET NULL"})
   parent: Category;
 
-  @OneToMany(type => Task, t => t.category, { onDelete: "CASCADE" })
+  @OneToMany(type => Task, t => t.category, { onDelete: "SET NULL" })
   tasks?: Task[];
 
   @OneToMany(type => Portfolio, t => t.category)
   portfolio: Portfolio[];
+
+  @OneToMany(type => TaskTypes, t => t.category)
+  task_types: TaskTypes[];
 
 }

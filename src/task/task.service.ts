@@ -26,15 +26,16 @@ export class TaskService {
   }
 
   async getAll(page, limit): Promise<Pagination<Task>> {
-    const data = await this.task.createQueryBuilder("task")
+    const data = this.task.createQueryBuilder("task")
       .leftJoinAndSelect("task.category", "category")
       .leftJoinAndSelect("category.parent", "parent")
       .leftJoinAndSelect("task.created_by", "created_by")
       .leftJoinAndSelect("task.responses", "responses")
       .leftJoinAndSelect("task.criteria", "criteria")
+      .leftJoinAndSelect("task.task_type", "task_type")
       .leftJoinAndSelect("responses.executor", "executor");
 
-    return paginate(data, { page, limit });
+    return await paginate(data, { page, limit });
   }
 
   async createTask(createTaskDto: CreateTaskDto, user, files: Array<Express.Multer.File>): Promise<Task> {
@@ -145,6 +146,7 @@ export class TaskService {
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor1")
       .leftJoin("task.criteria", "criteria")
+      .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
     if (search) {
@@ -211,6 +213,7 @@ export class TaskService {
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
       .leftJoin("task.criteria", "criteria")
+      .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
     if (started) {

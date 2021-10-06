@@ -6,6 +6,9 @@ import { Pagination } from "nestjs-typeorm-paginate";
 import { DeleteResult, UpdateResult } from "typeorm";
 import { Category } from "../database/entities/category.entity";
 import { CreateCategoryDto } from "./dto/create-category.dto";
+import { TaskTypes } from "../database/entities/task-types.entity";
+import { CreateTypeDto } from "./dto/create-type.dto";
+import { ApiImplicitParam } from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
 
 
 @ApiTags("Category")
@@ -29,6 +32,35 @@ export class CategoryController {
     return this.category.createCategory(createCategoryDto);
   }
 
+  @Post("create/type")
+  @ApiOperation({ summary: "Создать тип для раздела" })
+  @ApiCreatedResponse({ type: CreateTypeDto })
+  createType(
+    @Body() createTypeDto: CreateTypeDto
+  ): Promise<TaskTypes> {
+    return this.category.createType(createTypeDto);
+  }
+
+  @Get("get/list")
+  @ApiOperation({ summary: "Получить все типы" })
+  @ApiImplicitQuery({
+    name: "page",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "limit",
+    required: false,
+    type: Number
+  })
+  getAllTypes(
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100,
+    @Query("cat") cat: number
+  ): Promise<Pagination<TaskTypes>> {
+    return this.category.getAllTypes(page, limit, cat);
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Получить раздел по id" })
   @ApiImplicitQuery({
@@ -45,7 +77,7 @@ export class CategoryController {
   @Put(":id")
   @ApiOperation({ summary: "Обновить раздел" })
   @ApiCreatedResponse({ type: CreateCategoryDto })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number
@@ -57,7 +89,24 @@ export class CategoryController {
     return this.category.updateCategory(id, createCategoryDto);
   }
 
+  @ApiImplicitParam({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  @Delete("delete/type/:id")
+  @ApiOperation({ summary: "Удалить тип" })
+  deleteType(
+    @Param("id") id: number
+  ): Promise<DeleteResult> {
+    return this.category.deleteType(id);
+  }
 
+  @ApiImplicitParam({
+    name: "id",
+    required: true,
+    type: Number
+  })
   @Delete(":id")
   @ApiOperation({ summary: "Удалить раздел" })
   deleteCustomer(
@@ -81,3 +130,4 @@ export class CategoryController {
   }
 
 }
+
