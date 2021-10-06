@@ -1,4 +1,4 @@
-import { IsDate, IsString } from "class-validator";
+import { IsDate, IsInt, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 
@@ -16,8 +16,9 @@ export class CreateTaskDto {
   @ApiProperty({ example: "ссылка", description: "Ссылка на сайт", required: false })
   site: string;
 
+  @IsString()
   @ApiProperty({
-    example: 1,
+    example: 7,
     description: "Категория id нужно посылать самую нижнию по иерархие категоирию",
     required: true
   })
@@ -27,4 +28,15 @@ export class CreateTaskDto {
   @Type(() => Date)
   @ApiProperty({ example: "2021-10-01T05:54:12.153Z", description: "Время окончания", required: false })
   finishedAt: Date;
+
+  @IsString()
+  @ApiProperty({ example: 4, description: "Количество исполнителей", required: false })
+  participants: number;
+
+  @ApiProperty({ type: "array", items: { type: "string", format: "binary" }, required: false })
+  files?: any[];
+
+  @IsString()
+  @ApiProperty({ example: "7, 10, 15", description: "İd выбранных критериев", required: false })
+  criteria: any;
 }

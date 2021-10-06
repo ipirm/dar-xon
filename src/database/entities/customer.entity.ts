@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, Index, OneToMany } from "typeorm";
+import { BeforeInsert, Column, Entity, Index, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
@@ -64,7 +64,7 @@ export class Customer extends BaseEntity {
   @Column({ nullable: true })
   site: string;
 
-  @Column("simple-json", { default: null })
+  @Column("simple-json", { default: null})
   files: { url: string }[];
 
   @Column("enum", { enum: CustomerTypeEnum, default: CustomerTypeEnum.SelfEmployed })

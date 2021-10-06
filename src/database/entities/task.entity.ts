@@ -5,6 +5,7 @@ import { TaskResponses } from "./taskResponses.entity";
 import { Category } from "./category.entity";
 import { Executor } from "./executor.entity";
 import { TaskStatusEnum } from "../../enums/taskStatus.enum";
+import { CriteriaItem } from "./criteria-item.entity";
 
 
 @Entity("task")
@@ -48,4 +49,7 @@ export class Task extends BaseEntity {
   @Column("enum", { enum: TaskStatusEnum, default: TaskStatusEnum.Created })
   status: TaskStatusEnum;
 
+  @ManyToMany(() => CriteriaItem, c => c.tasks)
+  @JoinTable()
+  criteria: CriteriaItem[];
 }

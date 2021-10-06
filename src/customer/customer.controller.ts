@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CustomerService } from "./customer.service";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -64,7 +64,8 @@ export class CustomerController {
 
   @Put(":id")
   @UseInterceptors(FileFieldsInterceptor([
-    { name: "avatar", maxCount: 1 }
+    { name: "avatar", maxCount: 1 },
+    { name: "files", maxCount: 10 }
   ]))
   @ApiOperation({ summary: "Обновить заказчика" })
   @ApiCreatedResponse({ type: CreateCustomerDto })

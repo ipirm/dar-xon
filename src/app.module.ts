@@ -11,6 +11,7 @@ import { CategoryModule } from './category/category.module';
 import { TaskModule } from './task/task.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { AdminModule } from './admin/admin.module';
+import { CriteriaModule } from './criteria/criteria.module';
 import * as ormConfig from "./database/orm.config";
 
 
@@ -28,7 +29,8 @@ import * as ormConfig from "./database/orm.config";
     CategoryModule,
     TaskModule,
     PortfolioModule,
-    AdminModule
+    AdminModule,
+    CriteriaModule
   ],
   controllers: [AppController],
   providers: [AppService]

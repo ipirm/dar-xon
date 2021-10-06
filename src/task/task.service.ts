@@ -12,12 +12,14 @@ import { StartTaskDto } from "./dto/start-task.dto";
 import { TaskStatusEnum } from "../enums/taskStatus.enum";
 import { CustomerTypeTaskEnum } from "../enums/customerTypeTask.enum";
 import { Executor } from "../database/entities/executor.entity";
+import { CriteriaItem } from "../database/entities/criteria-item.entity";
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(Task) private readonly task: Repository<Task>,
     @InjectRepository(TaskResponses) private readonly response: Repository<TaskResponses>,
+    @InjectRepository(CriteriaItem) private readonly criteria: Repository<CriteriaItem>,
     @InjectRepository(Executor) private readonly executor: Repository<Executor>,
     private readonly aws: AwsService
   ) {
@@ -29,6 +31,7 @@ export class TaskService {
       .leftJoinAndSelect("category.parent", "parent")
       .leftJoinAndSelect("task.created_by", "created_by")
       .leftJoinAndSelect("task.responses", "responses")
+      .leftJoinAndSelect("task.criteria", "criteria")
       .leftJoinAndSelect("responses.executor", "executor");
 
     return paginate(data, { page, limit });
@@ -43,8 +46,9 @@ export class TaskService {
       }
       Object.assign(createTaskDto, { files: images });
     }
-
     Object.assign(createTaskDto, { created_by: user.id });
+    const criteria = await this.criteria.findByIds(createTaskDto.criteria.split(","));
+    Object.assign(createTaskDto, { criteria: criteria });
     return await this.task.save(this.task.create(createTaskDto));
   }
 
@@ -109,7 +113,7 @@ export class TaskService {
     }));;
   }
 
-  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search): Promise<Pagination<Task>> {
+  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -131,7 +135,8 @@ export class TaskService {
         "category.name",
         "executor.id",
         "responses.id",
-        "executor1.id"
+        "executor1.id",
+        "criteria.id"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
@@ -139,8 +144,23 @@ export class TaskService {
       .leftJoin("task.executor", "executor")
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor1")
-      .andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` })
+      .leftJoin("task.criteria", "criteria")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
+
+    if (search) {
+      data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
+    }
+
+    if (started) {
+      data.andWhere("task.createdAt > :start_at", { start_at: started });
+    }
+
+    if (criteria) {
+      data.andWhere("criteria.id IN (:...ids)", { ids: [...criteria.split(",")] });
+    }
+    if (cat) {
+      data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat))", { cat: [...cat.split(",")] });
+    }
 
     if (state === "execution") {
       data.andWhere("task.status = :started", { started: "started" });
@@ -165,7 +185,7 @@ export class TaskService {
     return paginate(data, { page, limit });
   }
 
-  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search): Promise<Pagination<Task>> {
+  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search, started, criteria, cat): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -184,26 +204,43 @@ export class TaskService {
         "parent.id",
         "parent.name",
         "category.id",
-        "category.name"
+        "category.name",
+        "criteria.id"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
-      .andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` })
+      .leftJoin("task.criteria", "criteria")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
-    if (state === "active") {
+    if (started) {
+      data.andWhere("task.createdAt > :start_at", { start_at: started });
+    }
+
+    if (criteria) {
+      data.andWhere("criteria.id IN (:...ids)", { ids: [...criteria.split(",")] });
+    }
+    if (cat) {
+      data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat))", { cat: [...cat.split(",")] });
+    }
+
+    if (search) {
+      data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
+    }
+
+    console.log(state);
+    if (state === CustomerTypeTaskEnum.Execution) {
       data.andWhere("(task.status = :started OR task.status = :created) ", { started: "started", created: "created" });
       data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
 
-    if (state === "archive") {
-      data.andWhere("task.status = :archive", { archive: "archive" });
+    if (state === CustomerTypeTaskEnum.Archive) {
+      data.andWhere("task.status = :archive", { archive: "finished" });
       data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
-    if (state === "all") {
+    if (state === CustomerTypeTaskEnum.All) {
       data.andWhere("task.status = :started", { started: "created" });
     }
 

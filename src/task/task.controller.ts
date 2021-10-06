@@ -11,7 +11,7 @@ import {
   UseInterceptors
 } from "@nestjs/common";
 import { TaskService } from "./task.service";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { Task } from "../database/entities/task.entity";
@@ -58,12 +58,13 @@ export class TaskController {
   }
 
   @ApiBearerAuth()
+  @ApiConsumes("multipart/form-data")
+  @ApiOperation({ summary: "Создать задачу" })
+  @ApiCreatedResponse({ type: CreateTaskDto })
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(FilesInterceptor("files", 10))
   @Post("")
-  @ApiOperation({ summary: "Создать задачу" })
-  @ApiCreatedResponse({ type: CreateTaskDto })
   saveCustomer(
     @Body() createTaskDto: CreateTaskDto,
     @UserDecorator() user: any,
@@ -112,16 +113,33 @@ export class TaskController {
     required: false,
     type: String
   })
-
+  @ApiImplicitQuery({
+    name: "started",
+    required: false,
+    type: String
+  })
+  @ApiImplicitQuery({
+    name: "criteria",
+    required: false,
+    type: String
+  })
+  @ApiImplicitQuery({
+    name: "cat",
+    required: false,
+    type: String
+  })
   @ApiOperation({ summary: "Получить все задачи исполнителя" })
   getAllExecutorTasks(
     @UserDecorator() user: any,
     @Query("state") state: ExecutorTypeTaskEnum = ExecutorTypeTaskEnum.All,
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
-    @Query("search") search: number = 100
+    @Query("search") search: string,
+    @Query("started") started: string,
+    @Query("criteria") criteria: string,
+    @Query("cat") cat: string
   ): Promise<Pagination<Task>> {
-    return this.task.getAllExecutorTasks(user, state, page, limit, search);
+    return this.task.getAllExecutorTasks(user, state, page, limit, search,started,criteria,cat);
   }
 
   @ApiBearerAuth()
@@ -143,22 +161,38 @@ export class TaskController {
     required: true,
     enum: CustomerTypeTaskEnum
   })
-
   @ApiImplicitQuery({
     name: "search",
     required: false,
     type: String
   })
-
+  @ApiImplicitQuery({
+    name: "started",
+    required: false,
+    type: String
+  })
+  @ApiImplicitQuery({
+    name: "criteria",
+    required: false,
+    type: String
+  })
+  @ApiImplicitQuery({
+    name: "cat",
+    required: false,
+    type: String
+  })
   @ApiOperation({ summary: "Получить все задачи заказчика" })
   getAllCustomerTasks(
     @UserDecorator() user: any,
     @Query("state") state: CustomerTypeTaskEnum = CustomerTypeTaskEnum.All,
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
-    @Query("search") search: number = 100
+    @Query("search") search: string,
+    @Query("started") started: string,
+    @Query("criteria") criteria: string,
+    @Query("cat") cat: string
   ): Promise<Pagination<Task>> {
-    return this.task.getAllCustomerTasks(user, state, page, limit, search);
+    return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat);
   }
 
   @ApiBearerAuth()

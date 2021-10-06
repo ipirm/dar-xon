@@ -13,6 +13,10 @@ export class CreateExecutorDto {
   phone: string;
 
   @IsString()
+  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
+  avatar: string;
+
+  @IsString()
   @ApiProperty({ example: "password112", description: "Пароль", required: false })
   password: string;
 

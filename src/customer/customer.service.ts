@@ -38,9 +38,17 @@ export class CustomerService {
 
   async updateCustomer(id: number, createCustomerDto: CreateCustomerDto, files: Express.Multer.File[]): Promise<UpdateResult> {
     if (files) {
+      let files = [];
       for (const [key, value] of Object.entries(files)) {
         const file = await this.aws.uploadPublicFile(value[0]);
-        Object.assign(createCustomerDto, { [key]: file.url });
+        if (key == "files") {
+          files.push({
+            url: file.url
+          });
+        } else {
+          Object.assign(createCustomerDto, { [key]: file.url });
+        }
+        Object.assign(createCustomerDto, { files: files });
       }
     }
     return await this.customer.update(id, this.customer.create(createCustomerDto));

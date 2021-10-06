@@ -6,10 +6,11 @@ import { Task } from "../database/entities/task.entity";
 import { AwsModule } from "../aws/aws.module";
 import { TaskResponses } from "../database/entities/taskResponses.entity";
 import { Executor } from "../database/entities/executor.entity";
+import { CriteriaItem } from "../database/entities/criteria-item.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Task, TaskResponses, Executor]),
+    TypeOrmModule.forFeature([Task, TaskResponses, Executor, CriteriaItem]),
     AwsModule
   ],
   providers: [TaskService],
