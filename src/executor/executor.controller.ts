@@ -37,6 +37,7 @@ export class ExecutorController {
 
   @Post("")
   @ApiOperation({ summary: "Создать исполнителя" })
+  @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileFieldsInterceptor([
     { name: "p_scan", maxCount: 1 },
     { name: "p_pink", maxCount: 1 },

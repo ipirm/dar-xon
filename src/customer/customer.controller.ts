@@ -40,6 +40,7 @@ export class CustomerController {
   @UseInterceptors(FileFieldsInterceptor([
     { name: "avatar", maxCount: 1 }
   ]))
+  @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: "Создать заказчика" })
   @ApiCreatedResponse({ type: CreateCustomerDto })
   saveCustomer(
