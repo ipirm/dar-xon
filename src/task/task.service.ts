@@ -42,7 +42,7 @@ export class TaskService {
     if (files) {
       for (const value of files) {
         const file = await this.aws.uploadPublicFile(value);
-        images.push({ url: file.url });
+        images.push({ url: file.url, name: file.key });
       }
       Object.assign(createTaskDto, { files: images });
     }

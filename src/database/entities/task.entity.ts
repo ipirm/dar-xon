@@ -31,18 +31,18 @@ export class Task extends BaseEntity {
   finishedAt: Date;
 
   @Column("simple-json", { default: null })
-  files: { url: string }[];
+  files: { name: string, url: string }[];
 
-  @ManyToOne(() => Customer, c => c.tasks, { onDelete: "CASCADE" })
+  @ManyToOne(() => Customer, c => c.tasks, { onDelete: "SET NULL" })
   created_by: Customer;
 
   @OneToMany(type => TaskResponses, t => t.task)
   responses: TaskResponses[];
 
-  @ManyToOne(type => Category, category => category.tasks, { onDelete: "CASCADE" })
+  @ManyToOne(type => Category, category => category.tasks, { onDelete: "SET NULL" })
   category: Category;
 
-  @ManyToMany(() => Executor, c => c.tasks, { onDelete: "CASCADE" })
+  @ManyToMany(() => Executor, c => c.tasks, { onDelete: "SET NULL" })
   @JoinTable()
   executors: Executor[];
 

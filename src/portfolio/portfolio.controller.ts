@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { PortfolioService } from "./portfolio.service";
 import { Portfolio } from "../database/entities/portfolio.entity";
