@@ -137,7 +137,8 @@ export class TaskService {
         "executors.id",
         "responses.id",
         "executor1.id",
-        "criteria.id"
+        "criteria.id",
+        "criteria.name"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
@@ -207,7 +208,8 @@ export class TaskService {
         "parent.name",
         "category.id",
         "category.name",
-        "criteria.id"
+        "criteria.id",
+        "criteria.name"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")

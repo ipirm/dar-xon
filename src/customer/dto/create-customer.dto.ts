@@ -1,4 +1,4 @@
-import { IsEmail, IsString, Matches } from "class-validator";
+import { IsEmail, IsEnum, IsString, Matches } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import { ApiModelProperty } from "@nestjs/swagger/dist/decorators/api-model-property.decorator";
@@ -67,6 +67,7 @@ export class CreateCustomerDto {
   @ApiProperty({ example: "https://tviser.agency", description: "Сайт", required: false })
   site: string;
 
+  @IsEnum(CustomerTypeEnum)
   @ApiModelProperty({
     enum: Object.keys(CustomerTypeEnum),
     default: CustomerTypeEnum.SelfEmployed
