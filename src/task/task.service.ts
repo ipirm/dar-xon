@@ -273,12 +273,18 @@ export class TaskService {
         "parent.id",
         "parent.name",
         "category.id",
-        "category.name"
+        "category.name",
+        "task_type.id",
+        "task_type.name",
+        "criteria.id",
+        "criteria.name"
       ])
       .where("task.id = :id", { id: id })
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
+      .leftJoin("task.task_type", "task_type")
+      .leftJoin("task.criteria","criteria")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .getOne();
 
@@ -304,15 +310,21 @@ export class TaskService {
           "executor.id",
           "executor.avatar",
           "executor.fio",
-          "executor.rating"
+          "executor.rating",
+          "task_type.id",
+          "task_type.name",
+          "criteria.id",
+          "criteria.name"
         ])
         .where("task.id = :id", { id: id })
         .leftJoin("task.created_by", "created_by")
         .leftJoin("task.category", "category")
+        .leftJoin("task.task_type", "task_type")
         .leftJoin("category.parent", "parent")
         .leftJoin("task.responses", "responses")
         .leftJoin("responses.executor", "executor")
         .leftJoinAndSelect("task.executors", "executors")
+        .leftJoin("task.criteria","criteria")
         .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
         .getOne();
     }
