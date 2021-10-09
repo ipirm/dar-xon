@@ -12,7 +12,9 @@ import { TaskModule } from './task/task.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { AdminModule } from './admin/admin.module';
 import { CriteriaModule } from './criteria/criteria.module';
+import { ChatModule } from './chat/chat.module';
 import * as ormConfig from "./database/orm.config";
+import { ServeStaticModule } from "@nestjs/serve-static";
 
 
 @Module({
@@ -30,7 +32,9 @@ import * as ormConfig from "./database/orm.config";
     TaskModule,
     PortfolioModule,
     AdminModule,
-    CriteriaModule
+    CriteriaModule,
+    ChatModule,
+    ServeStaticModule.forRoot({ rootPath: `${process.cwd()}/public` }),
   ],
   controllers: [AppController],
   providers: [AppService]

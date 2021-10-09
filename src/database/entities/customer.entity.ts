@@ -3,6 +3,7 @@ import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
 import { Task } from "./task.entity";
+import { Message } from "./message.entity";
 
 @Entity("customer")
 export class Customer extends BaseEntity {
@@ -89,5 +90,8 @@ export class Customer extends BaseEntity {
 
   @Column({ type: "boolean", default: false})
   verified: Boolean;
+
+  @OneToMany(type => Message, c => c.chat)
+  messages: Message[];
 
 }

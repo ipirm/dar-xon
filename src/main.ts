@@ -27,6 +27,8 @@ async function bootstrap() {
   }));
   // app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();
+
+
   SwaggerModule.setup("api", app, document);
   const port = process.env.PORT || 3000;
 

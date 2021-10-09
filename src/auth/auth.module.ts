@@ -14,6 +14,7 @@ import { AwsModule } from "../aws/aws.module";
 import { Admin } from "../database/entities/admin.entity";
 import { AdminService } from "../admin/admin.service";
 import { Mail } from "../database/entities/mail.entity";
+import { WsJwtGuard } from "./guards/ws.guard";
 
 @Module({
   imports: [
@@ -21,10 +22,10 @@ import { Mail } from "../database/entities/mail.entity";
       secret: jwtConstants.secret,
       signOptions: { expiresIn: "286400s" }
     }),
-    TypeOrmModule.forFeature([Customer, Executor,Admin,Mail]),
+    TypeOrmModule.forFeature([Customer, Executor, Admin, Mail]),
     AwsModule
   ],
-  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard,AdminService],
+  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard, AdminService, WsJwtGuard],
   controllers: [AuthController]
 })
 export class AuthModule {}

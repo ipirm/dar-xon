@@ -4,6 +4,8 @@ import * as bcrypt from "bcrypt";
 import { TaskResponses } from "./taskResponses.entity";
 import { Task } from "./task.entity";
 import { Portfolio } from "./portfolio.entity";
+import { Message } from "./message.entity";
+import { ChatRoom } from "./chat-room.entity";
 
 
 @Entity("executor")
@@ -86,4 +88,9 @@ export class Executor extends BaseEntity {
   @Column({ type: "boolean", default: false })
   verified: Boolean;
 
+  @OneToMany(type => Message, c => c.chat)
+  messages: Message[];
+
+  @ManyToMany(type => ChatRoom, c => c.executors)
+  rooms?: ChatRoom[];
 }

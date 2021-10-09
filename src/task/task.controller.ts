@@ -11,8 +11,15 @@ import {
   UseInterceptors
 } from "@nestjs/common";
 import { TaskService } from "./task.service";
-import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
-import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags
+} from "@nestjs/swagger";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { Task } from "../database/entities/task.entity";
 import { CreateTaskDto } from "./dto/create-task.dto";
@@ -38,24 +45,62 @@ export class TaskController {
   ) {
   }
 
-  @Get("")
-  @ApiOperation({ summary: "Получить все задачи" })
-  @ApiImplicitQuery({
+  @ApiQuery({
+    name: "state",
+    required: true,
+    enum: CustomerTypeTaskEnum,
+    example: CustomerTypeTaskEnum.All
+  })
+  @ApiQuery({
+    name: "search",
+    required: false,
+    type: String,
+    example: "Test task 3"
+  })
+  @ApiQuery({
+    name: "started",
+    required: false,
+    type: String,
+    example: "2021-10-08T06:31:16.544Z"
+  })
+  @ApiQuery({
+    name: "criteria",
+    required: false,
+    type: String,
+    example: "7,12,14"
+  })
+  @ApiQuery({
+    name: "cat",
+    required: false,
+    type: String,
+    example: "33,34,35"
+  })
+  @ApiQuery({
     name: "page",
     required: false,
-    type: Number
+    type: Number,
+    example: 1
   })
-  @ApiImplicitQuery({
+  @ApiQuery({
     name: "limit",
     required: false,
-    type: Number
+    type: Number,
+    example: 10
   })
+  @ApiOperation({ summary: "Получить все задачи" })
+  @Get("")
   getAll(
+    @Query("state") state: ExecutorTypeTaskEnum = ExecutorTypeTaskEnum.All,
     @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100
+    @Query("limit") limit: number = 100,
+    @Query("search") search: string,
+    @Query("started") started: string,
+    @Query("criteria") criteria: string,
+    @Query("cat") cat: string
   ): Promise<Pagination<Task>> {
-    return this.task.getAll(page, limit);
+    return this.task.getAll(state, page, limit, search, started, criteria, cat);
   }
+
 
   @ApiBearerAuth()
   @ApiConsumes("multipart/form-data")
@@ -88,46 +133,52 @@ export class TaskController {
   }
 
 
+  @ApiQuery({
+    name: "state",
+    required: true,
+    enum: CustomerTypeTaskEnum,
+    example: CustomerTypeTaskEnum.All
+  })
+  @ApiQuery({
+    name: "search",
+    required: false,
+    type: String,
+    example: "Test task 3"
+  })
+  @ApiQuery({
+    name: "started",
+    required: false,
+    type: String,
+    example: "2021-10-08T06:31:16.544Z"
+  })
+  @ApiQuery({
+    name: "criteria",
+    required: false,
+    type: String,
+    example: "7,12,14"
+  })
+  @ApiQuery({
+    name: "cat",
+    required: false,
+    type: String,
+    example: "33,34,35"
+  })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    example: 1
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    example: 10
+  })
   @ApiBearerAuth()
   @hasRoles(Role.Executor)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("executor/list")
-  @ApiImplicitQuery({
-    name: "page",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "limit",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "state",
-    required: true,
-    enum: ExecutorTypeTaskEnum
-  })
-
-  @ApiImplicitQuery({
-    name: "search",
-    required: false,
-    type: String
-  })
-  @ApiImplicitQuery({
-    name: "started",
-    required: false,
-    type: String
-  })
-  @ApiImplicitQuery({
-    name: "criteria",
-    required: false,
-    type: String
-  })
-  @ApiImplicitQuery({
-    name: "cat",
-    required: false,
-    type: String
-  })
   @ApiOperation({ summary: "Получить все задачи исполнителя" })
   getAllExecutorTasks(
     @UserDecorator() user: any,
@@ -139,48 +190,55 @@ export class TaskController {
     @Query("criteria") criteria: string,
     @Query("cat") cat: string
   ): Promise<Pagination<Task>> {
-    return this.task.getAllExecutorTasks(user, state, page, limit, search,started,criteria,cat);
+    return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat);
   }
 
+  @ApiQuery({
+    name: "state",
+    required: true,
+    enum: CustomerTypeTaskEnum,
+    example: CustomerTypeTaskEnum.All
+  })
+  @ApiQuery({
+    name: "search",
+    required: false,
+    type: String,
+    example: "Test task 3"
+  })
+  @ApiQuery({
+    name: "started",
+    required: false,
+    type: String,
+    example: "2021-10-08T06:31:16.544Z"
+  })
+  @ApiQuery({
+    name: "criteria",
+    required: false,
+    type: String,
+    example: "7,12,14"
+  })
+  @ApiQuery({
+    name: "cat",
+    required: false,
+    type: String,
+    example: "33,34,35"
+  })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    example: 1
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    example: 10
+  })
   @ApiBearerAuth()
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("customer/list")
-  @ApiImplicitQuery({
-    name: "page",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "limit",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "state",
-    required: true,
-    enum: CustomerTypeTaskEnum
-  })
-  @ApiImplicitQuery({
-    name: "search",
-    required: false,
-    type: String
-  })
-  @ApiImplicitQuery({
-    name: "started",
-    required: false,
-    type: String
-  })
-  @ApiImplicitQuery({
-    name: "criteria",
-    required: false,
-    type: String
-  })
-  @ApiImplicitQuery({
-    name: "cat",
-    required: false,
-    type: String
-  })
   @ApiOperation({ summary: "Получить все задачи заказчика" })
   getAllCustomerTasks(
     @UserDecorator() user: any,
@@ -230,7 +288,6 @@ export class TaskController {
     @Param("id") id: number,
     @UserDecorator() user: any
   ): Promise<any> {
-    console.log(user)
     return this.task.findOne(id, user);
   }
 

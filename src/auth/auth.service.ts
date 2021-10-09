@@ -74,4 +74,7 @@ export class AuthService {
     };
   }
 
+  async wsSignIn(token): Promise<any> {
+    return this.jwtService.verify(token);
+  }
 }

@@ -7,6 +7,7 @@ import { Executor } from "./executor.entity";
 import { TaskStatusEnum } from "../../enums/taskStatus.enum";
 import { CriteriaItem } from "./criteria-item.entity";
 import { TaskTypes } from "./task-types.entity";
+import { ChatRoom } from "./chat-room.entity";
 
 
 @Entity("task")
@@ -56,4 +57,8 @@ export class Task extends BaseEntity {
 
   @ManyToOne(type => TaskTypes, c => c.tasks, { onDelete: "SET NULL" })
   task_type: TaskTypes;
+
+  @OneToMany(type => TaskResponses, t => t.task)
+  rooms: ChatRoom[];
+
 }

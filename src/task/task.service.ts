@@ -25,17 +25,70 @@ export class TaskService {
   ) {
   }
 
-  async getAll(page, limit): Promise<Pagination<Task>> {
-    const data = this.task.createQueryBuilder("task")
-      .leftJoinAndSelect("task.category", "category")
-      .leftJoinAndSelect("category.parent", "parent")
-      .leftJoinAndSelect("task.created_by", "created_by")
-      .leftJoinAndSelect("task.responses", "responses")
-      .leftJoinAndSelect("task.criteria", "criteria")
-      .leftJoinAndSelect("task.task_type", "task_type")
-      .leftJoinAndSelect("responses.executor", "executor");
+  async getAll(state, page, limit, search, started, criteria, cat): Promise<Pagination<Task>> {
+    const searchText = decodeURI(search).toLowerCase();
+    const data = await this.task.createQueryBuilder("task")
+      .select([
+        "task.id",
+        "task.title",
+        "task.createdAt",
+        "task.finishedAt",
+        "task.files",
+        "task.description",
+        "task.site",
+        "task.status",
+        "created_by.id",
+        "created_by.fio",
+        "created_by.avatar",
+        "parent.id",
+        "parent.name",
+        "parent1.id",
+        "parent1.name",
+        "category.id",
+        "category.name",
+        "criteria.id",
+        "criteria.name",
+        "task_type.id",
+        "task_type.name",
+        "task.status"
+      ])
+      .leftJoin("task.created_by", "created_by")
+      .leftJoin("task.category", "category")
+      .leftJoin("category.parent", "parent")
+      .leftJoin("parent.parent", "parent1")
+      .leftJoin("task.criteria", "criteria")
+      .leftJoin("task.task_type", "task_type")
+      .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
-    return await paginate(data, { page, limit });
+    if (started) {
+      data.andWhere("task.createdAt > :start_at", { start_at: started });
+    }
+
+    if (criteria) {
+      data.andWhere("criteria.id IN (:...ids)", { ids: [...criteria.split(",")] });
+    }
+    if (cat) {
+      data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat) OR parent1.id IN (:...cat))", { cat: [...cat.split(",")] });
+    }
+
+    if (search) {
+      data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
+    }
+
+    if (state === CustomerTypeTaskEnum.Execution) {
+      data.andWhere("(task.status = :started OR task.status = :created) ", { started: "started", created: "created" });
+    }
+
+
+    if (state === CustomerTypeTaskEnum.Archive) {
+      data.andWhere("task.status = :archive", { archive: "finished" });
+    }
+
+    if (state === CustomerTypeTaskEnum.All) {
+      data.andWhere("task.status = :started", { started: "created" });
+    }
+
+    return paginate(data, { page, limit });
   }
 
   async createTask(createTaskDto: CreateTaskDto, user, files: Array<Express.Multer.File>): Promise<Task> {
@@ -132,17 +185,21 @@ export class TaskService {
         "created_by.avatar",
         "parent.id",
         "parent.name",
+        "parent1.id",
+        "parent1.name",
         "category.id",
         "category.name",
         "executors.id",
         "responses.id",
         "executor1.id",
         "criteria.id",
-        "criteria.name"
+        "criteria.name",
+        "task.status"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
+      .leftJoin("parent.parent", "parent1")
       .leftJoin("task.executors", "executors")
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor1")
@@ -162,7 +219,7 @@ export class TaskService {
       data.andWhere("criteria.id IN (:...ids)", { ids: [...criteria.split(",")] });
     }
     if (cat) {
-      data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat))", { cat: [...cat.split(",")] });
+      data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat) OR parent1.id IN (:...cat))", { cat: [...cat.split(",")] });
     }
 
     if (state === ExecutorTypeTaskEnum.Execution) {
@@ -206,14 +263,18 @@ export class TaskService {
         "created_by.avatar",
         "parent.id",
         "parent.name",
+        "parent1.id",
+        "parent1.name",
         "category.id",
         "category.name",
         "criteria.id",
-        "criteria.name"
+        "criteria.name",
+        "task.status"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
+      .leftJoin("parent.parent", "parent1")
       .leftJoin("task.criteria", "criteria")
       .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
@@ -226,7 +287,8 @@ export class TaskService {
       data.andWhere("criteria.id IN (:...ids)", { ids: [...criteria.split(",")] });
     }
     if (cat) {
-      data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat))", { cat: [...cat.split(",")] });
+      console.log(cat)
+      data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat) OR parent1.id IN (:...cat))", { cat: [...cat.split(",")] });
     }
 
     if (search) {
@@ -277,7 +339,8 @@ export class TaskService {
         "task_type.id",
         "task_type.name",
         "criteria.id",
-        "criteria.name"
+        "criteria.name",
+        "task.status",
       ])
       .where("task.id = :id", { id: id })
       .leftJoin("task.created_by", "created_by")
@@ -313,6 +376,7 @@ export class TaskService {
           "executor.rating",
           "task_type.id",
           "task_type.name",
+          "task.status",
           "criteria.id",
           "criteria.name"
         ])
