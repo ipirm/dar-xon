@@ -29,7 +29,7 @@ export class Portfolio extends BaseEntity {
   @Column("simple-json", { default: null })
   files: { url: string }[];
 
-  @ManyToOne(type => Category, category => category.portfolio)
+  @ManyToOne(type => Category, category => category.portfolio, { onDelete: "SET NULL" })
   category: Category;
 
   @ManyToOne(type => Executor, c => c.portfolios)

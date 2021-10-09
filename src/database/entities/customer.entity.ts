@@ -88,7 +88,7 @@ export class Customer extends BaseEntity {
   @Column({ type: "boolean", default: false, select: false })
   banned: Boolean;
 
-  @Column({ type: "boolean", default: false})
+  @Column({ type: "boolean", default: false })
   verified: Boolean;
 
   @OneToMany(type => Message, c => c.chat)

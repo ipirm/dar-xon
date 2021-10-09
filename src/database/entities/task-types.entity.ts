@@ -10,7 +10,7 @@ export class TaskTypes extends BaseEntity {
   @Column({ nullable: true })
   name: string;
 
-  @ManyToOne(type => Category, t => t.task_types)
+  @ManyToOne(type => Category, t => t.task_types, { onDelete: "SET NULL" })
   category: Category[];
 
   @ManyToOne(type => Task, c => c.task_type, { onDelete: "SET NULL" })

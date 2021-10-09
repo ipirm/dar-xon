@@ -7,7 +7,6 @@ import { Portfolio } from "./portfolio.entity";
 import { Message } from "./message.entity";
 import { ChatRoom } from "./chat-room.entity";
 
-
 @Entity("executor")
 export class Executor extends BaseEntity {
 
@@ -93,4 +92,5 @@ export class Executor extends BaseEntity {
 
   @ManyToMany(type => ChatRoom, c => c.executors)
   rooms?: ChatRoom[];
+
 }
