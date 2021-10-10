@@ -76,6 +76,12 @@ export class TaskController {
     example: "33,34,35"
   })
   @ApiQuery({
+    name: "task_type",
+    required: false,
+    type: Number,
+    example: 7
+  })
+  @ApiQuery({
     name: "page",
     required: false,
     type: Number,
@@ -96,9 +102,11 @@ export class TaskController {
     @Query("search") search: string,
     @Query("started") started: string,
     @Query("criteria") criteria: string,
-    @Query("cat") cat: string
+    @Query("cat") cat: string,
+    @Query("task_type") taskType: number
   ): Promise<Pagination<Task>> {
-    return this.task.getAll(state, page, limit, search, started, criteria, cat);
+    console.log(taskType)
+    return this.task.getAll(state, page, limit, search, started, criteria, cat,taskType);
   }
 
 
@@ -175,6 +183,12 @@ export class TaskController {
     type: Number,
     example: 10
   })
+  @ApiQuery({
+    name: "task_type",
+    required: false,
+    type: Number,
+    example: 7
+  })
   @ApiBearerAuth()
   @hasRoles(Role.Executor)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -188,9 +202,10 @@ export class TaskController {
     @Query("search") search: string,
     @Query("started") started: string,
     @Query("criteria") criteria: string,
-    @Query("cat") cat: string
+    @Query("cat") cat: string,
+    @Query("task_type") taskType: number
   ): Promise<Pagination<Task>> {
-    return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat);
+    return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat,taskType);
   }
 
   @ApiQuery({
@@ -235,6 +250,12 @@ export class TaskController {
     type: Number,
     example: 10
   })
+  @ApiQuery({
+    name: "task_type",
+    required: false,
+    type: Number,
+    example: 7
+  })
   @ApiBearerAuth()
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -248,9 +269,10 @@ export class TaskController {
     @Query("search") search: string,
     @Query("started") started: string,
     @Query("criteria") criteria: string,
-    @Query("cat") cat: string
+    @Query("cat") cat: string,
+    @Query("task_type") taskType: number
   ): Promise<Pagination<Task>> {
-    return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat);
+    return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat,taskType);
   }
 
   @ApiBearerAuth()

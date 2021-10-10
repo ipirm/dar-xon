@@ -7,11 +7,17 @@ import { AwsModule } from "../aws/aws.module";
 import { ChatRoom } from "../database/entities/chat-room.entity";
 import { Message } from "../database/entities/message.entity";
 import { Executor } from "../database/entities/executor.entity";
+import { JwtModule } from "@nestjs/jwt";
+import { jwtConstants } from "../auth/jwt/constants";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ChatRoom, Message, Executor]),
-    AwsModule
+    AwsModule,
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: "286400s" }
+    })
   ],
   providers: [ChatService, ChatGateway],
   controllers: [ChatController]

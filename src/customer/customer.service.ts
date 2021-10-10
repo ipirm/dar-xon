@@ -84,6 +84,7 @@ export class CustomerService {
       .where("customer.email = :nickname OR customer.phone = :nickname OR customer.login = :nickname", { nickname })
       .getOne();
 
+    console.log(nickname)
     if (!user)
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,

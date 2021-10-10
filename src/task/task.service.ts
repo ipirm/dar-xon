@@ -25,7 +25,7 @@ export class TaskService {
   ) {
   }
 
-  async getAll(state, page, limit, search, started, criteria, cat): Promise<Pagination<Task>> {
+  async getAll(state, page, limit, search, started, criteria, cat, taskType): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
     const data = await this.task.createQueryBuilder("task")
       .select([
@@ -60,6 +60,9 @@ export class TaskService {
       .leftJoin("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
+    if (taskType) {
+      data.andWhere("task_type.id = :task_type", { task_type: taskType });
+    }
     if (started) {
       data.andWhere("task.createdAt > :start_at", { start_at: started });
     }
@@ -76,17 +79,17 @@ export class TaskService {
     }
 
     if (state === CustomerTypeTaskEnum.Execution) {
-      data.andWhere("(task.status = :started OR task.status = :created) ", { started: "started", created: "created" });
+      data.andWhere("task.status = :started", { started: "started" });
     }
-
 
     if (state === CustomerTypeTaskEnum.Archive) {
       data.andWhere("task.status = :archive", { archive: "finished" });
     }
 
-    if (state === CustomerTypeTaskEnum.All) {
+    if (state === CustomerTypeTaskEnum.Consideration) {
       data.andWhere("task.status = :started", { started: "created" });
     }
+
 
     return paginate(data, { page, limit });
   }
@@ -107,6 +110,20 @@ export class TaskService {
   }
 
   async executeTask(createResponseDto: CreateResponseDto, user): Promise<TaskResponses> {
+    const response = await this.response.createQueryBuilder("r")
+      .leftJoinAndSelect("r.executor", "executor")
+      .leftJoinAndSelect("r.task", "task")
+      .where("executor.id = :executor AND task.id = :task", {
+        executor: user.id,
+        task: createResponseDto.task
+      }).getOne();
+
+    if (response)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Вы уже откликались на задачу ${response.task.title}`
+      }, HttpStatus.FORBIDDEN);
+
     return await this.response.save(this.response.create({
       executor: user.id,
       task: createResponseDto.task,
@@ -167,7 +184,7 @@ export class TaskService {
     }));;
   }
 
-  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat): Promise<Pagination<Task>> {
+  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat, taskType): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -207,6 +224,10 @@ export class TaskService {
       .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
+    if (taskType) {
+      data.andWhere("task_type.id = :task_type", { task_type: taskType });
+    }
+
     if (search) {
       data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
     }
@@ -228,24 +249,20 @@ export class TaskService {
     }
 
     if (state === ExecutorTypeTaskEnum.Сonsideration) {
-      data.andWhere("task.status = :started", { started: "started" });
+      data.andWhere("task.status = :started", { started: "created" });
       data.andWhere("executor1.id = :executor1", { executor1: user.id });
     }
 
     if (state === ExecutorTypeTaskEnum.Archive) {
       data.andWhere("task.status = :archive", { started: "finished" });
       data.andWhere("executor.id = :executor", { executor: user.id });
-
     }
 
-    if (state === ExecutorTypeTaskEnum.All) {
-      data.andWhere("task.status = :started", { started: "created" });
-    }
 
     return paginate(data, { page, limit });
   }
 
-  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search, started, criteria, cat): Promise<Pagination<Task>> {
+  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search, started, criteria, cat, taskType): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -279,6 +296,10 @@ export class TaskService {
       .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
+    if (taskType) {
+      data.andWhere("task_type.id = :task_type", { task_type: taskType });
+    }
+
     if (started) {
       data.andWhere("task.createdAt > :start_at", { start_at: started });
     }
@@ -287,7 +308,7 @@ export class TaskService {
       data.andWhere("criteria.id IN (:...ids)", { ids: [...criteria.split(",")] });
     }
     if (cat) {
-      console.log(cat)
+      console.log(cat);
       data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat) OR parent1.id IN (:...cat))", { cat: [...cat.split(",")] });
     }
 
@@ -295,9 +316,9 @@ export class TaskService {
       data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
     }
 
-    console.log(state);
+
     if (state === CustomerTypeTaskEnum.Execution) {
-      data.andWhere("(task.status = :started OR task.status = :created) ", { started: "started", created: "created" });
+      data.andWhere("(task.status = :started) ", { started: "started" });
       data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
@@ -307,7 +328,7 @@ export class TaskService {
       data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
-    if (state === CustomerTypeTaskEnum.All) {
+    if (state === CustomerTypeTaskEnum.Consideration) {
       data.andWhere("task.status = :started", { started: "created" });
     }
 
@@ -329,6 +350,7 @@ export class TaskService {
         "task.files",
         "task.description",
         "task.site",
+        "created_by.company_name",
         "created_by.id",
         "created_by.fio",
         "created_by.avatar",
@@ -360,6 +382,7 @@ export class TaskService {
           "task.finishedAt",
           "task.files",
           "task.description",
+          "created_by.company_name",
           "task.site",
           "created_by.id",
           "created_by.fio",

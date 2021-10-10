@@ -15,6 +15,8 @@ export class ChatController {
   ) {
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get("")
   @ApiOperation({ summary: "Получить все чаты" })
   @ApiImplicitQuery({
@@ -29,9 +31,10 @@ export class ChatController {
   })
   getAll(
     @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100
+    @Query("limit") limit: number = 100,
+    @UserDecorator() user: any
   ): Promise<Pagination<ChatRoom>> {
-    return this.chat.getAll(page, limit);
+    return this.chat.getAll(page, limit, user);
   }
 
 
