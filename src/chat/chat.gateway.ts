@@ -1,5 +1,6 @@
 import {
-  ConnectedSocket, MessageBody,
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -24,28 +25,31 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   server;
 
   connectedUsers: any = [];
-  rooms: any = [];
 
   afterInit(server: any): any {
     console.log("Initizialized");
   }
 
-  handleConnection(@ConnectedSocket() socket: Socket) {
+  handleConnection(@ConnectedSocket() socket: Socket): void {
     const decoded = this.jwt.verify(socket.handshake.auth.token, jwtConstants);
     this.connectedUsers.push(Object.assign(decoded, { socketId: socket.id }));
+    console.log("connected");
+    this.onRoomJoin(socket, { data: socket.handshake.query.chat_id });
   }
 
-  handleDisconnect(socket: Socket): any {
+  handleDisconnect(@ConnectedSocket() socket: Socket): void {
     this.connectedUsers = this.connectedUsers.filter(item => item?.socketId !== socket.id);
+    console.log("disconnected");
+    this.onRoomLeave(socket, { data: socket.handshake.query.chat_id });
   }
 
   @SubscribeMessage("message")
   async handleMessage(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
     const body = {
-      chat: 4,
+      chat: socket.handshake.query.chat_id,
       text: data.data,
-      read: false
+      read_by: null
     };
     if (user) {
       if (user.role === Role.Customer) {
@@ -61,22 +65,26 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       throw new WsException("Invalid credentials.");
     }
     await this.chat.saveMessage(body);
-    this.server.emit("message", data);
+    this.server.in("room-" + socket.handshake.query.chat_id).emit("message", data);
   }
 
 
   @SubscribeMessage("join")
-  async onRoomJoin(client, data: any): Promise<any> {
-    client.join(data[0]);
-
-    // const messages = await this.roomService.findMessages(data, 25);
-
-    // Send last messages to the connected user
-    // client.emit('message', messages);
+  async onRoomJoin(@ConnectedSocket() socket: Socket, @MessageBody() data: any) {
+    const room = await this.chat.getOne(data.data);
+    if (!room)
+      throw new WsException("Invalid room.");
+    socket.join("room-" + room.id);
   }
 
   @SubscribeMessage("leave")
-  onRoomLeave(client, data: any): void {
-    client.leave(data[0]);
+  onRoomLeave(@ConnectedSocket() socket: Socket, @MessageBody() data: any): void {
+    socket.leave("room-" + data.data);
   }
+
+  // @SubscribeMessage("read")
+  // readMessages(@ConnectedSocket() socket: Socket, @MessageBody() data: any): void {
+  //   socket.leave("room-" + data.data);
+  // }
+
 }

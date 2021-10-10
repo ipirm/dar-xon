@@ -45,7 +45,22 @@ export class ChatService {
   }
 
   async saveMessage(createMessageDto: CreateMessageDto): Promise<Message> {
-    console.log(createMessageDto);
     return await this.message.save(this.message.create(createMessageDto));
   }
+
+  async getMessages(page, limit, id, user): Promise<Pagination<Message>> {
+    const messages = await this.message.createQueryBuilder("m")
+      .select(["m.id", "m.text", "m.read", "m.createdAt", "chat.id", "executor.id", "executor.fio", "executor.avatar", "customer.id", "customer.fio", "customer.avatar"])
+      .leftJoin("m.chat", "chat")
+      .leftJoin("m.executor", "executor")
+      .leftJoin("m.customer", "customer")
+      .where("chat.id = :id", { id: id })
+      .orderBy("m.createdAt", "ASC");
+
+    return await paginate(messages, { page, limit });
+  }
+
+  // async getChat(id: number): Promise<ChatRoom> {
+  //   return await this.chat.findOne(id);
+  // }
 }

@@ -14,6 +14,6 @@ export class CreateMessageDto {
   @ApiProperty({ example: 1, description: "заказчик", required: false })
   customer?: any;
 
-  @ApiProperty({ example: true, description: "прочитано", required: false })
-  read: Boolean;
+  @ApiProperty({ example: 1, description: "прочитано", required: false })
+  read_by: string;
 }

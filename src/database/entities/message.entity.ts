@@ -20,6 +20,6 @@ export class Message extends BaseEntity {
   @ManyToOne(type => Customer, c => c.messages, { onDelete: "SET NULL" })
   customer: Customer;
 
-  @Column({ type: "boolean", default: false })
-  read: Boolean;
+  @Column({default: null })
+  read_by: string;
 }
