@@ -329,8 +329,14 @@ export class TaskService {
     }
 
     if (state === CustomerTypeTaskEnum.Consideration) {
+      data.andWhere("created_by.id = :created_by", { created_by: user.id });
       data.andWhere("task.status = :started", { started: "created" });
     }
+
+    if (state === CustomerTypeTaskEnum.All) {
+      data.andWhere("created_by.id = :created_by", { created_by: user.id });
+    }
+
 
     return paginate(data, { page, limit });
 
