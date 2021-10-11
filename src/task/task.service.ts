@@ -352,7 +352,7 @@ export class TaskService {
   }
 
   async findOne(id: number, user): Promise<any> {
-    let data = await this.task.createQueryBuilder("task")
+    const data = await this.task.createQueryBuilder("task")
       .select([
         "task.id",
         "task.title",
@@ -360,8 +360,8 @@ export class TaskService {
         "task.finishedAt",
         "task.files",
         "task.description",
-        "task.site",
         "created_by.company_name",
+        "task.site",
         "created_by.id",
         "created_by.fio",
         "created_by.avatar",
@@ -369,63 +369,29 @@ export class TaskService {
         "parent.name",
         "category.id",
         "category.name",
+        "responses.id",
+        "responses.comment",
+        "executor.id",
+        "executor.avatar",
+        "executor.fio",
+        "executor.rating",
         "task_type.id",
         "task_type.name",
-        "criteria.id",
-        "criteria.name",
         "task.status",
+        "criteria.id",
+        "criteria.name"
       ])
       .where("task.id = :id", { id: id })
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
-      .leftJoin("category.parent", "parent")
       .leftJoin("task.task_type", "task_type")
+      .leftJoin("category.parent", "parent")
+      .leftJoin("task.responses", "responses")
+      .leftJoin("responses.executor", "executor")
+      .leftJoinAndSelect("task.executors", "executors")
       .leftJoin("task.criteria","criteria")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .getOne();
-
-    if (data.created_by.id == user.id) {
-      data = await this.task.createQueryBuilder("task")
-        .select([
-          "task.id",
-          "task.title",
-          "task.createdAt",
-          "task.finishedAt",
-          "task.files",
-          "task.description",
-          "created_by.company_name",
-          "task.site",
-          "created_by.id",
-          "created_by.fio",
-          "created_by.avatar",
-          "parent.id",
-          "parent.name",
-          "category.id",
-          "category.name",
-          "responses.id",
-          "responses.comment",
-          "executor.id",
-          "executor.avatar",
-          "executor.fio",
-          "executor.rating",
-          "task_type.id",
-          "task_type.name",
-          "task.status",
-          "criteria.id",
-          "criteria.name"
-        ])
-        .where("task.id = :id", { id: id })
-        .leftJoin("task.created_by", "created_by")
-        .leftJoin("task.category", "category")
-        .leftJoin("task.task_type", "task_type")
-        .leftJoin("category.parent", "parent")
-        .leftJoin("task.responses", "responses")
-        .leftJoin("responses.executor", "executor")
-        .leftJoinAndSelect("task.executors", "executors")
-        .leftJoin("task.criteria","criteria")
-        .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
-        .getOne();
-    }
 
     return data;
   }
