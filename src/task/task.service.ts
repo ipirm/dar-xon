@@ -318,7 +318,7 @@ export class TaskService {
 
 
     if (state === CustomerTypeTaskEnum.Execution) {
-      data.andWhere("(task.status = :started) ", { started: "started" });
+      data.andWhere("task.status = :started", { started: "started" });
       data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
@@ -331,6 +331,11 @@ export class TaskService {
     if (state === CustomerTypeTaskEnum.Consideration) {
       data.andWhere("created_by.id = :created_by", { created_by: user.id });
       data.andWhere("task.status = :started", { started: "created" });
+    }
+
+    if (state === CustomerTypeTaskEnum.Current) {
+      data.andWhere("(task.status = :started OR task.status = :created)", { started: "started", created: "created" });
+      data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
     if (state === CustomerTypeTaskEnum.All) {
