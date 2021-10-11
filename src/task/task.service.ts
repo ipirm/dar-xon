@@ -207,11 +207,17 @@ export class TaskService {
         "category.id",
         "category.name",
         "executors.id",
-        "responses.id",
         "executor1.id",
         "criteria.id",
         "criteria.name",
-        "task.status"
+        "task.status",
+        "responses.id",
+        "responses.comment",
+        "executor.id",
+        "executor.avatar",
+        "executor.fio",
+        "executor.rating",
+
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
@@ -286,13 +292,22 @@ export class TaskService {
         "category.name",
         "criteria.id",
         "criteria.name",
-        "task.status"
+        "task.status",
+        "responses.id",
+        "responses.comment",
+        "executor.id",
+        "executor.avatar",
+        "executor.fio",
+        "executor.rating",
+
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
       .leftJoin("parent.parent", "parent1")
       .leftJoin("task.criteria", "criteria")
+      .leftJoin("task.responses", "responses")
+      .leftJoin("responses.executor", "executor")
       .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
