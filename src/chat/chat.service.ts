@@ -135,7 +135,6 @@ export class ChatService {
   }
 
   async saveFile(files): Promise<any> {
-    console.log(files.file[0])
     const data = await this.aws.uploadPublicFile(files.file[0]);
     return { url: data.url, name: data.key };
   }

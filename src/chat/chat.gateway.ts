@@ -48,7 +48,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async handleMessage(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
     let body;
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
-    console.log(socket)
     if (data.data.m_type === MessageType.Text) {
       body = {
         chat: socket.handshake.query.chat_id,
