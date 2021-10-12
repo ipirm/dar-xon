@@ -8,6 +8,11 @@ import { ConfirmDto } from "./dto/confirm.dto";
 import { RegistrationExecutorDto } from "./dto/registration-executor.dto";
 import { RegistrationCustomerDto } from "./dto/registration-customer.dto";
 import { AdminService } from "../admin/admin.service";
+import { Mail } from "../database/entities/mail.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CreateContactDto } from "./dto/create-contact.dto";
+import { AwsService } from "../aws/aws.service";
 
 @Injectable()
 export class AuthService {
@@ -15,7 +20,9 @@ export class AuthService {
     private jwtService: JwtService,
     private customer: CustomerService,
     private executor: ExecutorService,
-    private admin: AdminService
+    private readonly admin: AdminService,
+    private readonly aws: AwsService,
+    @InjectRepository(Mail) private readonly contact: Repository<Mail>
   ) {
   }
 
@@ -99,10 +106,20 @@ export class AuthService {
     let data;
     if (user.role === Role.Customer)
       data = this.customer.getTasksStatus(user);
-
     if (user.role === Role.Executor)
       data = this.executor.getTasksStatus(user);
-
     return data;
+  }
+
+  async contactUs(createContactDto: CreateContactDto, user, files): Promise<Mail> {
+    const images: Array<any> = [];
+    if (files) {
+      for (const value of files) {
+        const file = await this.aws.uploadPublicFile(value);
+        images.push({ url: file.url, name: file.key });
+      }
+      Object.assign(createContactDto, { files: images });
+    }
+    return await this.contact.save(this.contact.create(createContactDto));
   }
 }

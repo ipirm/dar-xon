@@ -21,12 +21,11 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { Executor } from "../database/entities/executor.entity";
 import { Customer } from "../database/entities/customer.entity";
-import { CreateThemeDto } from "./dto/create-theme.dto";
-import { Mail } from "../database/entities/mail.entity";
 import { Role } from "../enums/roles.enum";
 import { hasRoles } from "../decorators/roles.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
+import { Mail } from "../database/entities/mail.entity";
 
 
 @ApiTags("Admin")
@@ -91,6 +90,29 @@ export class AdminController {
     @Param("id") id: number
   ): Promise<Customer> {
     return this.admin.getCustomer(id);
+  }
+
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get("form-contact/list")
+  @ApiOperation({ summary: "Получить все заявки ( формы обратной связи)" })
+  @ApiImplicitQuery({
+    name: "page",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "limit",
+    required: false,
+    type: Number
+  })
+  getAllMails(
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100
+  ): Promise<Pagination<Mail>> {
+    return this.admin.getAllMails(page, limit);
   }
 
   @ApiBearerAuth()
@@ -163,18 +185,6 @@ export class AdminController {
     @Query("limit") limit: number = 100
   ): Promise<Pagination<Admin>> {
     return this.admin.getAll(page, limit);
-  }
-
-  @ApiBearerAuth()
-  @hasRoles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Post("mail")
-  @ApiOperation({ summary: "Отправить обращение" })
-  @ApiCreatedResponse({ type: CreateThemeDto })
-  sendTheme(
-    @Body() createThemeDto: CreateThemeDto
-  ): Promise<Mail> {
-    return this.admin.sendTheme(createThemeDto);
   }
 
   @ApiBearerAuth()
@@ -305,6 +315,5 @@ export class AdminController {
   ): Promise<DeleteResult> {
     return this.admin.deleteAdmin(id);
   }
-
 
 }

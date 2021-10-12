@@ -153,8 +153,11 @@ export class AdminService {
         error: "Неверный пароль"
       }, HttpStatus.FORBIDDEN);
     }
-
-
     return user;
+  }
+
+  async getAllMails(page,limit):Promise<Pagination<Mail>>{
+    const data = this.mail.createQueryBuilder('m')
+    return await paginate(data,{page,limit})
   }
 }
