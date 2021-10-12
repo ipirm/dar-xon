@@ -8,7 +8,6 @@ import { Role } from "../enums/roles.enum";
 import { ConfirmDto } from "./dto/confirm.dto";
 import { RegistrationCustomerDto } from "./dto/registration-customer.dto";
 import { RegistrationExecutorDto } from "./dto/registration-executor.dto";
-import { TaskStatusEnum } from "../enums/taskStatus.enum";
 
 
 @ApiTags("Auth")
@@ -58,6 +57,25 @@ export class AuthController {
     return this.auth.getAllTasksByStatus(user, status);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Пользователь онлайн" })
+  @Get("status/online")
+  setOnline(
+    @UserDecorator() user: any
+  ): Promise<any> {
+    return this.auth.setOnline(user);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Пользователь оффлайн" })
+  @Get("status/offline")
+  setOffline(
+    @UserDecorator() user: any
+  ): Promise<any> {
+    return this.auth.setOffline(user);
+  }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

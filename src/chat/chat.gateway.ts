@@ -47,8 +47,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage("message")
   async handleMessage(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
     let body;
-    console.log(data.data)
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
+    console.log(socket)
     if (data.data.m_type === MessageType.Text) {
       body = {
         chat: socket.handshake.query.chat_id,
@@ -56,10 +56,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         message_type: MessageType.Text
       };
     } else if (data.data.m_type === MessageType.File) {
-      console.log('here')
       body = {
         chat: socket.handshake.query.chat_id,
-        file: data.data.file,
+        file: {
+          name: data.data.file.name,
+          url: data.data.file.url
+        },
         m_type: MessageType.File
       };
     }

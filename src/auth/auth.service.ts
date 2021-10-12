@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { SignInDto } from "./dto/sign-in.dto";
 import { CustomerService } from "../customer/customer.service";
@@ -74,6 +74,26 @@ export class AuthService {
     };
   }
 
+  async setOnline(user): Promise<any> {
+    if (user.role === Role.Customer) {
+      await this.customer.setOnline(user, true);
+    }
+    if (user.role === Role.Executor) {
+      await this.executor.setOnline(user, true);
+    }
+
+    return HttpStatus.OK;
+  }
+
+  async setOffline(user): Promise<any> {
+    if (user.role === Role.Customer) {
+      await this.customer.setOnline(user, false);
+    }
+    if (user.role === Role.Executor) {
+      await this.executor.setOnline(user, false);
+    }
+    return HttpStatus.OK;
+  }
 
   async getAllTasksByStatus(user, status): Promise<any> {
     let data;

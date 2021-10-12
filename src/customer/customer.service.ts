@@ -150,4 +150,8 @@ export class CustomerService {
       .getOne();
     return data;
   }
+
+  async setOnline(user,status):Promise<any>{
+    return await this.customer.update(user.id,{online: status})
+  }
 }

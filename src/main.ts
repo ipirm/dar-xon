@@ -23,7 +23,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     forbidUnknownValues: true,
     skipMissingProperties: true,
-    whitelist: true
+    whitelist: true,
+    forbidNonWhitelisted: true
   }));
   // app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();

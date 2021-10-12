@@ -99,4 +99,7 @@ export class Executor extends BaseEntity {
 
   @ManyToMany(() => Message, c => c.read_by_executors)
   readBy: Message[];
+
+  @Column({ type: "boolean", default: false })
+  online: Boolean;
 }

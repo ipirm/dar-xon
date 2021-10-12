@@ -1,5 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, Param, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags
+} from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { ChatService } from "./chat.service";
@@ -8,6 +16,8 @@ import { CreateChatDto } from "./dto/create-chat.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { UserDecorator } from "../decorators/user.decorator";
 import { Message } from "../database/entities/message.entity";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { CreateFileDto } from "./dto/create-file.dto";
 
 @ApiTags("Chat")
 @Controller("chat")
@@ -80,5 +90,20 @@ export class ChatController {
     @UserDecorator() user: any
   ): Promise<ChatRoom> {
     return this.chat.createChat(createChatDto, user);
+  }
+
+
+  @Post("/upload-file")
+  @ApiConsumes("multipart/form-data")
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: "file", maxCount: 1 }
+  ]))
+  @ApiOperation({ summary: "Отправка Файла в чат" })
+  @ApiCreatedResponse({ type: CreateFileDto })
+  saveFile(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Body() createFileDto: CreateFileDto
+  ): Promise<any> {
+    return this.chat.saveFile(files);
   }
 }

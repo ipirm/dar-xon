@@ -101,4 +101,7 @@ export class Customer extends BaseEntity {
   @ManyToMany(() => Message, c => c.read_by_customer)
   readBy: Message[];
 
+
+  @Column({ type: "boolean", default: false })
+  online: Boolean;
 }

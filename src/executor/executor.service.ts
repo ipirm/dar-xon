@@ -123,4 +123,8 @@ export class ExecutorService {
       .getOne();
     return data;
   }
+
+  async setOnline(user,status):Promise<any>{
+    return await this.executor.update(user.id,{online: status})
+  }
 }
