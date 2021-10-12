@@ -56,37 +56,12 @@ export class AdminService {
     return await this.admin.delete(id);
   }
 
-  async getAllUsers(page, limit, search, date): Promise<any> {
-    const searchText = decodeURI(search).toLowerCase();
-    const dataText = decodeURI(date);
-    const executors = this.executor.createQueryBuilder("e")
-      .select(["e.id", "e.fio", "e.createdAt", "e.avatar"])
-      .take(limit)
-      .skip(page === 1 ? 0 : (limit / 2) * page + 1);
-
-    if (date) {
-      executors.andWhere("e.createdAt = :date", { date: dataText });
-    }
-    if (search) {
-      executors.andWhere("LOWER(e.fio) ILIKE :value", { value: `%${searchText}%` });
-    }
-    const data = await executors.getMany();
-    data.forEach((i) => {
-      Object.assign(i, { role: Role.Executor });
-    });
-    return executors;
-  }
-
   async getExecutor(id: number): Promise<Executor> {
     return await this.executor.createQueryBuilder("e").where("e.id = :id", { id: id }).addSelect(["e.banned", "e.verified"]).getOne();
   }
 
   async getCustomer(id: number): Promise<Customer> {
     return await this.customer.createQueryBuilder("c").where("c.id = :id", { id: id }).addSelect(["c.banned", "c.verified"]).getOne();
-  }
-
-  async sendTheme(createThemeDto: CreateThemeDto): Promise<Mail> {
-    return await this.mail.save(this.mail.create(createThemeDto));
   }
 
   async updateCustomer(id: number): Promise<UpdateResult> {

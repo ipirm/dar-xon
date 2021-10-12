@@ -69,7 +69,7 @@ export class AdminController {
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
     @Query("banned") banned: boolean = false,
-    @Query("role") role: Role = Role.Executor,
+    @Param("role") role: Role = Role.Executor,
     @Query("search") search: number = null,
     @Query("date") date: number = null
   ): Promise<Pagination<Admin>> {
@@ -129,40 +129,6 @@ export class AdminController {
     @Param("id") id: number
   ): Promise<Executor> {
     return this.admin.getExecutor(id);
-  }
-
-  @ApiBearerAuth()
-  @hasRoles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Get("main-page")
-  @ApiOperation({ summary: "Получить всех исполнителей и заказчиков" })
-  @ApiImplicitQuery({
-    name: "page",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "limit",
-    required: false,
-    type: Number
-  })
-  @ApiImplicitQuery({
-    name: "search",
-    required: false,
-    type: String
-  })
-  @ApiImplicitQuery({
-    name: "date",
-    required: false,
-    type: String
-  })
-  getAllUsers(
-    @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100,
-    @Query("search") search: number = null,
-    @Query("date") date: number = null
-  ): Promise<any> {
-    return this.admin.getAllUsers(page, limit, search, date);
   }
 
   @ApiBearerAuth()
