@@ -8,6 +8,7 @@ import { TaskStatusEnum } from "../../enums/taskStatus.enum";
 import { CriteriaItem } from "./criteria-item.entity";
 import { TaskTypes } from "./task-types.entity";
 import { ChatRoom } from "./chat-room.entity";
+import { Review } from "./review.entity";
 
 
 @Entity("task")
@@ -60,5 +61,8 @@ export class Task extends BaseEntity {
 
   @OneToMany(type => TaskResponses, t => t.task)
   rooms: ChatRoom[];
+
+  @OneToMany(type => Review, c => c.executor)
+  reviews: Review[];
 
 }

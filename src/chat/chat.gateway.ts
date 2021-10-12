@@ -82,9 +82,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     socket.leave("room-" + data.data);
   }
 
-  // @SubscribeMessage("read")
-  // readMessages(@ConnectedSocket() socket: Socket, @MessageBody() data: any): void {
-  //   socket.leave("room-" + data.data);
-  // }
+  @SubscribeMessage("read")
+  async readMessages(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
+    const user = this.connectedUsers.find(i => i.socketId === socket.id);
+    await this.chat.getMessagesUnRead(data.data, user);
+  }
 
 }

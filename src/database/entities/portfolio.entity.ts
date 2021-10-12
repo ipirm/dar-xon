@@ -2,6 +2,7 @@ import { Column, Entity, Index, ManyToOne } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { Category } from "./category.entity";
 import { Executor } from "./executor.entity";
+import { TaskTypes } from "./task-types.entity";
 
 
 @Entity("portfolio")
@@ -14,8 +15,11 @@ export class Portfolio extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ nullable: true })
-  image: string;
+  @Column("simple-json", { default: null })
+  image: { name: string, url: string };
+
+  @Column("simple-json", { default: null })
+  logo: { name: string, url: string };
 
   @Column({ nullable: true })
   company_name: string;
@@ -27,12 +31,15 @@ export class Portfolio extends BaseEntity {
   finishedAt: Date;
 
   @Column("simple-json", { default: null })
-  files: { url: string }[];
+  files: { name: string, url: string }[];
 
-  @ManyToOne(type => Category, category => category.portfolio, { onDelete: "SET NULL" })
+  @ManyToOne(type => Category, c => c.portfolio, { onDelete: "SET NULL" })
   category: Category;
 
   @ManyToOne(type => Executor, c => c.portfolios)
   executor: Executor;
+
+  @ManyToOne(type => TaskTypes, c => c.portfolios, { onDelete: "SET NULL" })
+  cat_type: TaskTypes;
 
 }

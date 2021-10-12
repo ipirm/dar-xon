@@ -15,19 +15,27 @@ export class PortfolioService {
   }
 
   async savePortfolio(createPortfolioDto: CreatePortfolioDto, files: any, user): Promise<Portfolio> {
-    const images: any = [];
-    if (files.length) {
-      if (files?.image) {
-        const image = await this.aws.uploadPublicFile(files?.image[0]);
-        Object.assign(createPortfolioDto, { image: image.url });
+    if (files) {
+      for (const [key, value] of Object.entries(files)) {
+        if (key === "image") {
+          const file = await this.aws.uploadPublicFile(value[0]);
+          Object.assign(createPortfolioDto, { image: { name: file.key, url: file.url } });
+        } else if (key === "logo") {
+          const file = await this.aws.uploadPublicFile(value[0]);
+          Object.assign(createPortfolioDto, { logo: { name: file.key, url: file.url } });
+        } else {
+          const uploadedFiles = [];
+          // @ts-ignore
+          for (const item of value) {
+            const file = await this.aws.uploadPublicFile(item);
+            uploadedFiles.push({
+              name: file.key,
+              url: file.url
+            });
+          }
+          Object.assign(createPortfolioDto, { files: uploadedFiles });
+        }
       }
-      for (const [key, value] of Object.entries(files?.files)) {
-        const file = await this.aws.uploadPublicFile(value);
-        images.push({
-          url: file.url
-        });
-      }
-      Object.assign(createPortfolioDto, { files: images });
     }
 
     Object.assign(createPortfolioDto, {
@@ -37,11 +45,15 @@ export class PortfolioService {
     return await this.portfolio.save(this.portfolio.create(createPortfolioDto));
   }
 
-  async getAll(page, limit): Promise<Pagination<Portfolio>> {
+  async getAll(page, limit, user, cat): Promise<Pagination<Portfolio>> {
     const data = this.portfolio.createQueryBuilder("portfolio")
       .leftJoinAndSelect("portfolio.executor", "executor")
       .leftJoinAndSelect("portfolio.category", "category")
-      .leftJoinAndSelect("category.parent", "parent");
+      .where("executor.id = :id", { id: user.id });
+    
+    if (cat)
+      data.andWhere("category.id = :cat", { cat: cat });
+
     return await paginate(data, { page, limit });
   }
 
@@ -65,20 +77,27 @@ export class PortfolioService {
       error: "Вы не Явлеетесь создателем данного портфолио"
     }, HttpStatus.UNAUTHORIZED);
 
-    const images: any = [];
-
-    if (files.length) {
-      if (files?.image) {
-        const image = await this.aws.uploadPublicFile(files?.image[0]);
-        Object.assign(createPortfolioDto, { image: image.url });
+    if (files) {
+      for (const [key, value] of Object.entries(files)) {
+        if (key === "image") {
+          const file = await this.aws.uploadPublicFile(value[0]);
+          Object.assign(createPortfolioDto, { image: { name: file.key, url: file.url } });
+        } else if (key === "logo") {
+          const file = await this.aws.uploadPublicFile(value[0]);
+          Object.assign(createPortfolioDto, { logo: { name: file.key, url: file.url } });
+        } else {
+          const uploadedFiles = [];
+          // @ts-ignore
+          for (const item of value) {
+            const file = await this.aws.uploadPublicFile(item);
+            uploadedFiles.push({
+              name: file.key,
+              url: file.url
+            });
+          }
+          Object.assign(createPortfolioDto, { files: uploadedFiles });
+        }
       }
-      for (const [key, value] of Object.entries(files?.files)) {
-        const file = await this.aws.uploadPublicFile(value);
-        images.push({
-          url: file.url
-        });
-      }
-      Object.assign(createPortfolioDto, { files: images });
     }
 
     // @ts-ignore

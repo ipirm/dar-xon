@@ -180,39 +180,7 @@ export class AdminController {
   @ApiBearerAuth()
   @hasRoles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Put("customer/verify/:id")
-  @ApiOperation({ summary: "Потвердить заказчика" })
-  @ApiImplicitQuery({
-    name: "id",
-    required: true,
-    type: Number
-  })
-  updateCustomer(
-    @Param("id") id: number
-  ): Promise<UpdateResult> {
-    return this.admin.updateCustomer(id);
-  }
-
-  @ApiBearerAuth()
-  @hasRoles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Put("executor/verify/:id")
-  @ApiOperation({ summary: "Потвердить исполнителя" })
-  @ApiImplicitQuery({
-    name: "id",
-    required: true,
-    type: Number
-  })
-  updateExecutor(
-    @Param("id") id: number
-  ): Promise<UpdateResult> {
-    return this.admin.updateExecutor(id);
-  }
-
-  @ApiBearerAuth()
-  @hasRoles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Put("customer/verify/:id")
+  @Put("customer/banned/:id")
   @ApiOperation({ summary: "Заблокировать заказчика" })
   @ApiImplicitQuery({
     name: "id",
@@ -228,7 +196,7 @@ export class AdminController {
   @ApiBearerAuth()
   @hasRoles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Put("executor/verify/:id")
+  @Put("executor/banned/:id")
   @ApiOperation({ summary: "Заблокировать исполнителя" })
   @ApiImplicitQuery({
     name: "id",
@@ -239,6 +207,38 @@ export class AdminController {
     @Param("id") id: number
   ): Promise<UpdateResult> {
     return this.admin.bannedExecutor(id);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put("customer/verify/:id")
+  @ApiOperation({ summary: "Верефицировать заказчика" })
+  @ApiImplicitQuery({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  updateCustomer(
+    @Param("id") id: number
+  ): Promise<UpdateResult> {
+    return this.admin.updateCustomer(id);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put("executor/verify/:id")
+  @ApiOperation({ summary: "Верефицировать исполнителя" })
+  @ApiImplicitQuery({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  updateExecutor(
+    @Param("id") id: number
+  ): Promise<UpdateResult> {
+    return this.admin.updateExecutor(id);
   }
 
   @ApiBearerAuth()

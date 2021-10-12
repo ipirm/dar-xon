@@ -6,6 +6,7 @@ import { Task } from "./task.entity";
 import { Portfolio } from "./portfolio.entity";
 import { Message } from "./message.entity";
 import { ChatRoom } from "./chat-room.entity";
+import { Review } from "./review.entity";
 
 @Entity("executor")
 export class Executor extends BaseEntity {
@@ -42,7 +43,7 @@ export class Executor extends BaseEntity {
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
 
-  @Column({ type: "integer", default: 5 })
+  @Column({ type: "numeric", default: 5 })
   rating: number;
 
   @Column({ nullable: true })
@@ -87,10 +88,15 @@ export class Executor extends BaseEntity {
   @Column({ type: "boolean", default: false })
   verified: Boolean;
 
+  @OneToMany(type => Review, c => c.executor)
+  reviews: Review[];
+
   @OneToMany(type => Message, c => c.chat)
   messages: Message[];
 
   @ManyToMany(type => ChatRoom, c => c.executors)
   rooms?: ChatRoom[];
 
+  @ManyToMany(() => Message, c => c.read_by_executors)
+  readBy: Message[];
 }

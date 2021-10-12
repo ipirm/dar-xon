@@ -15,6 +15,7 @@ import { CriteriaModule } from './criteria/criteria.module';
 import { ChatModule } from './chat/chat.module';
 import * as ormConfig from "./database/orm.config";
 import { ServeStaticModule } from "@nestjs/serve-static";
+import { ReviewModule } from './review/review.module';
 
 
 @Module({
@@ -35,6 +36,7 @@ import { ServeStaticModule } from "@nestjs/serve-static";
     CriteriaModule,
     ChatModule,
     ServeStaticModule.forRoot({ rootPath: `${process.cwd()}/public` }),
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService]

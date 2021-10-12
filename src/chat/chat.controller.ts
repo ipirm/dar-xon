@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { ChatService } from "./chat.service";
@@ -18,6 +18,12 @@ export class ChatController {
   }
 
   @ApiBearerAuth()
+  @ApiQuery({
+    name: "search",
+    required: false,
+    type: String,
+    example: "Test task 3"
+  })
   @UseGuards(JwtAuthGuard)
   @Get("")
   @ApiOperation({ summary: "Получить все чаты" })
@@ -34,9 +40,10 @@ export class ChatController {
   getAll(
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
-    @UserDecorator() user: any
+    @UserDecorator() user: any,
+    @Query("search") search: string
   ): Promise<Pagination<ChatRoom>> {
-    return this.chat.getAll(page, limit, user);
+    return this.chat.getAll(page, limit, user,search);
   }
 
   @ApiBearerAuth()

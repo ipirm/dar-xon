@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { ChatRoom } from "./chat-room.entity";
 import { Executor } from "./executor.entity";
@@ -20,6 +20,13 @@ export class Message extends BaseEntity {
   @ManyToOne(type => Customer, c => c.messages, { onDelete: "SET NULL" })
   customer: Customer;
 
-  @Column({default: null })
-  read_by: string;
+  @ManyToMany(type => Customer,e=>e.readBy)
+  @JoinTable()
+  read_by_customer?: Customer[];
+
+  @ManyToMany(type => Executor,e=>e.readBy)
+  @JoinTable()
+  read_by_executors?: Executor[];
+
+
 }

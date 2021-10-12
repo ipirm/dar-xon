@@ -25,7 +25,7 @@ export class TaskService {
   ) {
   }
 
-  async getAll(state, page, limit, search, started, criteria, cat, taskType): Promise<Pagination<Task>> {
+  async getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
     const data = await this.task.createQueryBuilder("task")
       .select([
@@ -37,6 +37,7 @@ export class TaskService {
         "task.description",
         "task.site",
         "task.status",
+        "task.participants",
         "created_by.id",
         "created_by.fio",
         "created_by.avatar",
@@ -59,6 +60,10 @@ export class TaskService {
       .leftJoin("task.criteria", "criteria")
       .leftJoin("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
+
+    if (participantsCount) {
+      data.andWhere("task.participants > 1");
+    }
 
     if (taskType) {
       data.andWhere("task_type.id = :task_type", { task_type: taskType });
@@ -184,7 +189,7 @@ export class TaskService {
     }));;
   }
 
-  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat, taskType): Promise<Pagination<Task>> {
+  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat, taskType, participantsCount): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -195,6 +200,7 @@ export class TaskService {
         "task.finishedAt",
         "task.files",
         "task.description",
+        "task.participants",
         "task.site",
         "task.status",
         "created_by.id",
@@ -216,8 +222,7 @@ export class TaskService {
         "executor.id",
         "executor.avatar",
         "executor.fio",
-        "executor.rating",
-
+        "executor.rating"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
@@ -229,6 +234,10 @@ export class TaskService {
       .leftJoin("task.criteria", "criteria")
       .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
+
+    if (participantsCount) {
+      data.andWhere("task.participants > 1");
+    }
 
     if (taskType) {
       data.andWhere("task_type.id = :task_type", { task_type: taskType });
@@ -268,7 +277,7 @@ export class TaskService {
     return paginate(data, { page, limit });
   }
 
-  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search, started, criteria, cat, taskType): Promise<Pagination<Task>> {
+  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search, started, criteria, cat, taskType,participantsCount): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -278,6 +287,7 @@ export class TaskService {
         "task.createdAt",
         "task.finishedAt",
         "task.files",
+        "task.participants",
         "task.description",
         "task.site",
         "task.status",
@@ -310,6 +320,10 @@ export class TaskService {
       .leftJoin("responses.executor", "executor")
       .leftJoinAndSelect("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
+
+    if (participantsCount) {
+      data.andWhere("task.participants > 1");
+    }
 
     if (taskType) {
       data.andWhere("task_type.id = :task_type", { task_type: taskType });

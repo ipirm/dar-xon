@@ -1,9 +1,10 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, Index, OneToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
 import { Task } from "./task.entity";
 import { Message } from "./message.entity";
+import { Review } from "./review.entity";
 
 @Entity("customer")
 export class Customer extends BaseEntity {
@@ -93,5 +94,11 @@ export class Customer extends BaseEntity {
 
   @OneToMany(type => Message, c => c.chat)
   messages: Message[];
+
+  @OneToMany(type => Review, c => c.customer)
+  reviews: Review[];
+
+  @ManyToMany(() => Message, c => c.read_by_customer)
+  readBy: Message[];
 
 }

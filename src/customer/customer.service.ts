@@ -80,11 +80,10 @@ export class CustomerService {
 
   async findOne(nickname: string, password: string): Promise<Customer> {
     const user = await this.customer.createQueryBuilder("customer")
-      .addSelect(["customer.password", "customer.confirmed"])
+      .addSelect(["customer.password", "customer.confirmed", "customer.banned"])
       .where("customer.email = :nickname OR customer.phone = :nickname OR customer.login = :nickname", { nickname })
       .getOne();
 
-    console.log(nickname)
     if (!user)
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
@@ -93,11 +92,17 @@ export class CustomerService {
 
     const valid = await bcrypt.compare(password, user.password);
 
-    console.log(user)
     if (!valid) {
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
         error: "Неверный пароль"
+      }, HttpStatus.FORBIDDEN);
+    }
+
+    if (user.banned) {
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: "Пользователь заблокирован"
       }, HttpStatus.FORBIDDEN);
     }
 
@@ -133,5 +138,16 @@ export class CustomerService {
 
     await this.customer.update(confirmDto.user_id, { confirmed: true });
     return await this.customer.findOne(confirmDto.user_id);
+  }
+
+  async getTasksStatus(user): Promise<any> {
+    const data = await this.customer.createQueryBuilder("c")
+      .select(["c.id"])
+      .where("c.id = :id", { id: user.id })
+      .loadRelationCountAndMap("task.createdCount", "c.tasks", "createdCount", qb => qb.andWhere("createdCount.status = :status", { status: "created" }))
+      .loadRelationCountAndMap("task.activeCount", "c.tasks", "activeCount", qb => qb.andWhere("activeCount.status = :status", { status: "started" }))
+      .loadRelationCountAndMap("task.finishedCount", "c.tasks", "finishedCount", qb => qb.andWhere("finishedCount.status = :status", { status: "finished" }))
+      .getOne();
+    return data;
   }
 }

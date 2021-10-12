@@ -93,6 +93,12 @@ export class TaskController {
     type: Number,
     example: 10
   })
+  @ApiQuery({
+    name: "participants_count",
+    required: false,
+    type: Boolean,
+    example: false
+  })
   @ApiOperation({ summary: "Получить все задачи" })
   @Get("")
   getAll(
@@ -103,10 +109,10 @@ export class TaskController {
     @Query("started") started: string,
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
-    @Query("task_type") taskType: number
+    @Query("task_type") taskType: number,
+    @Query("participants_count") participantsCount: Boolean = false
   ): Promise<Pagination<Task>> {
-    console.log(taskType)
-    return this.task.getAll(state, page, limit, search, started, criteria, cat,taskType);
+    return this.task.getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount);
   }
 
 
@@ -189,6 +195,12 @@ export class TaskController {
     type: Number,
     example: 7
   })
+  @ApiQuery({
+    name: "participants_count",
+    required: false,
+    type: Boolean,
+    example: false
+  })
   @ApiBearerAuth()
   @hasRoles(Role.Executor)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -203,9 +215,10 @@ export class TaskController {
     @Query("started") started: string,
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
-    @Query("task_type") taskType: number
+    @Query("task_type") taskType: number,
+    @Query("participants_count") participantsCount: Boolean = false
   ): Promise<Pagination<Task>> {
-    return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat,taskType);
+    return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
   }
 
   @ApiQuery({
@@ -256,6 +269,12 @@ export class TaskController {
     type: Number,
     example: 7
   })
+  @ApiQuery({
+    name: "participants_count",
+    required: false,
+    type: Boolean,
+    example: false
+  })
   @ApiBearerAuth()
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -270,9 +289,10 @@ export class TaskController {
     @Query("started") started: string,
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
-    @Query("task_type") taskType: number
+    @Query("task_type") taskType: number,
+    @Query("participants_count") participantsCount: Boolean = false
   ): Promise<Pagination<Task>> {
-    return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat,taskType);
+    return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
   }
 
   @ApiBearerAuth()

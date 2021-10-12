@@ -74,7 +74,15 @@ export class AuthService {
     };
   }
 
-  async wsSignIn(token): Promise<any> {
-    return this.jwtService.verify(token);
+
+  async getAllTasksByStatus(user, status): Promise<any> {
+    let data;
+    if (user.role === Role.Customer)
+      data = this.customer.getTasksStatus(user);
+
+    if (user.role === Role.Executor)
+      data = this.executor.getTasksStatus(user);
+
+    return data;
   }
 }

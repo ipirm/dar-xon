@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { PortfolioService } from "./portfolio.service";
 import { Portfolio } from "../database/entities/portfolio.entity";
@@ -33,6 +33,9 @@ export class PortfolioController {
   ) {
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Executor)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get("")
   @ApiOperation({ summary: "Получить все портфолио" })
   @ApiImplicitQuery({
@@ -45,13 +48,22 @@ export class PortfolioController {
     required: false,
     type: Number
   })
+  @ApiImplicitQuery({
+    name: "cat",
+    required: false,
+    description: "ID Категории",
+    type: Number
+  })
   getAll(
     @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100
+    @Query("limit") limit: number = 100,
+    @UserDecorator("user") user: any,
+    @Query("cat") cat: number
   ): Promise<Pagination<Portfolio>> {
-    return this.portfolio.getAll(page, limit);
+    return this.portfolio.getAll(page, limit, user, cat);
   }
 
+  @ApiConsumes("multipart/form-data")
   @ApiBearerAuth()
   @hasRoles(Role.Executor)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -59,6 +71,7 @@ export class PortfolioController {
   @ApiOperation({ summary: "Создать портфолио" })
   @UseInterceptors(FileFieldsInterceptor([
     { name: "image", maxCount: 1 },
+    { name: "logo", maxCount: 1 },
     { name: "files", maxCount: 10 }
   ]))
   @ApiCreatedResponse({ type: CreatePortfolioDto })
@@ -84,6 +97,7 @@ export class PortfolioController {
   }
 
 
+  @ApiConsumes("multipart/form-data")
   @ApiBearerAuth()
   @hasRoles(Role.Executor)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -92,6 +106,7 @@ export class PortfolioController {
   @ApiCreatedResponse({ type: CreatePortfolioDto })
   @UseInterceptors(FileFieldsInterceptor([
     { name: "image", maxCount: 1 },
+    { name: "logo", maxCount: 1 },
     { name: "files", maxCount: 10 }
   ]))
   updatePortfolio(

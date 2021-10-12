@@ -52,13 +52,10 @@ export class ExecutorService {
   }
 
   async findOne(nickname: string, password: string): Promise<Executor> {
-    console.log(nickname)
     const user = await this.executor.createQueryBuilder("executor")
-      .addSelect(["executor.password", "executor.confirmed"])
+      .addSelect(["executor.password", "executor.confirmed", "executor.banned"])
       .where("executor.phone = :nickname OR executor.login = :nickname", { nickname })
       .getOne();
-
-    console.log(user)
 
     if (!user)
       throw new HttpException({
@@ -72,6 +69,13 @@ export class ExecutorService {
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
         error: "Неверный пароль"
+      }, HttpStatus.FORBIDDEN);
+    }
+
+    if (user.banned) {
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: "Пользователь заблокирован"
       }, HttpStatus.FORBIDDEN);
     }
 
@@ -107,5 +111,16 @@ export class ExecutorService {
 
     await this.executor.update(confirmDto.user_id, { confirmed: true });
     return await this.executor.findOne(confirmDto.user_id);
+  }
+
+  async getTasksStatus(user): Promise<any> {
+    const data = await this.executor.createQueryBuilder("c")
+      .select(["c.id"])
+      .where("c.id = :id", { id: user.id })
+      .loadRelationCountAndMap("task.createdCount", "c.tasks", "createdCount", qb => qb.andWhere("createdCount.status = :status", { status: "created" }))
+      .loadRelationCountAndMap("task.activeCount", "c.tasks", "activeCount", qb => qb.andWhere("activeCount.status = :status", { status: "started" }))
+      .loadRelationCountAndMap("task.finishedCount", "c.tasks", "finishedCount", qb => qb.andWhere("finishedCount.status = :status", { status: "finished" }))
+      .getOne();
+    return data;
   }
 }

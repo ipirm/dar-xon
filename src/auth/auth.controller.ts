@@ -5,10 +5,10 @@ import { SignInDto } from "./dto/sign-in.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { UserDecorator } from "../decorators/user.decorator";
 import { Role } from "../enums/roles.enum";
-import { RegistrationDto } from "./dto/registration.dto";
 import { ConfirmDto } from "./dto/confirm.dto";
 import { RegistrationCustomerDto } from "./dto/registration-customer.dto";
 import { RegistrationExecutorDto } from "./dto/registration-executor.dto";
+import { TaskStatusEnum } from "../enums/taskStatus.enum";
 
 
 @ApiTags("Auth")
@@ -45,6 +45,19 @@ export class AuthController {
   ): Promise<any> {
     return this.auth.confirmNumber(confirmDto, role);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Получить статусы и количество задач" })
+  @ApiParam({ name: "role", enum: Role })
+  @Get("tasks/:role")
+  getAllTasksByStatus(
+    @UserDecorator() user: any,
+    @Param("status") status: any
+  ): Promise<any> {
+    return this.auth.getAllTasksByStatus(user, status);
+  }
+
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
