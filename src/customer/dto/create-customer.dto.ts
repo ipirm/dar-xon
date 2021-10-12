@@ -64,6 +64,10 @@ export class CreateCustomerDto {
   corporate_account: string;
 
   @IsString()
+  @ApiProperty({ example: "Берлин", description: "Город", required: false })
+  city: string;
+
+  @IsString()
   @ApiProperty({ example: "https://tviser.agency", description: "Сайт", required: false })
   site: string;
 

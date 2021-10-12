@@ -120,6 +120,12 @@ export class AuthService {
       }
       Object.assign(createContactDto, { files: images });
     }
+    if (user.role === Role.Customer) {
+      Object.assign(createContactDto, { customer: user.id });
+    }
+    if (user.role === Role.Executor) {
+      Object.assign(createContactDto, { executor: user.id });
+    }
     return await this.contact.save(this.contact.create(createContactDto));
   }
 }

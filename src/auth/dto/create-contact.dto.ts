@@ -21,4 +21,5 @@ export class CreateContactDto {
 
   @ApiProperty({ type: "array", items: { type: "string", format: "binary" }, required: false })
   files?: any[];
+
 }

@@ -5,6 +5,9 @@ import * as bcrypt from "bcrypt";
 import { Task } from "./task.entity";
 import { Message } from "./message.entity";
 import { Review } from "./review.entity";
+import { TaskResponses } from "./taskResponses.entity";
+import { ChatRoom } from "./chat-room.entity";
+import { Mail } from "./mail.entity";
 
 @Entity("customer")
 export class Customer extends BaseEntity {
@@ -63,6 +66,9 @@ export class Customer extends BaseEntity {
   bank_name: string;
 
   @Column({ nullable: true })
+  city: string;
+
+  @Column({ nullable: true })
   corporate_account: string;
 
   @Column({ nullable: true })
@@ -104,4 +110,7 @@ export class Customer extends BaseEntity {
 
   @Column({ type: "boolean", default: false })
   online: Boolean;
+
+  @OneToMany(type => Mail, t => t.customer)
+  forms: Mail[];
 }

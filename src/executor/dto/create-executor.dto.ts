@@ -21,6 +21,10 @@ export class CreateExecutorDto {
   password: string;
 
   @IsString()
+  @ApiProperty({ example: "Берлин", description: "Город", required: false })
+  city: string;
+
+  @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
   p_series: string;
 

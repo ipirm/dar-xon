@@ -8,7 +8,6 @@ import { AwsService } from "../aws/aws.service";
 import { Executor } from "../database/entities/executor.entity";
 import { Customer } from "../database/entities/customer.entity";
 import { Role } from "../enums/roles.enum";
-import { CreateThemeDto } from "./dto/create-theme.dto";
 import { Mail } from "../database/entities/mail.entity";
 import * as bcrypt from "bcrypt";
 
@@ -132,7 +131,9 @@ export class AdminService {
   }
 
   async getAllMails(page,limit):Promise<Pagination<Mail>>{
-    const data = this.mail.createQueryBuilder('m')
+    const data = this.mail.createQueryBuilder("m")
+      .leftJoinAndSelect("m.customer", "customer")
+      .leftJoinAndSelect("m.executor", "executor")
     return await paginate(data,{page,limit})
   }
 }

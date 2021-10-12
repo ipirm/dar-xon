@@ -7,6 +7,7 @@ import { Portfolio } from "./portfolio.entity";
 import { Message } from "./message.entity";
 import { ChatRoom } from "./chat-room.entity";
 import { Review } from "./review.entity";
+import { Mail } from "./mail.entity";
 
 @Entity("executor")
 export class Executor extends BaseEntity {
@@ -102,4 +103,10 @@ export class Executor extends BaseEntity {
 
   @Column({ type: "boolean", default: false })
   online: Boolean;
+
+  @OneToMany(type => Mail, t => t.executor)
+  forms: Mail[];
+
+  @Column({ nullable: true })
+  city: string;
 }
