@@ -8,13 +8,16 @@ import { Executor } from "../database/entities/executor.entity";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import { Message } from "../database/entities/message.entity";
 import { Role } from "../enums/roles.enum";
+import { AwsService } from "../aws/aws.service";
+import { MessageType } from "../enums/messageType";
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectRepository(ChatRoom) private readonly chat: Repository<ChatRoom>,
     @InjectRepository(Executor) private readonly executor: Repository<Executor>,
-    @InjectRepository(Message) private readonly message: Repository<Message>
+    @InjectRepository(Message) private readonly message: Repository<Message>,
+    private readonly aws: AwsService
   ) {
   }
 
@@ -80,16 +83,24 @@ export class ChatService {
 
   }
 
-  async saveMessage(createMessageDto: CreateMessageDto): Promise<Message> {
-    const array = [];
+  async saveMessage(createMessageDto: CreateMessageDto): Promise<any> {
     const room = await this.chat.createQueryBuilder("c")
       .select(["c.id", "e.id", "b.id"])
       .leftJoin("c.executors", "e")
       .leftJoin("c.customer", "b")
       .getOne();
-    array.push(room.customer);
+
+    console.log(createMessageDto.file)
+    if (createMessageDto.m_type === MessageType.File) {
+      // console.log(createMessageDto.file)
+      // const file = await this.aws.uploadPublicFile(createMessageDto.file);
+      // Object.assign(createMessageDto, { file: { name: file.key, url: file.url } });
+      // console.log(file)
+    }
+
     Object.assign(createMessageDto, { read_by_customer: Array, read_by_executors: room.executors });
-    return await this.message.save(this.message.create(createMessageDto));
+    return null
+    // return await this.message.save(this.message.create(createMessageDto));
   }
 
   async getMessages(page, limit, id, user): Promise<Pagination<any>> {

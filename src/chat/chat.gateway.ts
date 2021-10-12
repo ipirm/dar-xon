@@ -14,6 +14,7 @@ import { jwtConstants } from "../auth/jwt/constants";
 import { JwtService } from "@nestjs/jwt";
 import { ChatService } from "./chat.service";
 import { Role } from "../enums/roles.enum";
+import { MessageType } from "../enums/messageType";
 
 @WebSocketGateway({ cors: true, allowEIO3: true })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -45,12 +46,23 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage("message")
   async handleMessage(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
+    let body;
+    console.log(data.data)
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
-    const body = {
-      chat: socket.handshake.query.chat_id,
-      text: data.data,
-      read_by: null
-    };
+    if (data.data.m_type === MessageType.Text) {
+      body = {
+        chat: socket.handshake.query.chat_id,
+        text: data.data.text,
+        message_type: MessageType.Text
+      };
+    } else if (data.data.m_type === MessageType.File) {
+      console.log('here')
+      body = {
+        chat: socket.handshake.query.chat_id,
+        file: data.data.file,
+        m_type: MessageType.File
+      };
+    }
     if (user) {
       if (user.role === Role.Customer) {
         Object.assign(body, {
@@ -64,6 +76,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     } else {
       throw new WsException("Invalid credentials.");
     }
+
     await this.chat.saveMessage(body);
     this.server.in("room-" + socket.handshake.query.chat_id).emit("message", data);
   }
