@@ -5,9 +5,8 @@ import * as bcrypt from "bcrypt";
 import { Task } from "./task.entity";
 import { Message } from "./message.entity";
 import { Review } from "./review.entity";
-import { TaskResponses } from "./taskResponses.entity";
-import { ChatRoom } from "./chat-room.entity";
 import { Mail } from "./mail.entity";
+import { RefreshToken } from "./refresh-token.entity";
 
 @Entity("customer")
 export class Customer extends BaseEntity {
@@ -113,4 +112,7 @@ export class Customer extends BaseEntity {
 
   @OneToMany(type => Mail, t => t.customer)
   forms: Mail[];
+
+  @OneToMany(type => RefreshToken, c => c.executor)
+  refresh_tokens: RefreshToken[];
 }

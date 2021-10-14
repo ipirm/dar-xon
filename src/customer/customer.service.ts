@@ -154,4 +154,5 @@ export class CustomerService {
   async setOnline(user,status):Promise<any>{
     return await this.customer.update(user.id,{online: status})
   }
+
 }

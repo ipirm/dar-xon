@@ -1,5 +1,3 @@
-
-
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsImNyZWF0ZWRBdCI6IjIwMjEtMTAtMTBUMTM6MzE6NTMuMjAyWiIsInVwZGF0ZWRBdCI6IjIwMjEtMTAtMTBUMTM6MzE6NTMuMjAyWiIsImZpbyI6bnVsbCwiZW1haWwiOiJpbGhhbS5waXJtMkBnbWFpbC5jb20iLCJhdmF0YXIiOm51bGwsImxvZ2luIjoidzMzaGFhYSIsInBob25lIjpudWxsLCJwYXNzd29yZCI6IiQyYiQxMCRieDZBM1JGc1ZJdWU3cndiUTQ4TFhPbW9mTHhoSVUvUFZwWTdJb05lM29Ia2hJTGJ6RzhiUyIsImNvbXBhbnlfbmFtZSI6bnVsbCwiY29tcGFueV9hZGRyZXNzIjpudWxsLCJpbm4iOm51bGwsImJpayI6bnVsbCwib2dybiI6bnVsbCwi0YFoZWNraW5nX2FjY291bnQiOm51bGwsImJhbmtfbmFtZSI6bnVsbCwiY29ycG9yYXRlX2FjY291bnQiOm51bGwsInNuaWxzIjpudWxsLCJzaXRlIjpudWxsLCJmaWxlcyI6bnVsbCwiY3VzdG9tZXJfdHlwZSI6InNlbGYtZW1wbG95ZWQiLCJjb25maXJtZWQiOmZhbHNlLCJ2ZXJpZmllZCI6ZmFsc2UsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTYzNDA0MDI4OCwiZXhwIjoxNjM0MzI2Njg4fQ._6VF5iCdOnQId3K4dSdPmZnCKBVcfsl1qW_bRK3E3MQ"
 const socket = io(window.location.origin, {
   auth: {
@@ -20,7 +18,6 @@ const handleSubmitNewMessage = () => {
 };
 
 socket.on("message", ({ data }) => {
-  console.log(data);
   if (data.m_type === "text") {
     handleNewMessage(data.text);
   }

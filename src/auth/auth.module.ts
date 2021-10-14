@@ -14,7 +14,6 @@ import { AwsModule } from "../aws/aws.module";
 import { Admin } from "../database/entities/admin.entity";
 import { AdminService } from "../admin/admin.service";
 import { Mail } from "../database/entities/mail.entity";
-import { WsGuard } from "./guards/ws.guard";
 
 @Module({
   imports: [
@@ -25,7 +24,7 @@ import { WsGuard } from "./guards/ws.guard";
     TypeOrmModule.forFeature([Customer, Executor, Admin, Mail]),
     AwsModule
   ],
-  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard, AdminService,WsGuard],
+  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard, AdminService],
   controllers: [AuthController]
 })
 export class AuthModule {}
