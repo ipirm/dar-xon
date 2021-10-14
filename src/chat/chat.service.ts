@@ -97,8 +97,10 @@ export class ChatService {
       .leftJoin("m.read_by_customer", "customer1")
       .leftJoin("m.read_by_executors", "executors1")
       .where("chat.id = :id", { id: id })
-      .orderBy("m.createdAt", "ASC");
-    return await paginate(messages, { page, limit });
+      .orderBy("m.createdAt", "DESC");
+    const data = await paginate(messages, { page, limit });
+    Object.assign(data.meta, { timestamp: new Date() });
+    return data;
   }
 
   async getMessagesUnRead(ids: Array<any>, user): Promise<void> {

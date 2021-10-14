@@ -64,6 +64,11 @@ export class AdminController {
     required: false,
     type: String
   })
+  @ApiImplicitQuery({
+    name: "verified",
+    required: false,
+    type: Boolean
+  })
   @ApiParam({ name: "role", enum: Role })
   getListUsers(
     @Query("page") page: number = 1,
@@ -71,9 +76,10 @@ export class AdminController {
     @Query("banned") banned: boolean = false,
     @Param("role") role: Role = Role.Executor,
     @Query("search") search: number = null,
-    @Query("date") date: number = null
+    @Query("date") date: number = null,
+    @Query("verified") verified: boolean
   ): Promise<Pagination<Admin>> {
-    return this.admin.getListUsers(page, limit, role, banned,search,date);
+    return this.admin.getListUsers(page, limit, role, banned,search,date,verified);
   }
 
   @ApiBearerAuth()

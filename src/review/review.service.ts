@@ -6,6 +6,7 @@ import { CreateReviewDto } from "./dto/create-review.dto";
 import { Executor } from "../database/entities/executor.entity";
 import { CommentExecutor } from "../database/entities/comment.entity";
 import { CreateCommentDto } from "./dto/create-comment.dto";
+import { paginate } from "nestjs-typeorm-paginate";
 
 @Injectable()
 export class ReviewService {
@@ -56,6 +57,21 @@ export class ReviewService {
   async saveReviewComment(createCommentDto: CreateCommentDto, user): Promise<CommentExecutor> {
     return await this.comment.save(this.comment.create(createCommentDto));
 
+  }
+
+  async findOne(page, limit, id: number, with_comment: boolean, task: number): Promise<any> {
+    const data = this.review.createQueryBuilder("r")
+      .leftJoinAndSelect("r.executor", "e")
+      .andWhere("e.id = :id", { id: id });
+    if (with_comment) {
+      data.leftJoinAndSelect("r.comments", "c");
+    }
+    if (task) {
+      data.leftJoinAndSelect("r.task", "t")
+        .andWhere("t.id = :task", { task: task });
+    }
+
+    return await paginate(data, { page, limit });
   }
 
 }

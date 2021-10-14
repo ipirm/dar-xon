@@ -79,17 +79,17 @@ export class AdminService {
     return await this.executor.update(id, { banned: true });
   }
 
-  async getListUsers(page, limit, role: Role, banned: boolean, search, date): Promise<Pagination<any>> {
+  async getListUsers(page, limit, role: Role, banned: boolean, search, date, verified: boolean): Promise<Pagination<any>> {
     let data: any = [];
     const searchText = decodeURI(search).toLowerCase();
     const dataText = decodeURI(date);
 
     if (role === Role.Executor) {
-      data = this.executor.createQueryBuilder("e").addSelect(["e.banned"]).where("e.banned = :banned", { banned: banned });
+      data = this.executor.createQueryBuilder("e").addSelect(["e.banned", "e.verified"]).where("e.banned = :banned", { banned: banned });
     }
 
     if (role === Role.Customer) {
-      data = this.customer.createQueryBuilder("e").addSelect(["e.banned"]).where("e.banned = :banned", { banned: banned });
+      data = this.customer.createQueryBuilder("e").addSelect(["e.banned", "e.verified"]).where("e.banned = :banned", { banned: banned });
     }
 
     if (date) {
@@ -98,7 +98,11 @@ export class AdminService {
     if (search) {
       data.andWhere("LOWER(e.fio) ILIKE :value", { value: `%${searchText}%` });
     }
+    if (verified)
+      data.andWhere("e.verified = :verified", { verified: verified });
+
     data.select(["e.id", "e.fio", "e.createdAt", "e.avatar"]);
+    data.orderBy("e.createdAt", "ASC");
     return paginate(data, { page, limit });
   }
 

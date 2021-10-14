@@ -1,5 +1,5 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ReviewService } from "./review.service";
 import { Review } from "../database/entities/review.entity";
 import { CreateReviewDto } from "./dto/create-review.dto";
@@ -10,6 +10,8 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { UserDecorator } from "../decorators/user.decorator";
 import { CreateCommentDto } from "./dto/create-comment.dto";
 import { CommentExecutor } from "../database/entities/comment.entity";
+import { Portfolio } from "../database/entities/portfolio.entity";
+import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 
 
 @ApiTags("Review")
@@ -44,4 +46,46 @@ export class ReviewController {
   ): Promise<CommentExecutor> {
     return this.review.saveReviewComment(createCommentDto, user);
   }
+
+  @Get(":id")
+  @ApiOperation({ summary: "Получить отзыв по id исполнителя" })
+  @ApiParam({
+    name: "id",
+    required: true,
+    type: Number,
+    description: "İd исполнителя"
+  })
+  @ApiImplicitQuery({
+    name: "with_comment",
+    required: true,
+    type: Boolean,
+    description: "С коментариями"
+  })
+  @ApiImplicitQuery({
+    name: "task",
+    required: true,
+    type: Number,
+    description: "İd задачи"
+  })
+  @ApiImplicitQuery({
+    name: "page",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "limit",
+    required: false,
+    type: Number
+  })
+  getOne(
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100,
+    @Param("id") id: number,
+    @Query("with_comment") with_comment: boolean,
+    @Query("task") task: number
+  ): Promise<Portfolio> {
+    return this.review.findOne(page, limit, id, with_comment, task);
+  }
+
+
 }

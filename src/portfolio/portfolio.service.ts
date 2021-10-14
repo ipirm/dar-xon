@@ -59,8 +59,8 @@ export class PortfolioService {
 
   async findOne(id: number): Promise<Portfolio> {
     return await this.portfolio.createQueryBuilder("portfolio")
-      .where("portfolio.id = :id", { id: id })
       .leftJoinAndSelect("portfolio.executor", "executor")
+      .where("executor.id = :id", { id: id })
       .leftJoinAndSelect("portfolio.category", "category")
       .leftJoinAndSelect("category.parent", "parent")
       .getOne();

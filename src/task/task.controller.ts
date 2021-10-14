@@ -4,7 +4,7 @@ import {
   Delete,
   Get,
   Param,
-  Post,
+  Post, Put,
   Query,
   UploadedFiles,
   UseGuards,
@@ -124,7 +124,7 @@ export class TaskController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(FilesInterceptor("files", 10))
   @Post("")
-  saveCustomer(
+  createTask(
     @Body() createTaskDto: CreateTaskDto,
     @UserDecorator() user: any,
     @UploadedFiles() files: Array<Express.Multer.File>
@@ -132,6 +132,23 @@ export class TaskController {
     return this.task.createTask(createTaskDto, user, files);
   }
 
+  @ApiBearerAuth()
+  @ApiConsumes("multipart/form-data")
+  @ApiOperation({ summary: "Обновить задачу" })
+  @ApiCreatedResponse({ type: CreateTaskDto })
+  @ApiParam({ name: "id", example: 4, type: Number })
+  @hasRoles(Role.Customer)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseInterceptors(FilesInterceptor("files", 10))
+  @Put(":id")
+  updateTask(
+    @Body() createTaskDto: CreateTaskDto,
+    @UserDecorator() user: any,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Param("id") id: number,
+  ): Promise<Task> {
+    return this.task.updateTask(createTaskDto, user, files,id);
+  }
 
   @ApiBearerAuth()
   @hasRoles(Role.Executor)

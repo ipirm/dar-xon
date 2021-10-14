@@ -418,11 +418,30 @@ export class TaskService {
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor")
       .leftJoinAndSelect("task.executors", "executors")
-      .leftJoin("task.criteria","criteria")
+      .leftJoin("task.criteria", "criteria")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .getOne();
 
     return data;
+  }
+
+
+  async updateTask(createTaskDto, user, files, id): Promise<any> {
+    const images: any = [];
+    if (files) {
+      for (const value of files) {
+        const file = await this.aws.uploadPublicFile(value);
+        images.push({ url: file.url, name: file.key });
+      }
+      Object.assign(createTaskDto, { files: images });
+    }
+    Object.assign(createTaskDto, { created_by: user.id });
+    if (createTaskDto.criteria) {
+      const criteria = await this.criteria.findByIds(createTaskDto.criteria.split(","));
+      Object.assign(createTaskDto, { criteria: criteria });
+
+    }
+    return await this.task.save({ id: id, ...createTaskDto });
   }
 
 }

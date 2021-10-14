@@ -84,7 +84,7 @@ export class PortfolioController {
   }
 
   @Get(":id")
-  @ApiOperation({ summary: "Получить портфолио по id" })
+  @ApiOperation({ summary: "Получить портфолио по user id" })
   @ApiImplicitQuery({
     name: "id",
     required: true,
