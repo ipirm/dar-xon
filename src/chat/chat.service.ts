@@ -159,6 +159,8 @@ export class ChatService {
   }
 
   async getMessages(page, limit, id, user): Promise<Pagination<any>> {
+    let unRead = null;
+
     const messages = this.message.createQueryBuilder("m")
       .select([
         "m.m_type",
@@ -183,10 +185,32 @@ export class ChatService {
     if (user.role === Role.Executor) {
       messages.addSelect(["rbe.id", "rbe.read"]);
       messages.leftJoin("m.read_by_executors", "rbe", "rbe.executor.id = :user", { user: user.id });
+
+      unRead = await this.messageReadExecutor.createQueryBuilder("m")
+        .select(["m.id", "message.id", "executor.id", "chat.id"])
+        .leftJoin("m.message", "message")
+        .leftJoin("message.chat", "chat")
+        .andWhere("chat.id = :ch", { ch: id })
+        .leftJoin("m.executor", "executor")
+        .andWhere("executor.id = :user", { user: user.id })
+        .getMany();
     }
     if (user.role === Role.Customer) {
       messages.addSelect(["rbc.id", "rbc.read"]);
       messages.leftJoin("m.read_by_customers", "rbc", "rbc.customer.id = :user", { user: user.id });
+
+      unRead = await this.messageReadExecutor.createQueryBuilder("m")
+        .select(["m.id", "message.id", "customer.id", "chat.id"])
+        .leftJoin("m.message", "message")
+        .leftJoin("message.chat", "chat")
+        .andWhere("chat.id = :ch", { ch: id })
+        .leftJoin("m.customer", "customer")
+        .andWhere("customer.id = :user", { user: user.id })
+        .getMany();
+    }
+
+    for (const value of unRead) {
+      await this.messageReadExecutor.update(value.id, { read: true });
     }
 
     const data = await paginate(messages, { page, limit });

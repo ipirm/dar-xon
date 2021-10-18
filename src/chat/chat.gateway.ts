@@ -36,7 +36,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.connectedUsers.push({ socketId: socket.id, online: true, id: decoded.id, role: decoded.role });
     console.log("connected");
     this.setOnline(socket);
-    await this.onRoomJoin(socket, { data: socket.handshake.query.chat_id });
+    // @ts-ignore
+    if (socket.handshake.query.chat_id != 0)
+      await this.onRoomJoin(socket, { data: socket.handshake.query.chat_id });
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket): void {
@@ -86,6 +88,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage("join")
   async onRoomJoin(@ConnectedSocket() socket: Socket, @MessageBody() data: any) {
+    console.log("join");
     const room = await this.chat.getOne(data.data);
     if (!room)
       throw new WsException("Invalid room.");

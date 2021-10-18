@@ -6,7 +6,7 @@ const socket = io(window.location.origin, {
     token: token
   },
   query: {
-    chat_id: 6,
+    chat_id: 0, // посылать 0 если просто нужно указать что онлайн
     page: 1,
     limit: 10
   }
