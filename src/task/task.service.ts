@@ -13,6 +13,8 @@ import { TaskStatusEnum } from "../enums/taskStatus.enum";
 import { CustomerTypeTaskEnum } from "../enums/customerTypeTask.enum";
 import { Executor } from "../database/entities/executor.entity";
 import { CriteriaItem } from "../database/entities/criteria-item.entity";
+import { ChatRoom } from "../database/entities/chat-room.entity";
+import { Role } from "../enums/roles.enum";
 
 @Injectable()
 export class TaskService {
@@ -21,6 +23,7 @@ export class TaskService {
     @InjectRepository(TaskResponses) private readonly response: Repository<TaskResponses>,
     @InjectRepository(CriteriaItem) private readonly criteria: Repository<CriteriaItem>,
     @InjectRepository(Executor) private readonly executor: Repository<Executor>,
+    @InjectRepository(ChatRoom) private readonly chat: Repository<ChatRoom>,
     private readonly aws: AwsService
   ) {
   }
@@ -114,7 +117,29 @@ export class TaskService {
     return await this.task.save(this.task.create(createTaskDto));
   }
 
-  async executeTask(createResponseDto: CreateResponseDto, user): Promise<TaskResponses> {
+  async executeTask(createResponseDto: CreateResponseDto, user): Promise<any> {
+    let res: any = this.chat.createQueryBuilder("c");
+
+    const task = await this.task.findOne(createResponseDto.task, { relations: ["created_by"] });
+
+    if (!task)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Задачи с id не существует ${createResponseDto.task}`
+      }, HttpStatus.FORBIDDEN);
+
+    if (task.status === TaskStatusEnum.Started)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Задача начата`
+      }, HttpStatus.FORBIDDEN);
+
+    if (task.status === TaskStatusEnum.Finished)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Задача завершена`
+      }, HttpStatus.FORBIDDEN);
+
     const response = await this.response.createQueryBuilder("r")
       .leftJoinAndSelect("r.executor", "executor")
       .leftJoinAndSelect("r.task", "task")
@@ -123,17 +148,39 @@ export class TaskService {
         task: createResponseDto.task
       }).getOne();
 
+    if (response) {
+      res.select(["c.id", "task.id", "customer.id", "executors.id"])
+        .leftJoin("c.task", "task")
+        .leftJoin("c.customer", "customer")
+        .leftJoin("c.executors", "executors")
+        .andWhere("task.id = :task", { task: createResponseDto.task });
+
+      if (user.role === Role.Executor)
+        res.andWhere("executors.id = :ex", { ex: user.id });
+
+      if (user.role === Role.Customer)
+        res.andWhere("customer.id = :ex", { ex: user.id });
+
+    }
+    res = await res.getOne();
+
     if (response)
-      throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
-        error: `Вы уже откликались на задачу ${response.task.title}`
-      }, HttpStatus.FORBIDDEN);
+      return { chatId: res.id };
+
+
+    const executors = await this.executor.findByIds([user.id]);
+    await this.chat.save(this.chat.create({
+      task: createResponseDto.task,
+      customer: task.created_by,
+      executors: executors
+    }));
 
     return await this.response.save(this.response.create({
       executor: user.id,
       task: createResponseDto.task,
       comment: createResponseDto.comment
     }));
+
   }
 
   async startTask(startTaskDto: StartTaskDto, user): Promise<Task> {
@@ -404,6 +451,10 @@ export class TaskService {
         "executor.avatar",
         "executor.fio",
         "executor.rating",
+        "executors.id",
+        "executors.avatar",
+        "executors.fio",
+        "executors.rating",
         "task_type.id",
         "task_type.name",
         "task.status",
@@ -417,14 +468,23 @@ export class TaskService {
       .leftJoin("category.parent", "parent")
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor")
-      .leftJoinAndSelect("task.executors", "executors")
+      .leftJoin("task.executors", "executors")
       .leftJoin("task.criteria", "criteria")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .getOne();
 
-    return data;
-  }
 
+    const chat = await this.chat.createQueryBuilder("c")
+      .select(["c.id", "cs.id", "ex.id", "ts.id"])
+      .leftJoin("c.task", "ts")
+      .andWhere("ts.id = :t", { t: id })
+      .andWhere("(cs.id = :user OR ex.id = :user)", { user: user.id })
+      .leftJoin("c.customer", "cs")
+      .leftJoin("c.executors", "ex")
+      .getMany();
+
+    return Object.assign(data, { chat: chat });
+  }
 
   async updateTask(createTaskDto, user, files, id): Promise<any> {
     const images: any = [];

@@ -7,10 +7,11 @@ import { AwsModule } from "../aws/aws.module";
 import { TaskResponses } from "../database/entities/taskResponses.entity";
 import { Executor } from "../database/entities/executor.entity";
 import { CriteriaItem } from "../database/entities/criteria-item.entity";
+import { ChatRoom } from "../database/entities/chat-room.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Task, TaskResponses, Executor, CriteriaItem]),
+    TypeOrmModule.forFeature([Task, TaskResponses, Executor, CriteriaItem, ChatRoom]),
     AwsModule
   ],
   providers: [TaskService],

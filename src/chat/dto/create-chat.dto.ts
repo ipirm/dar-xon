@@ -11,6 +11,5 @@ export class CreateChatDto {
   @ApiProperty({ example: [18, 19, 20], description: "Исполнители", required: false })
   executors: any;
 
-
   messages: any;
 }
