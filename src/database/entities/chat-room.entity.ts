@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from "typeorm";
+import { Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { Task } from "./task.entity";
 import { Customer } from "./customer.entity";
@@ -9,11 +9,10 @@ import { Message } from "./message.entity";
 @Entity("chat_room")
 export class ChatRoom extends BaseEntity {
 
-  @ManyToOne(type => Task, c => c.rooms, { onDelete: "SET NULL" })
+  @ManyToOne(type => Task, c => c.rooms, { onDelete: "CASCADE" })
   task: Task;
 
-  @OneToOne(() => Customer)
-  @JoinColumn()
+  @ManyToOne(type => Customer, c => c.chats, { onDelete: "SET NULL" })
   customer: Customer;
 
   @ManyToMany(() => Executor, c => c.rooms)
@@ -22,7 +21,5 @@ export class ChatRoom extends BaseEntity {
 
   @OneToMany(type => Message, c => c.chat)
   messages: Message[];
-
-
 
 }

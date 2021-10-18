@@ -120,6 +120,7 @@ export class ExecutorService {
       .loadRelationCountAndMap("task.createdCount", "c.tasks", "createdCount", qb => qb.andWhere("createdCount.status = :status", { status: "created" }))
       .loadRelationCountAndMap("task.activeCount", "c.tasks", "activeCount", qb => qb.andWhere("activeCount.status = :status", { status: "started" }))
       .loadRelationCountAndMap("task.finishedCount", "c.tasks", "finishedCount", qb => qb.andWhere("finishedCount.status = :status", { status: "finished" }))
+      .loadRelationCountAndMap("task.reviewCount", "c.reviews", "reviewCount")
       .getOne();
     return data;
   }

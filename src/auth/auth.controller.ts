@@ -50,7 +50,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: "Получить статусы и количество задач" })
+  @ApiOperation({ summary: "Получить статусы и количество задач,отзывы" })
   @ApiParam({ name: "role", enum: Role })
   @Get("tasks/:role")
   getAllTasksByStatus(

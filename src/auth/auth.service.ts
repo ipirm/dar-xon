@@ -41,7 +41,6 @@ export class AuthService {
     return { ...loggedUser, ...{ role: user.role } };
   }
 
-
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<any> {
     const user = await this.customer.registrationCustomer(registrationCustomerDto);
     return { ...user, role: Role.Customer };

@@ -106,4 +106,15 @@ export class ChatController {
   ): Promise<any> {
     return this.chat.saveFile(files);
   }
+
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get("unread-messages/count")
+  @ApiOperation({ summary: "Получение кол-ва непрочитанных" })
+  getUnreadCount(
+    @UserDecorator() user: any
+  ): Promise<any> {
+    return this.chat.getUnreadCount(user);
+  }
 }

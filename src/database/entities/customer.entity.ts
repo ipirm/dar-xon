@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToMany, OneToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import * as bcrypt from "bcrypt";
@@ -7,6 +7,8 @@ import { Message } from "./message.entity";
 import { Review } from "./review.entity";
 import { Mail } from "./mail.entity";
 import { RefreshToken } from "./refresh-token.entity";
+import { MessagesReadCustomer } from "./messages-read-customer.entity";
+import { ChatRoom } from "./chat-room.entity";
 
 @Entity("customer")
 export class Customer extends BaseEntity {
@@ -103,10 +105,6 @@ export class Customer extends BaseEntity {
   @OneToMany(type => Review, c => c.customer)
   reviews: Review[];
 
-  @ManyToMany(() => Message, c => c.read_by_customer)
-  readBy: Message[];
-
-
   @Column({ type: "boolean", default: false })
   online: Boolean;
 
@@ -115,4 +113,10 @@ export class Customer extends BaseEntity {
 
   @OneToMany(type => RefreshToken, c => c.executor)
   refresh_tokens: RefreshToken[];
+
+  @OneToMany(type => MessagesReadCustomer, c => c.customer)
+  readBy?: MessagesReadCustomer[];
+
+  @OneToMany(type => ChatRoom, c => c.customer)
+  chats: ChatRoom[];
 }

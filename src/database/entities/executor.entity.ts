@@ -9,6 +9,7 @@ import { ChatRoom } from "./chat-room.entity";
 import { Review } from "./review.entity";
 import { Mail } from "./mail.entity";
 import { RefreshToken } from "./refresh-token.entity";
+import { MessagesReadExecutor } from "./messages-read-executor.entity";
 
 @Entity("executor")
 export class Executor extends BaseEntity {
@@ -99,9 +100,6 @@ export class Executor extends BaseEntity {
   @ManyToMany(type => ChatRoom, c => c.executors)
   rooms?: ChatRoom[];
 
-  @ManyToMany(() => Message, c => c.read_by_executors)
-  readBy: Message[];
-
   @Column({ type: "boolean", default: false })
   online: Boolean;
 
@@ -113,5 +111,8 @@ export class Executor extends BaseEntity {
 
   @OneToMany(type => RefreshToken, c => c.executor)
   refresh_tokens: RefreshToken[];
+
+  @OneToMany(() => MessagesReadExecutor, c => c.executor)
+  readBy?: MessagesReadExecutor[];
 
 }

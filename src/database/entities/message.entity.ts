@@ -1,9 +1,11 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import { ChatRoom } from "./chat-room.entity";
 import { Executor } from "./executor.entity";
 import { Customer } from "./customer.entity";
 import { MessageType } from "../../enums/messageType";
+import { MessagesReadExecutor } from "./messages-read-executor.entity";
+import { MessagesReadCustomer } from "./messages-read-customer.entity";
 
 
 @Entity("message")
@@ -24,13 +26,11 @@ export class Message extends BaseEntity {
   @ManyToOne(type => Customer, c => c.messages, { onDelete: "SET NULL" })
   customer: Customer;
 
-  @ManyToMany(type => Customer, e => e.readBy)
-  @JoinTable()
-  read_by_customer?: Customer[];
+  @OneToMany(type => MessagesReadCustomer, e => e.message)
+  read_by_customers?: MessagesReadCustomer[];
 
-  @ManyToMany(type => Executor, e => e.readBy)
-  @JoinTable()
-  read_by_executors?: Executor[];
+  @OneToMany(type => MessagesReadExecutor, e => e.message)
+  read_by_executors?: MessagesReadExecutor[];
 
   @Column("enum", { enum: MessageType, default: MessageType.Text })
   m_type: MessageType;

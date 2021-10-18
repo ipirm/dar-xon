@@ -9,10 +9,12 @@ import { Message } from "../database/entities/message.entity";
 import { Executor } from "../database/entities/executor.entity";
 import { JwtModule } from "@nestjs/jwt";
 import { jwtConstants } from "../auth/jwt/constants";
+import { MessagesReadExecutor } from "../database/entities/messages-read-executor.entity";
+import { MessagesReadCustomer } from "../database/entities/messages-read-customer.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ChatRoom, Message, Executor]),
+    TypeOrmModule.forFeature([ChatRoom, Message, Executor, MessagesReadExecutor,MessagesReadCustomer]),
     AwsModule,
     JwtModule.register({
       secret: jwtConstants.secret,

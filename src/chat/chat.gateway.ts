@@ -31,26 +31,26 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log("Initizialized");
   }
 
-  handleConnection(@ConnectedSocket() socket: Socket): void {
+  async handleConnection(@ConnectedSocket() socket: Socket): Promise<void> {
     const decoded = this.jwt.verify(socket.handshake.auth.token, jwtConstants);
-    this.connectedUsers.push(Object.assign(decoded, { socketId: socket.id }));
+    this.connectedUsers.push({ socketId: socket.id, online: true, id: decoded.id, role: decoded.role });
     console.log("connected");
-    this.onRoomJoin(socket, { data: socket.handshake.query.chat_id });
+    this.setOnline(socket);
+    await this.onRoomJoin(socket, { data: socket.handshake.query.chat_id });
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket): void {
     this.connectedUsers = this.connectedUsers.filter(item => item?.socketId !== socket.id);
     console.log("disconnected");
+    this.setOnline(socket);
     this.onRoomLeave(socket, { data: socket.handshake.query.chat_id });
   }
 
   @SubscribeMessage("message")
   async handleMessage(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
-    console.log(data)
     let body;
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
     if (data.data.m_type === MessageType.Text) {
-      console.log('Bodies')
       body = {
         chat: socket.handshake.query.chat_id,
         text: data.data.text,
@@ -79,7 +79,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     } else {
       throw new WsException("Invalid credentials.");
     }
-
     const message = await this.chat.saveMessage(body);
     this.server.in("room-" + socket.handshake.query.chat_id).emit("message", message);
   }
@@ -90,6 +89,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const room = await this.chat.getOne(data.data);
     if (!room)
       throw new WsException("Invalid room.");
+
     socket.join("room-" + room.id);
   }
 
@@ -101,7 +101,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage("read")
   async readMessages(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
-    await this.chat.getMessagesUnRead(data.data, user);
+    await this.chat.setMessagesRead(data.data, user);
+  }
+
+  setOnline(@ConnectedSocket() socket: Socket): void {
+    socket.broadcast.emit("onlineList", this.connectedUsers);
   }
 
 }
