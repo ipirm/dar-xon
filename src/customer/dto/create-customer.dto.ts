@@ -23,8 +23,33 @@ export class CreateCustomerDto {
   phone: string;
 
   @IsString()
-  @ApiProperty({ example: "AZ89AIIB410500C6434010168118", description: "Снилс", required: false })
-  snils: string;
+  @ApiProperty({ example: "position", description: "Позиция", required: false })
+  position: string;
+
+  @IsString()
+  @ApiProperty({ example: "sign", description: "Подпись", required: false })
+  sign: string;
+
+  @IsString()
+  @ApiProperty({ example: "rights_no", description: "rights_no", required: false })
+  rights_no: string;
+
+  @IsString()
+  @ApiProperty({ example: "rights_date", description: "rights_date", required: false })
+  rights_date: string;
+
+  @IsString()
+  @ApiProperty({ example: "rights_expire", description: "rights_expire", required: false })
+  rights_expire: string;
+
+  @IsString()
+  @ApiProperty({ example: "kpp", description: "kpp", required: false })
+  kpp: string;
+
+  @IsString()
+  @ApiProperty({ example: "ogrn", description: "ogrn", required: false })
+  ogrn: string;
+  
 
   @IsString()
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
@@ -40,6 +65,10 @@ export class CreateCustomerDto {
   company_address: string;
 
   @IsString()
+  @ApiProperty({ example: "F.X.Xoyski 79", description: "Адресс Компании", required: false })
+  company_real_address: string;
+
+  @IsString()
   @ApiProperty({ example: "1489552", description: "ИНН", required: false })
   inn: string;
 
@@ -47,9 +76,6 @@ export class CreateCustomerDto {
   @ApiProperty({ example: "1489552", description: "БИК", required: false })
   bik: string;
 
-  @IsString()
-  @ApiProperty({ example: "AZ89AIIB410500C6434010168118", description: "ОГРН", required: false })
-  ogrn: string;
 
   @IsString()
   @ApiProperty({ example: "AZ89AIIB410500C6434010168118", description: "Рассчетный счет", required: false })
