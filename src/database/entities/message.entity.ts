@@ -11,7 +11,7 @@ import { MessagesReadCustomer } from "./messages-read-customer.entity";
 @Entity("message")
 export class Message extends BaseEntity {
 
-  @ManyToOne(type => ChatRoom, c => c.messages, { onDelete: "SET NULL" })
+  @ManyToOne(type => ChatRoom, c => c.messages, { onDelete: "CASCADE" })
   chat: ChatRoom;
 
   @Column({ nullable: true })
@@ -20,10 +20,10 @@ export class Message extends BaseEntity {
   @Column("simple-json", { default: null })
   file: { name: string, url: string };
 
-  @ManyToOne(type => Executor, c => c.messages, { onDelete: "SET NULL" })
+  @ManyToOne(type => Executor, c => c.messages, { onDelete: "CASCADE" })
   executor: Executor;
 
-  @ManyToOne(type => Customer, c => c.messages, { onDelete: "SET NULL" })
+  @ManyToOne(type => Customer, c => c.messages, { onDelete: "CASCADE" })
   customer: Customer;
 
   @OneToMany(type => MessagesReadCustomer, e => e.message)
