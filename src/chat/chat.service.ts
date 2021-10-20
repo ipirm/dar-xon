@@ -189,7 +189,7 @@ export class ChatService {
       .getOne();
   }
 
-  async getMessages(page, limit, id, user): Promise<Pagination<any>> {
+  async getMessages(page, limit, id, user, started): Promise<Pagination<any>> {
     let unRead = null;
 
     const messages = this.message.createQueryBuilder("m")
@@ -212,6 +212,10 @@ export class ChatService {
       .leftJoin("m.customer", "customer")
       .where("chat.id = :id", { id: id })
       .orderBy("m.createdAt", "DESC");
+
+    if (started) {
+      messages.andWhere("task.createdAt > :start_at", { start_at: started });
+    }
 
     if (user.role === Role.Executor) {
       messages.addSelect(["rbe.id", "rbe.read"]);

@@ -70,14 +70,21 @@ export class ChatController {
     required: false,
     type: Number
   })
+  @ApiQuery({
+    name: "started",
+    required: false,
+    type: String,
+    example: "2021-10-08T06:31:16.544Z"
+  })
   @ApiParam({ name: "id", example: 4, type: Number })
   getMessages(
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
     @Param("id") id: number = 4,
-    @UserDecorator() user: any
+    @UserDecorator() user: any,
+    @Query("started") started: string
   ): Promise<Pagination<Message>> {
-    return this.chat.getMessages(page, limit, id,user);
+    return this.chat.getMessages(page, limit, id, user, started);
   }
 
   @ApiBearerAuth()
