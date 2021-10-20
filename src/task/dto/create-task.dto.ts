@@ -18,7 +18,7 @@ export class CreateTaskDto {
 
   @IsString()
   @ApiProperty({
-    example: 14,
+    example: 1,
     description: "Категория id нужно посылать самую нижнию по иерархие категоирию",
     required: true
   })
@@ -45,6 +45,6 @@ export class CreateTaskDto {
   files?: any[];
 
   @IsString()
-  @ApiProperty({ example: "7, 10, 15", description: "İd выбранных критериев", required: false })
+  @ApiProperty({ example: "2", description: "İd выбранных критериев", required: false })
   criteria: any;
 }

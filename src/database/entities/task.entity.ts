@@ -45,7 +45,7 @@ export class Task extends BaseEntity {
   @ManyToOne(type => Category, category => category.tasks, { onDelete: "SET NULL" })
   category: Category;
 
-  @ManyToMany(() => Executor, c => c.tasks, { onDelete: "SET NULL" })
+  @ManyToMany(() => Executor, c => c.tasks)
   @JoinTable()
   executors: Executor[];
 

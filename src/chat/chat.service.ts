@@ -11,6 +11,8 @@ import { AwsService } from "../aws/aws.service";
 import { MessagesReadExecutor } from "../database/entities/messages-read-executor.entity";
 import { Role } from "../enums/roles.enum";
 import { MessagesReadCustomer } from "../database/entities/messages-read-customer.entity";
+import { WsException } from "@nestjs/websockets";
+import { ChatStatus } from "../enums/chatStatus";
 
 @Injectable()
 export class ChatService {
@@ -29,6 +31,7 @@ export class ChatService {
     const data = this.chat.createQueryBuilder("chat")
       .select([
         "chat.id",
+        "chat.status",
         "executors.id",
         "executors.fio",
         "executors.avatar",
@@ -123,16 +126,30 @@ export class ChatService {
     return await this.chat.save(this.chat.create(createChatDto));
   }
 
-  async getOne(id: number): Promise<any> {
-    return await this.chat.findOne(id);
+  async getOne(user, id: number): Promise<any> {
+    return await this.chat.createQueryBuilder("c")
+      .select(["c.id", "e.id", "b.id", "c.status"])
+      .leftJoin("c.executors", "e")
+      .leftJoin("c.customer", "b")
+      .andWhere("(e.id = :exe OR b.id = :exe)", { exe: user.id })
+      .andWhere("c.id = :id", { id: id })
+      .getOne();
   }
 
   async saveMessage(createMessageDto: CreateMessageDto): Promise<any> {
     const room = await this.chat.createQueryBuilder("c")
-      .select(["c.id", "e.id", "b.id"])
+      .select(["c.id", "e.id", "b.id", "c.status"])
       .leftJoin("c.executors", "e")
       .leftJoin("c.customer", "b")
+      .andWhere("(e.id = :exe OR b.id = :cus)", { exe: createMessageDto.executor, cus: createMessageDto.customer })
+      .andWhere("c.id = :id", { id: createMessageDto.chat })
       .getOne();
+
+    if (room.status === ChatStatus.Archive)
+      throw new WsException("Чат архивирован");
+
+    if (!room)
+      throw new WsException("У вас нет доступа к чату");
 
     const message = await this.message.save(this.message.create(createMessageDto));
 
@@ -151,11 +168,23 @@ export class ChatService {
     }));
 
     return this.message.createQueryBuilder("m")
+      .select([
+        "m.id",
+        "m.text",
+        "m.file",
+        "m.createdAt",
+        "m.m_type",
+        "e.id",
+        "e.avatar",
+        "e.fio",
+        "e.rating",
+        "c.id",
+        "c.avatar",
+        "c.fio"
+      ])
       .where("m.id = :id", { id: message.id })
-      .leftJoinAndSelect("m.customer", "c")
-      .leftJoinAndSelect("m.executor", "e")
-      .leftJoinAndSelect("m.read_by_customers", "rc")
-      .leftJoinAndSelect("m.read_by_executors", "re")
+      .leftJoin("m.customer", "c")
+      .leftJoin("m.executor", "e")
       .getOne();
   }
 

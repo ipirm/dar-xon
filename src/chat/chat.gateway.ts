@@ -88,8 +88,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage("join")
   async onRoomJoin(@ConnectedSocket() socket: Socket, @MessageBody() data: any) {
-    console.log("join");
-    const room = await this.chat.getOne(data.data);
+    const user = this.connectedUsers.find(i => i.socketId === socket.id);
+    const room = await this.chat.getOne(user, data.data);
+    console.log(user)
+    console.log(room)
     if (!room)
       throw new WsException("Invalid room.");
 

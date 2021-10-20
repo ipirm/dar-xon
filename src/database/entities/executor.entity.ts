@@ -76,10 +76,10 @@ export class Executor extends BaseEntity {
   @Column({ default: false, select: false })
   confirmed: Boolean;
 
-  @OneToMany(type => TaskResponses, t => t.executor)
+  @OneToMany(type => TaskResponses, t => t.executor,{cascade: true})
   responses?: TaskResponses[];
 
-  @ManyToMany(() => Task, c => c.executors)
+  @ManyToMany(() => Task, c => c.executors,{cascade: true})
   tasks: Task[];
 
   @OneToMany(type => Portfolio, t => t.executor)

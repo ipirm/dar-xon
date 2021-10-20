@@ -16,6 +16,7 @@ import { CriteriaItem } from "../database/entities/criteria-item.entity";
 import { ChatRoom } from "../database/entities/chat-room.entity";
 import { Role } from "../enums/roles.enum";
 import { FinishTaskDto } from "./dto/finish-task.dto";
+import { ChatStatus } from "../enums/chatStatus";
 
 @Injectable()
 export class TaskService {
@@ -191,10 +192,24 @@ export class TaskService {
 
   async startTask(startTaskDto: StartTaskDto, user): Promise<Task> {
     const task = await this.task.createQueryBuilder("task")
-      .select(["task.id", "created_by.id"])
+      .select(["task.id", "created_by.id", "task.participants", "rs.id", "task.status"])
       .where("task.id = :id", { id: startTaskDto.task })
       .leftJoin("task.created_by", "created_by")
+      .leftJoin("task.responses", "rs")
+      .leftJoinAndSelect("rs.executor", "ex")
       .getOne();
+
+    if (task.status === TaskStatusEnum.Started)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Задача начата`
+      }, HttpStatus.FORBIDDEN);
+
+    if (task.status === TaskStatusEnum.Finished)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Задача завершена`
+      }, HttpStatus.FORBIDDEN);
 
     if (task.created_by.id !== user.id)
       throw new HttpException({
@@ -202,13 +217,27 @@ export class TaskService {
         error: "Вы не являетесь создателем данной задачи"
       }, HttpStatus.FORBIDDEN);
 
-    if (task.participants >= startTaskDto.executors.length)
+    if (!(task.participants >= startTaskDto.executors.length))
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
         error: `У задачи максимально ${task.participants} исполнителя`
       }, HttpStatus.FORBIDDEN);
 
     const executors = await this.executor.findByIds(startTaskDto.executors);
+
+    const chatsToArchiveExecutorIds = task.responses.map(i => i.executor.id).filter(e => executors.map(i => i.id).indexOf(e) < 0);
+
+    for (const value of chatsToArchiveExecutorIds) {
+      let chat = await this.chat.createQueryBuilder("c")
+        .select(["c.id", "ex.id"])
+        .leftJoin("c.executors", "ex")
+        .leftJoin("c.task", "t")
+        .andWhere("t.id = :tt", { tt: task.id })
+        .andWhere("ex.id = :exx", { exx: value })
+        .getOne();
+
+      await this.chat.update(chat.id, { status: ChatStatus.Archive });
+    }
 
     await this.task.update(task.id, this.task.create({
       startedAt: new Date(),
@@ -219,18 +248,35 @@ export class TaskService {
 
   async finishTask(finishTaskDto: FinishTaskDto, user): Promise<UpdateResult> {
     const task = await this.task.createQueryBuilder("task")
-      .select(["task.id", "created_by.id"])
+      .select(["task.id", "created_by.id", "task.status", "ex.id"])
       .where("task.id = :id", { id: finishTaskDto.task })
       .leftJoin("task.created_by", "created_by")
+      .leftJoin("task.executors", "ex")
       .getOne();
 
+    if (task.status === TaskStatusEnum.Finished)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: `Задача уже завершена`
+      }, HttpStatus.FORBIDDEN);
 
     if (task.created_by.id !== user.id)
       throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
+        status: HttpStatus.CONFLICT,
         error: "Вы не являетесь создателем данной задачи"
       }, HttpStatus.FORBIDDEN);
 
+    for (const i of task.executors) {
+      let chat = await this.chat.createQueryBuilder("c")
+        .select(["c.id", "ex.id"])
+        .leftJoin("c.executors", "ex")
+        .leftJoin("c.task", "t")
+        .andWhere("t.id = :tt", { tt: task.id })
+        .andWhere("ex.id = :exx", { exx: i.id })
+        .getOne();
+
+      await this.chat.update(chat.id, { status: ChatStatus.Archive });
+    }
 
     return await this.task.update(task.id, this.task.create({
       status: TaskStatusEnum.Finished
@@ -480,7 +526,7 @@ export class TaskService {
 
 
     const chat = await this.chat.createQueryBuilder("c")
-      .select(["c.id", "cs.id", "ex.id", "ts.id"])
+      .select(["c.id", "cs.id", "ex.id", "ts.id", "c.status"])
       .leftJoin("c.task", "ts")
       .andWhere("ts.id = :t", { t: id })
       .andWhere("(cs.id = :user OR ex.id = :user)", { user: user.id })
@@ -491,7 +537,7 @@ export class TaskService {
     return Object.assign(data, { chats: chat });
   }
 
-  async updateTask(createTaskDto, user, files, id): Promise<any> {
+  async updateTask(createTaskDto, user, files, id): Promise<Task> {
     const images: any = [];
     if (files) {
       for (const value of files) {
