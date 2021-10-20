@@ -53,10 +53,33 @@ export class Customer extends BaseEntity {
   company_address: string;
 
   @Column({ nullable: true })
+  company_real_address: string;
+
+
+
+  @Column({ nullable: true })
+  position: string;
+
+  @Column({ nullable: true })
+  sign: string;
+
+  @Column({ nullable: true })
+  rights_no: string;
+
+  @Column({ nullable: true })
+  rights_date: string;
+
+  @Column({ nullable: true })
+  rights_expire: string;
+
+  @Column({ nullable: true })
+  city: string;
+
+  @Column({ nullable: true })
   inn: string;
 
   @Column({ nullable: true })
-  bik: string;
+  kpp: string;
 
   @Column({ nullable: true })
   ogrn: string;
@@ -65,16 +88,13 @@ export class Customer extends BaseEntity {
   сhecking_account: string;
 
   @Column({ nullable: true })
-  bank_name: string;
-
-  @Column({ nullable: true })
-  city: string;
-
-  @Column({ nullable: true })
   corporate_account: string;
 
   @Column({ nullable: true })
-  snils: string;
+  bik: string;
+
+  @Column({ nullable: true })
+  bank_name: string;
 
   @Column({ nullable: true })
   site: string;
@@ -121,3 +141,4 @@ export class Customer extends BaseEntity {
   @OneToMany(type => ChatRoom, c => c.customer)
   chats: ChatRoom[];
 }
+
