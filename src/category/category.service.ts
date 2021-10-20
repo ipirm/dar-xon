@@ -15,11 +15,11 @@ export class CategoryService {
   ) {
   }
 
-  async getAll(): Promise<any> {
+  async getAll(): Promise<Category[]> {
     return await this.category.find();
   }
 
-  async getChildren(parent: string): Promise<any> {
+  async getChildren(parent: string): Promise<Category> {
     const cat = await this.category.findOne(parent);
     if (!cat)
       throw new HttpException({
@@ -29,7 +29,7 @@ export class CategoryService {
     return await this.category.findDescendantsTree(cat);
   }
 
-  async getParent(): Promise<any> {
+  async getParent(): Promise<Category[]> {
     return await this.category.findRoots();
   }
 

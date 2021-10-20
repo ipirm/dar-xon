@@ -55,29 +55,8 @@ export class AuthController {
   @Get("tasks/:role")
   getAllTasksByStatus(
     @UserDecorator() user: any,
-    @Param("status") status: any
   ): Promise<any> {
-    return this.auth.getAllTasksByStatus(user, status);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: "Пользователь онлайн" })
-  @Get("status/online")
-  setOnline(
-    @UserDecorator() user: any
-  ): Promise<any> {
-    return this.auth.setOnline(user);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: "Пользователь оффлайн" })
-  @Get("status/offline")
-  setOffline(
-    @UserDecorator() user: any
-  ): Promise<any> {
-    return this.auth.setOffline(user);
+    return this.auth.getAllTasksByStatus(user);
   }
 
   @ApiBearerAuth()

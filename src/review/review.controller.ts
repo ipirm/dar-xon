@@ -10,8 +10,8 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { UserDecorator } from "../decorators/user.decorator";
 import { CreateCommentDto } from "./dto/create-comment.dto";
 import { CommentExecutor } from "../database/entities/comment.entity";
-import { Portfolio } from "../database/entities/portfolio.entity";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
+import { Pagination } from "nestjs-typeorm-paginate";
 
 
 @ApiTags("Review")
@@ -83,7 +83,7 @@ export class ReviewController {
     @Param("id") id: number,
     @Query("with_comment") with_comment: boolean,
     @Query("task") task: number
-  ): Promise<Portfolio> {
+  ): Promise<Pagination<Review>> {
     return this.review.findOne(page, limit, id, with_comment, task);
   }
 

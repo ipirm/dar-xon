@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, Repository } from "typeorm";
+import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import { paginate, Pagination } from "nestjs-typeorm-paginate";
 import { Executor } from "../database/entities/executor.entity";
 import { CreateExecutorDto } from "./dto/create-executor.dto";
@@ -36,15 +36,14 @@ export class ExecutorService {
     return await this.executor.findOne(id);
   }
 
-  async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<any> {
+  async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<UpdateResult> {
     if (files) {
       for (const [key, value] of Object.entries(files)) {
         const file = await this.aws.uploadPublicFile(value[0]);
         Object.assign(createExecutorDto, { [key]: { name: file.key, url: file.url } });
       }
     }
-    await this.executor.update(id, this.executor.create(createExecutorDto));
-    return await this.executor.findOne(id);
+    return await this.executor.update(id, this.executor.create(createExecutorDto));
   }
 
   async deleteExecutor(id: number): Promise<DeleteResult> {
@@ -113,7 +112,7 @@ export class ExecutorService {
     return await this.executor.findOne(confirmDto.user_id);
   }
 
-  async getTasksStatus(user): Promise<any> {
+  async getTasksStatus(user): Promise<Executor> {
     const data = await this.executor.createQueryBuilder("c")
       .select(["c.id"])
       .where("c.id = :id", { id: user.id })
@@ -125,7 +124,7 @@ export class ExecutorService {
     return data;
   }
 
-  async setOnline(user,status):Promise<any>{
-    return await this.executor.update(user.id,{online: status})
+  async setOnline(user, status): Promise<UpdateResult> {
+    return await this.executor.update(user.id, { online: status });
   }
 }

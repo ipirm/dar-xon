@@ -140,7 +140,7 @@ export class CustomerService {
     return await this.customer.findOne(confirmDto.user_id);
   }
 
-  async getTasksStatus(user): Promise<any> {
+  async getTasksStatus(user): Promise<Customer> {
     const data = await this.customer.createQueryBuilder("c")
       .select(["c.id"])
       .where("c.id = :id", { id: user.id })
@@ -151,7 +151,7 @@ export class CustomerService {
     return data;
   }
 
-  async setOnline(user,status):Promise<any>{
+  async setOnline(user,status):Promise<UpdateResult>{
     return await this.customer.update(user.id,{online: status})
   }
 

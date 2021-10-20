@@ -80,28 +80,7 @@ export class AuthService {
     };
   }
 
-  async setOnline(user): Promise<any> {
-    if (user.role === Role.Customer) {
-      await this.customer.setOnline(user, true);
-    }
-    if (user.role === Role.Executor) {
-      await this.executor.setOnline(user, true);
-    }
-
-    return HttpStatus.OK;
-  }
-
-  async setOffline(user): Promise<any> {
-    if (user.role === Role.Customer) {
-      await this.customer.setOnline(user, false);
-    }
-    if (user.role === Role.Executor) {
-      await this.executor.setOnline(user, false);
-    }
-    return HttpStatus.OK;
-  }
-
-  async getAllTasksByStatus(user, status): Promise<any> {
+  async getAllTasksByStatus(user): Promise<any> {
     let data;
     if (user.role === Role.Customer)
       data = this.customer.getTasksStatus(user);

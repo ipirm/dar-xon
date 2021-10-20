@@ -19,7 +19,7 @@ export class CategoryController {
 
   @Get("")
   @ApiOperation({ summary: "Получить все разделы" })
-  getAll(): Promise<any> {
+  getAll(): Promise<Category[]> {
     return this.category.getAll();
   }
 
@@ -117,7 +117,7 @@ export class CategoryController {
 
   @Get("parent/roots")
   @ApiOperation({ summary: "Получить все основные разделы" })
-  getParent(): Promise<any> {
+  getParent(): Promise<Category[]> {
     return this.category.getParent();
   }
 
@@ -125,7 +125,7 @@ export class CategoryController {
   @ApiOperation({ summary: "Получить саб разделы" })
   getChildren(
     @Query("parent") parent: string = null
-  ): Promise<Pagination<Category>> {
+  ): Promise<Category> {
     return this.category.getChildren(parent);
   }
 
