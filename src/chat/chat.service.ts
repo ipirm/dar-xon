@@ -106,9 +106,10 @@ export class ChatService {
   async createChat(createChatDto: CreateChatDto, user): Promise<any> {
     const executors = await this.executor.findByIds(createChatDto.executors);
     const exist = await this.chat.createQueryBuilder("c")
-      .leftJoinAndSelect("c.customer", "customer")
-      .leftJoinAndSelect("c.executors", "executors")
-      .leftJoinAndSelect("c.task", "task")
+      .select(["c.id", "customer.id", "executors.id", "task.id"])
+      .leftJoin("c.customer", "customer")
+      .leftJoin("c.executors", "executors")
+      .leftJoin("c.task", "task")
       .andWhere("customer.id = :customer", { customer: user.id })
       .andWhere("task.id = :task", { task: createChatDto.task })
       .andWhere("executors.id IN (:...ids)", { ids: executors.map(i => i.id) })
@@ -129,7 +130,7 @@ export class ChatService {
   async saveMessage(createMessageDto: CreateMessageDto): Promise<any> {
     const room = await this.chat.createQueryBuilder("c")
       .select(["c.id", "e.id", "b.id"])
-      .leftJoinAndSelect("c.executors", "e")
+      .leftJoin("c.executors", "e")
       .leftJoin("c.customer", "b")
       .getOne();
 

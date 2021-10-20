@@ -43,12 +43,12 @@ export class AuthService {
 
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<any> {
     const user = await this.customer.registrationCustomer(registrationCustomerDto);
-    return { ...user, role: Role.Customer };
+    return { id: user.id, role: Role.Customer };
   }
 
   async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<any> {
     const user = await this.executor.registrationExecutor(registrationExecutorDto);
-    return { ...user, role: Role.Executor };
+    return { id: user.id, role: Role.Executor };
   }
 
   async confirmNumber(confirmDto: ConfirmDto, role: Role): Promise<any> {

@@ -87,5 +87,15 @@ export class ReviewController {
     return this.review.findOne(page, limit, id, with_comment, task);
   }
 
-
+  @ApiBearerAuth()
+  @hasRoles(Role.Customer)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get("check/review")
+  @ApiOperation({ summary: "Проверить наличие отзыва от заказчика" })
+  checkForReview(
+    @Query("executor") executor: number,
+    @UserDecorator() user: any
+  ): Promise<Review> {
+    return this.review.checkForReview(executor,user);
+  }
 }

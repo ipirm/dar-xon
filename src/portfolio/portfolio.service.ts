@@ -46,7 +46,7 @@ export class PortfolioService {
   }
 
   async getAll(page, limit, user, cat): Promise<Pagination<Portfolio>> {
-    const data = this.portfolio.createQueryBuilder("portfolio")
+    const data = this.portfolio.createQueryBuilder("p")
       .leftJoinAndSelect("portfolio.executor", "executor")
       .leftJoinAndSelect("portfolio.category", "category")
       .where("executor.id = :id", { id: user.id });

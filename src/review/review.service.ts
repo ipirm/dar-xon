@@ -61,17 +61,39 @@ export class ReviewService {
 
   async findOne(page, limit, id: number, with_comment: boolean, task: number): Promise<any> {
     const data = this.review.createQueryBuilder("r")
+      .select(["r.id", "r.comment", "r.rating", ""])
       .leftJoinAndSelect("r.executor", "e")
       .andWhere("e.id = :id", { id: id });
     if (with_comment) {
       data.leftJoinAndSelect("r.comments", "c");
     }
     if (task) {
-      data.leftJoinAndSelect("r.task", "t")
+      data.addSelect(["t.id"])
+        .leftJoin("r.task", "t")
         .andWhere("t.id = :task", { task: task });
     }
 
     return await paginate(data, { page, limit });
+  }
+
+  async checkForReview(executor, user): Promise<any> {
+    const review = await this.review.createQueryBuilder("r")
+      .select(["r.id", "c.id", "e.id"])
+      .leftJoin("r.customer", "c")
+      .leftJoin("r.executor", "e")
+      .andWhere("c.id = :user", { user: user.id })
+      .andWhere("e.id = :executor", { executor: executor });
+
+    if (review)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Вы уже оставляли отзыв"
+      }, HttpStatus.FORBIDDEN);
+
+    return {
+      status: HttpStatus.OK,
+      message: `Вы не оставляли отзыв ${executor} исполнителю`
+    };
   }
 
 }

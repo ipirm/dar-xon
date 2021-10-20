@@ -15,7 +15,7 @@ export class Category extends BaseEntity {
   @TreeChildren()
   children: Category[];
 
-  @TreeParent({onDelete: "SET NULL"})
+  @TreeParent({onDelete: "CASCADE"})
   parent: Category;
 
   @OneToMany(type => Task, t => t.category)

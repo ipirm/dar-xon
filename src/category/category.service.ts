@@ -16,7 +16,7 @@ export class CategoryService {
   }
 
   async getAll(): Promise<any> {
-    return await this.category.findTrees();
+    return await this.category.find();
   }
 
   async getChildren(parent: string): Promise<any> {
@@ -71,10 +71,13 @@ export class CategoryService {
 
   async getAllTypes(page, limit, cat): Promise<Pagination<TaskTypes>> {
     const data = this.taskType.createQueryBuilder("c")
-      .leftJoinAndSelect("c.category", "category");
+      .select(["c.id", "c.name"]);
 
-    if (cat)
-      data.andWhere("category.id = :cat", { cat: cat });
+    if (cat) {
+      data.addSelect(["category.id"])
+        .leftJoin("c.category", "category")
+        .andWhere("category.id = :cat", { cat: cat });
+    }
 
     return await paginate(data, { page, limit });
   }

@@ -4,7 +4,8 @@ import {
   Delete,
   Get,
   Param,
-  Post, Put,
+  Post,
+  Put,
   Query,
   UploadedFiles,
   UseGuards,
@@ -35,6 +36,7 @@ import { ExecutorTypeTaskEnum } from "../enums/executorTypeTask.enum";
 import { StartTaskDto } from "./dto/start-task.dto";
 import { DeleteResult, UpdateResult } from "typeorm";
 import { CustomerTypeTaskEnum } from "../enums/customerTypeTask.enum";
+import { FinishTaskDto } from "./dto/finish-task.dto";
 
 
 @ApiTags("Task")
@@ -329,13 +331,13 @@ export class TaskController {
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post("finish")
-  @ApiCreatedResponse({ type: StartTaskDto })
+  @ApiCreatedResponse({ type: FinishTaskDto })
   @ApiOperation({ summary: "Завершить проект" })
   finishTask(
-    @Body() startTaskDto: StartTaskDto,
+    @Body() finishTaskDto: FinishTaskDto,
     @UserDecorator() user: any
   ): Promise<UpdateResult> {
-    return this.task.finishTask(startTaskDto, user);
+    return this.task.finishTask(finishTaskDto, user);
   }
 
   @ApiBearerAuth()

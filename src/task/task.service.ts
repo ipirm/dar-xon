@@ -15,6 +15,7 @@ import { Executor } from "../database/entities/executor.entity";
 import { CriteriaItem } from "../database/entities/criteria-item.entity";
 import { ChatRoom } from "../database/entities/chat-room.entity";
 import { Role } from "../enums/roles.enum";
+import { FinishTaskDto } from "./dto/finish-task.dto";
 
 @Injectable()
 export class TaskService {
@@ -141,8 +142,9 @@ export class TaskService {
       }, HttpStatus.FORBIDDEN);
 
     const response = await this.response.createQueryBuilder("r")
-      .leftJoinAndSelect("r.executor", "executor")
-      .leftJoinAndSelect("r.task", "task")
+      .select(["r.id", "executor.id", "task.id"])
+      .leftJoin("r.executor", "executor")
+      .leftJoin("r.task", "task")
       .where("executor.id = :executor AND task.id = :task", {
         executor: user.id,
         task: createResponseDto.task
@@ -169,24 +171,29 @@ export class TaskService {
 
 
     const executors = await this.executor.findByIds([user.id]);
-    await this.chat.save(this.chat.create({
+    const chat = await this.chat.save(this.chat.create({
       task: createResponseDto.task,
       customer: task.created_by,
       executors: executors
     }));
 
-    return await this.response.save(this.response.create({
+    const data = await this.response.save(this.response.create({
       executor: user.id,
       task: createResponseDto.task,
       comment: createResponseDto.comment
     }));
 
+    return {
+      ...data,
+      chatId: chat.id
+    };
   }
 
   async startTask(startTaskDto: StartTaskDto, user): Promise<Task> {
     const task = await this.task.createQueryBuilder("task")
+      .select(["task.id", "created_by.id"])
       .where("task.id = :id", { id: startTaskDto.task })
-      .leftJoinAndSelect("task.created_by", "created_by")
+      .leftJoin("task.created_by", "created_by")
       .getOne();
 
     if (task.created_by.id !== user.id)
@@ -195,7 +202,7 @@ export class TaskService {
         error: "Вы не являетесь создателем данной задачи"
       }, HttpStatus.FORBIDDEN);
 
-    if (task.participants <= startTaskDto.executors.length)
+    if (task.participants >= startTaskDto.executors.length)
       throw new HttpException({
         status: HttpStatus.FORBIDDEN,
         error: `У задачи максимально ${task.participants} исполнителя`
@@ -210,18 +217,13 @@ export class TaskService {
     return await this.task.save({ id: task.id, executors: executors });
   }
 
-  async finishTask(startTaskDto: StartTaskDto, user): Promise<UpdateResult> {
+  async finishTask(finishTaskDto: FinishTaskDto, user): Promise<UpdateResult> {
     const task = await this.task.createQueryBuilder("task")
-      .where("task.id = :id", { id: startTaskDto.task })
-      .leftJoinAndSelect("task.executors", "executors")
-      .leftJoinAndSelect("task.created_by", "created_by")
+      .select(["task.id", "created_by.id"])
+      .where("task.id = :id", { id: finishTaskDto.task })
+      .leftJoin("task.created_by", "created_by")
       .getOne();
 
-    if (!task.executors)
-      throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
-        error: "У задачи нет исполнителей"
-      }, HttpStatus.FORBIDDEN);
 
     if (task.created_by.id !== user.id)
       throw new HttpException({
@@ -230,10 +232,9 @@ export class TaskService {
       }, HttpStatus.FORBIDDEN);
 
 
-
-    return  await this.task.update(task.id, this.task.create({
+    return await this.task.update(task.id, this.task.create({
       status: TaskStatusEnum.Finished
-    }));;
+    }));
   }
 
   async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat, taskType, participantsCount): Promise<Pagination<Task>> {
@@ -269,7 +270,9 @@ export class TaskService {
         "executor.id",
         "executor.avatar",
         "executor.fio",
-        "executor.rating"
+        "executor.rating",
+        "task_type.id",
+        "task_type.name"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
@@ -279,7 +282,7 @@ export class TaskService {
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor1")
       .leftJoin("task.criteria", "criteria")
-      .leftJoinAndSelect("task.task_type", "task_type")
+      .leftJoin("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
     if (participantsCount) {
@@ -356,7 +359,8 @@ export class TaskService {
         "executor.avatar",
         "executor.fio",
         "executor.rating",
-
+        "task_type.id",
+        "task_type.name"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
@@ -365,7 +369,7 @@ export class TaskService {
       .leftJoin("task.criteria", "criteria")
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor")
-      .leftJoinAndSelect("task.task_type", "task_type")
+      .leftJoin("task.task_type", "task_type")
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
     if (participantsCount) {
@@ -436,6 +440,7 @@ export class TaskService {
         "task.finishedAt",
         "task.files",
         "task.description",
+        "task.participants",
         "created_by.company_name",
         "task.site",
         "created_by.id",
@@ -483,7 +488,7 @@ export class TaskService {
       .leftJoin("c.executors", "ex")
       .getMany();
 
-    return Object.assign(data, { chat: chat });
+    return Object.assign(data, { chats: chat });
   }
 
   async updateTask(createTaskDto, user, files, id): Promise<any> {
