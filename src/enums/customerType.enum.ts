@@ -1,5 +1,7 @@
 export enum CustomerTypeEnum {
-  SelfEmployed = "self-employed",
-  IndividualEntrepreneur = "individual-intrepreneur",
+  FL = "self-fl",
+  YL = "yl",
+  SELF = "self",
+  IP = "ip",
   NKO = "nko"
 }

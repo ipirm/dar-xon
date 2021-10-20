@@ -74,7 +74,7 @@ export class CreateCustomerDto {
   @IsEnum(CustomerTypeEnum)
   @ApiModelProperty({
     enum: Object.keys(CustomerTypeEnum),
-    default: CustomerTypeEnum.SelfEmployed
+    default: CustomerTypeEnum.SELF
   })
   customer_type: CustomerTypeEnum;
 

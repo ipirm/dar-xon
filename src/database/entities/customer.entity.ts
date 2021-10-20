@@ -81,7 +81,7 @@ export class Customer extends BaseEntity {
   @Column("simple-json", { default: null })
   files: { name: string, url: string }[];
 
-  @Column("enum", { enum: CustomerTypeEnum, default: CustomerTypeEnum.SelfEmployed })
+  @Column("enum", { enum: CustomerTypeEnum, default: CustomerTypeEnum.SELF })
   customer_type: CustomerTypeEnum;
 
   @Column({ default: "123456", select: false })
