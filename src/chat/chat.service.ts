@@ -107,7 +107,7 @@ export class ChatService {
     return chats;
   }
 
-  async createChat(createChatDto: CreateChatDto, user): Promise<any> {
+  async createChat(createChatDto: CreateChatDto, user): Promise<ChatRoom> {
     const executors = await this.executor.findByIds(createChatDto.executors);
     const exist = await this.chat.createQueryBuilder("c")
       .select(["c.id", "customer.id", "executors.id", "task.id"])
@@ -127,7 +127,7 @@ export class ChatService {
     return await this.chat.save(this.chat.create(createChatDto));
   }
 
-  async getOne(user, id: number): Promise<any> {
+  async getOne(user, id: number): Promise<ChatRoom> {
     return await this.chat.createQueryBuilder("c")
       .select(["c.id", "e.id", "b.id", "c.status"])
       .leftJoin("c.executors", "e")
@@ -137,7 +137,7 @@ export class ChatService {
       .getOne();
   }
 
-  async saveMessage(createMessageDto: CreateMessageDto): Promise<any> {
+  async saveMessage(createMessageDto: CreateMessageDto): Promise<Message> {
     const room = await this.chat.createQueryBuilder("c")
       .select(["c.id", "e.id", "b.id", "c.status"])
       .leftJoin("c.executors", "e")
@@ -189,7 +189,7 @@ export class ChatService {
       .getOne();
   }
 
-  async getMessages(page, limit, id, user, started): Promise<Pagination<any>> {
+  async getMessages(page, limit, id, user, started): Promise<Pagination<Message>> {
     let unRead = null;
 
     const messages = this.message.createQueryBuilder("m")
