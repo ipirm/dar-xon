@@ -52,6 +52,7 @@ export class ChatService {
       .leftJoin("category.parent", "parent")
       .leftJoin("chat.customer", "customer")
       .leftJoin("chat.messages", "messages")
+      .andWhere("(executors.id = :chh OR customer.id = :chh)", { chh: user.id })
 
     if (search) {
       data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
