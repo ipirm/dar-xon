@@ -39,8 +39,9 @@ export class ExecutorController {
   @ApiOperation({ summary: "Создать исполнителя" })
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileFieldsInterceptor([
-    { name: "p_scan", maxCount: 1 },
-    { name: "p_pink", maxCount: 1 },
+    { name: "file_rose_ticket", maxCount: 1 },
+    { name: "file_passport", maxCount: 1 },
+    { name: "file_passport_2", maxCount: 1 },
     { name: "avatar", maxCount: 1 }
   ]))
   @ApiCreatedResponse({ type: CreateExecutorDto })
@@ -69,8 +70,9 @@ export class ExecutorController {
   @ApiOperation({ summary: "Обновить исполнителя" })
   @ApiCreatedResponse({ type: CreateExecutorDto })
   @UseInterceptors(FileFieldsInterceptor([
-    { name: "p_scan", maxCount: 1 },
-    { name: "p_pink", maxCount: 1 },
+    { name: "file_rose_ticket", maxCount: 1 },
+    { name: "file_passport", maxCount: 1 },
+    { name: "file_passport_2", maxCount: 1 },
     { name: "avatar", maxCount: 1 }
   ]))
   updateExecutor(

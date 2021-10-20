@@ -49,7 +49,6 @@ export class CreateCustomerDto {
   @IsString()
   @ApiProperty({ example: "ogrn", description: "ogrn", required: false })
   ogrn: string;
-  
 
   @IsString()
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
@@ -75,7 +74,6 @@ export class CreateCustomerDto {
   @IsString()
   @ApiProperty({ example: "1489552", description: "БИК", required: false })
   bik: string;
-
 
   @IsString()
   @ApiProperty({ example: "AZ89AIIB410500C6434010168118", description: "Рассчетный счет", required: false })

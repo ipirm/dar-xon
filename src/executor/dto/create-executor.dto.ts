@@ -26,30 +26,40 @@ export class CreateExecutorDto {
 
   @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
-  p_series: string;
+  about: string;
 
   @IsString()
-  @ApiProperty({ example: "14889522", description: "Номер паспорта", required: false })
-  p_number: string;
+  @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  address: string;
 
   @IsString()
-  @ApiProperty({ example: "ASAN1", description: "Кем выдан", required: false })
-  p_by: string;
+  @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  passport_series: string;
+
+  @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  passport_number: string;
 
   @IsString()
-  @ApiProperty({ example: "28.06.2014", description: "Когда выдан", required: false })
-  p_issue_time: string;
+  @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  passport_issuer: string;
 
   @IsString()
-  @ApiProperty({ example: "16.03.1998", description: "Дата рождения", required: false })
-  p_birth_date: string;
+  @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  passport_issued_at: string;
+
+  @IsString()
+  @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  birthdate: string;
+
+  @ApiProperty({ type: "string", format: "binary" })
+  file_rose_ticket: { name: string, url: string };
+
+  @ApiProperty({ type: "string", format: "binary" })
+  file_passport: { name: string, url: string };
+
+  @ApiProperty({ type: "string", format: "binary" })
+  file_passport_2: { name: string, url: string };
 
   @ApiProperty({ type: "string", format: "binary" })
   avatar: any;
-
-  @ApiProperty({ type: "string", format: "binary" })
-  p_scan: any;
-
-  @ApiProperty({ type: "string", format: "binary" })
-  p_pink: any;
 }

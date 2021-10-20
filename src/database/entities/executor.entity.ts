@@ -22,6 +22,36 @@ export class Executor extends BaseEntity {
   phone: string;
 
   @Column({ nullable: true })
+  about: string;
+
+  @Column({ nullable: true })
+  address: string;
+
+  @Column({ nullable: true })
+  passport_series: string;
+
+  @Column({ nullable: true })
+  passport_number: string;
+
+  @Column({ nullable: true })
+  passport_issuer: string;
+
+  @Column({ nullable: true })
+  passport_issued_at: string;
+
+  @Column({ nullable: true })
+  birthdate: string;
+
+  @Column("simple-json", { nullable: true })
+  file_rose_ticket: { name: string, url: string };
+
+  @Column("simple-json", { nullable: true })
+  file_passport: { name: string, url: string };
+
+  @Column("simple-json", { nullable: true })
+  file_passport_2: { name: string, url: string };
+
+  @Column({ nullable: true })
   login: string;
 
   @Column("simple-json", { nullable: true })
@@ -29,6 +59,12 @@ export class Executor extends BaseEntity {
 
   @Column({ nullable: true })
   email: string;
+
+  @Column({ nullable: true })
+  site: string;
+
+  @Column({ type: "numeric", default: 5 })
+  rating: number;
 
   @Column({ select: false, nullable: true })
   password: string;
@@ -46,30 +82,6 @@ export class Executor extends BaseEntity {
 
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
-
-  @Column({ type: "numeric", default: 5 })
-  rating: number;
-
-  @Column({ nullable: true })
-  p_series: string;
-
-  @Column({ nullable: true })
-  p_number: string;
-
-  @Column({ nullable: true })
-  p_by: string;
-
-  @Column({ nullable: true })
-  p_issue_time: string;
-
-  @Column({ nullable: true })
-  p_birth_date: string;
-
-  @Column("simple-json", { nullable: true })
-  p_scan: { name: string, url: string };
-
-  @Column("simple-json", { nullable: true })
-  p_pink: { name: string, url: string };
 
   @Column({ default: "123456", select: false })
   confirmation: string;
