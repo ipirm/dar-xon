@@ -57,6 +57,7 @@ export class ChatService {
     if (status) {
       data.andWhere("chat.status = :st", { st: status });
     }
+
     if (search) {
       data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
     }

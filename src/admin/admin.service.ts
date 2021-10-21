@@ -80,11 +80,11 @@ export class AdminService {
   }
 
   async unBannedCustomer(id: number): Promise<UpdateResult> {
-    return await this.customer.update(id, { banned: true });
+    return await this.customer.update(id, { banned: false });
   }
 
   async unBannedExecutor(id: number): Promise<UpdateResult> {
-    return await this.executor.update(id, { banned: true });
+    return await this.executor.update(id, { banned: false });
   }
 
   async getListUsers(page, limit, role: Role, banned: boolean, search, date, verified: boolean): Promise<Pagination<any>> {
