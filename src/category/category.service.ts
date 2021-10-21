@@ -15,8 +15,8 @@ export class CategoryService {
   ) {
   }
 
-  async getAll(): Promise<Category[]> {
-    return await this.category.find();
+  async getAll(): Promise<any> {
+    return await this.category.findTrees();
   }
 
   async getChildren(parent: string): Promise<Category> {
