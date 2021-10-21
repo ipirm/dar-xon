@@ -71,7 +71,7 @@ export class TaskService {
     }
 
     if (taskType) {
-      data.andWhere("task_type.id = :task_type", { task_type: taskType });
+      data.andWhere("task_type.id IN (:...tt)", { tt: [...taskType.split(",")] });
     }
     if (started) {
       data.andWhere("task.createdAt > :start_at", { start_at: started });
@@ -336,7 +336,7 @@ export class TaskService {
     }
 
     if (taskType) {
-      data.andWhere("task_type.id = :task_type", { task_type: taskType });
+      data.andWhere("task_type.id IN (:...tt)", { tt: [...taskType.split(",")] });
     }
 
     if (search) {
@@ -423,7 +423,7 @@ export class TaskService {
     }
 
     if (taskType) {
-      data.andWhere("task_type.id = :task_type", { task_type: taskType });
+      data.andWhere("task_type.id IN (:...tt)", { tt: [...taskType.split(",")] });
     }
 
     if (started) {

@@ -80,8 +80,8 @@ export class TaskController {
   @ApiQuery({
     name: "task_type",
     required: false,
-    type: Number,
-    example: 7
+    type: String,
+    example: "1,2,3"
   })
   @ApiQuery({
     name: "page",
@@ -111,7 +111,7 @@ export class TaskController {
     @Query("started") started: string,
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
-    @Query("task_type") taskType: number,
+    @Query("task_type") taskType: string,
     @Query("participants_count") participantsCount: Boolean = false
   ): Promise<Pagination<Task>> {
     return this.task.getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount);
@@ -211,8 +211,8 @@ export class TaskController {
   @ApiQuery({
     name: "task_type",
     required: false,
-    type: Number,
-    example: 7
+    type: String,
+    example: "1,2,3"
   })
   @ApiQuery({
     name: "participants_count",
@@ -234,7 +234,7 @@ export class TaskController {
     @Query("started") started: string,
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
-    @Query("task_type") taskType: number,
+    @Query("task_type") taskType: string,
     @Query("participants_count") participantsCount: Boolean = false
   ): Promise<Pagination<Task>> {
     return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
@@ -285,8 +285,8 @@ export class TaskController {
   @ApiQuery({
     name: "task_type",
     required: false,
-    type: Number,
-    example: 7
+    type: String,
+    example: "1,2,3"
   })
   @ApiQuery({
     name: "participants_count",
@@ -308,7 +308,7 @@ export class TaskController {
     @Query("started") started: string,
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
-    @Query("task_type") taskType: number,
+    @Query("task_type") taskType: string,
     @Query("participants_count") participantsCount: Boolean = false
   ): Promise<Pagination<Task>> {
     return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);

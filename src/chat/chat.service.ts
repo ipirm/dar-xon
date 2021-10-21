@@ -150,8 +150,8 @@ export class ChatService {
       .andWhere("c.id = :id", { id: createMessageDto.chat })
       .getOne();
 
-    if (room.status === ChatStatus.Archive)
-      throw new WsException("Чат архивирован");
+    // if (room.status === ChatStatus.Archive)
+    //   throw new WsException("Чат архивирован");
 
     if (!room)
       throw new WsException("У вас нет доступа к чату");
