@@ -4,51 +4,52 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateExecutorDto {
 
-  @IsString()
   @ApiProperty({ example: "Ильхам Пирмаммадов,Вугар", description: "ФИО", required: false })
+  @IsString()
   fio: string;
 
-  @IsString()
   @ApiProperty({ example: "w33haa", description: "login", required: false })
+  @IsString()
   login: string;
 
-  @IsString()
   @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
+  @IsString()
   phone: string;
 
-  @IsString()
   @ApiProperty({ example: "password112", description: "Пароль", required: false })
+  @IsString()
   password: string;
 
-  @IsString()
   @ApiProperty({ example: "Берлин", description: "Город", required: false })
+  @IsString()
   city: string;
 
-  @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  @IsString()
   about: string;
 
-  @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  @IsString()
   address: string;
 
-  @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  @IsString()
   passport_series: string;
 
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  @IsString()
   passport_number: string;
 
-  @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  @IsString()
   passport_issuer: string;
 
-  @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  @IsString()
   passport_issued_at: string;
 
-  @IsString()
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
+  @IsString()
   birthdate: string;
 
   @ApiProperty({ type: "string", format: "binary" })

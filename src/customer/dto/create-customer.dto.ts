@@ -6,93 +6,92 @@ import { ApiModelProperty } from "@nestjs/swagger/dist/decorators/api-model-prop
 
 export class CreateCustomerDto {
 
-  @IsString()
   @ApiProperty({ example: "Ильхам", description: "Имя", required: false })
+  @IsString()
   fio: string;
 
-  @IsString()
   @ApiProperty({ example: "w33haa", description: "login", required: false })
+  @IsString()
   login: string;
 
-  @IsEmail()
   @ApiProperty({ example: "ilham.pirm@gmail.com", description: "почта", required: false })
+  @IsString()
   email: string;
 
-  @IsString()
   @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
+  @IsString()
   phone: string;
 
-  @IsString()
   @ApiProperty({ example: "position", description: "Позиция", required: false })
+  @IsString()
   position: string;
 
-  @IsString()
   @ApiProperty({ example: "sign", description: "Подпись", required: false })
+  @IsString()
   sign: string;
 
-  @IsString()
   @ApiProperty({ example: "rights_no", description: "rights_no", required: false })
+  @IsString()
   rights_no: string;
 
-  @IsString()
   @ApiProperty({ example: "rights_date", description: "rights_date", required: false })
+  @IsString()
   rights_date: string;
 
-  @IsString()
   @ApiProperty({ example: "rights_expire", description: "rights_expire", required: false })
+  @IsString()
   rights_expire: string;
 
-  @IsString()
   @ApiProperty({ example: "kpp", description: "kpp", required: false })
+  @IsString()
   kpp: string;
 
-  @IsString()
   @ApiProperty({ example: "ogrn", description: "ogrn", required: false })
+  @IsString()
   ogrn: string;
 
-  @IsString()
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
   password: string;
 
-  @IsString()
   @ApiProperty({ example: "Apple", description: "Название Компании", required: false })
+  @IsString()
   company_name: string;
 
-  @IsString()
   @ApiProperty({ example: "F.X.Xoyski 79", description: "Адресс Компании", required: false })
+  @IsString()
   company_address: string;
 
-  @IsString()
   @ApiProperty({ example: "F.X.Xoyski 79", description: "Адресс Компании", required: false })
+  @IsString()
   company_real_address: string;
 
-  @IsString()
   @ApiProperty({ example: "1489552", description: "ИНН", required: false })
+  @IsString()
   inn: string;
 
-  @IsString()
   @ApiProperty({ example: "1489552", description: "БИК", required: false })
+  @IsString()
   bik: string;
 
-  @IsString()
   @ApiProperty({ example: "AZ89AIIB410500C6434010168118", description: "Рассчетный счет", required: false })
+  @IsString()
   сhecking_account: string;
 
-  @IsString()
   @ApiProperty({ example: "Kapital bank", description: "Название банка", required: false })
+  @IsString()
   bank_name: string;
 
-  @IsString()
   @ApiProperty({ example: "AZ89AIIB410500C6434010168118", description: "Кор. счет", required: false })
+  @IsString()
   corporate_account: string;
 
-  @IsString()
   @ApiProperty({ example: "Берлин", description: "Город", required: false })
+  @IsString()
   city: string;
 
-  @IsString()
   @ApiProperty({ example: "https://tviser.agency", description: "Сайт", required: false })
+  @IsString()
   site: string;
 
   @IsEnum(CustomerTypeEnum)
