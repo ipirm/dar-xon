@@ -26,7 +26,7 @@ export class ChatService {
   ) {
   }
 
-  async getAll(page, limit, user, search): Promise<Pagination<ChatRoom>> {
+  async getAll(page, limit, user, search, status): Promise<Pagination<ChatRoom>> {
     const searchText = decodeURI(search).toLowerCase();
     const data = this.chat.createQueryBuilder("chat")
       .select([
@@ -54,6 +54,9 @@ export class ChatService {
       .leftJoin("chat.messages", "messages")
       .andWhere("(executors.id = :chh OR customer.id = :chh)", { chh: user.id })
 
+    if (status) {
+      data.andWhere("chat.status = :st", { st: status });
+    }
     if (search) {
       data.andWhere("LOWER(task.title) ILIKE :value", { value: `%${searchText}%` });
     }

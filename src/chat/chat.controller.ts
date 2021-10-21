@@ -18,6 +18,7 @@ import { UserDecorator } from "../decorators/user.decorator";
 import { Message } from "../database/entities/message.entity";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { CreateFileDto } from "./dto/create-file.dto";
+import { ChatStatus } from "../enums/chatStatus";
 
 @ApiTags("Chat")
 @Controller("chat")
@@ -47,13 +48,19 @@ export class ChatController {
     required: false,
     type: Number
   })
+  @ApiImplicitQuery({
+    name: "status",
+    enum: ChatStatus,
+    required: false
+  })
   getAll(
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
     @UserDecorator() user: any,
-    @Query("search") search: string
+    @Query("search") search: string,
+    @Query("status") status: ChatStatus
   ): Promise<Pagination<ChatRoom>> {
-    return this.chat.getAll(page, limit, user,search);
+    return this.chat.getAll(page, limit, user, search, status);
   }
 
   @ApiBearerAuth()
@@ -69,6 +76,11 @@ export class ChatController {
     name: "limit",
     required: false,
     type: Number
+  })
+  @ApiImplicitQuery({
+    name: "status",
+    enum: ChatStatus,
+    required: false
   })
   @ApiQuery({
     name: "started",
