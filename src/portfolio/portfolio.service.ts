@@ -50,20 +50,27 @@ export class PortfolioService {
       .leftJoinAndSelect("portfolio.executor", "executor")
       .leftJoinAndSelect("portfolio.category", "category")
       .where("executor.id = :id", { id: user.id });
-    
+
     if (cat)
       data.andWhere("category.id = :cat", { cat: cat });
 
     return await paginate(data, { page, limit });
   }
 
-  async findOne(id: number): Promise<Portfolio> {
-    return await this.portfolio.createQueryBuilder("portfolio")
+  async findOne(id: number, portfolioId: number): Promise<Portfolio> {
+    const data = this.portfolio.createQueryBuilder("portfolio")
       .leftJoinAndSelect("portfolio.executor", "executor")
       .where("executor.id = :id", { id: id })
       .leftJoinAndSelect("portfolio.category", "category")
-      .leftJoinAndSelect("category.parent", "parent")
-      .getOne();
+      .leftJoinAndSelect("category.parent", "parent");
+
+    if (portfolioId)
+      data.where("portfolio.id = :id", { id: portfolioId });
+
+    if (id)
+      data.andWhere("executor.id = :id", { id: id });
+
+    return await data.getOne();
   }
 
   async updatePortfolio(id, createPortfolioDto, files, user): Promise<UpdateResult> {

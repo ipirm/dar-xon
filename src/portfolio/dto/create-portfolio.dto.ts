@@ -40,9 +40,9 @@ export class CreatePortfolioDto {
   @ApiProperty({ type: "array", items: { type: "string", format: "binary", description: "Файлы" }, required: false })
   files?: any[];
 
-  @ApiProperty({ type: "string", format: "binary", description: "Логотип Заказчика" })
+  @ApiProperty({ type: "string", format: "binary", description: "Логотип Заказчика", required: false  })
   logo: any;
 
-  @ApiProperty({ type: "string", format: "binary", description: "Обложка Портфолио" })
+  @ApiProperty({ type: "string", format: "binary", description: "Обложка Портфолио", required: false  })
   image: any;
 }

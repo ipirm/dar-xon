@@ -90,10 +90,16 @@ export class PortfolioController {
     required: true,
     type: Number
   })
+  @ApiImplicitQuery({
+    name: "portfolio_id",
+    required: true,
+    type: Number
+  })
   getOne(
-    @Param("id") id: number
+    @Param("id") id: number,
+    @Param("portfolio_id") portfolioId: number
   ): Promise<Portfolio> {
-    return this.portfolio.findOne(id);
+    return this.portfolio.findOne(id,portfolioId);
   }
 
 

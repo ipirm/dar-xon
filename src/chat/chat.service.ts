@@ -210,14 +210,16 @@ export class ChatService {
       .leftJoin("m.chat", "chat")
       .leftJoin("m.executor", "executor")
       .leftJoin("m.customer", "customer")
-      .where("chat.id = :id", { id: id })
+      .andWhere("chat.id = :id", { id: id })
       .orderBy("m.createdAt", "DESC");
 
     if (started) {
+      console.log("stated")
       messages.andWhere("task.createdAt > :start_at", { start_at: started });
     }
 
     if (user.role === Role.Executor) {
+      console.log("executor")
       messages.addSelect(["rbe.id", "rbe.read"]);
       messages.leftJoin("m.read_by_executors", "rbe", "rbe.executor.id = :user", { user: user.id });
 
