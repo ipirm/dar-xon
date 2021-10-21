@@ -194,6 +194,38 @@ export class AdminController {
   @ApiBearerAuth()
   @hasRoles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put("customer/banned/:id")
+  @ApiOperation({ summary: "Раблокировать заказчика" })
+  @ApiImplicitQuery({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  unBannedCustomer(
+    @Param("id") id: number
+  ): Promise<UpdateResult> {
+    return this.admin.unBannedCustomer(id);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put("executor/banned/:id")
+  @ApiOperation({ summary: "Раблокировать исполнителя" })
+  @ApiImplicitQuery({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  unBannedExecutor(
+    @Param("id") id: number
+  ): Promise<UpdateResult> {
+    return this.admin.unBannedExecutor(id);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("customer/verify/:id")
   @ApiOperation({ summary: "Верефицировать заказчика" })
   @ApiImplicitQuery({

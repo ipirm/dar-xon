@@ -79,6 +79,14 @@ export class AdminService {
     return await this.executor.update(id, { banned: true });
   }
 
+  async unBannedCustomer(id: number): Promise<UpdateResult> {
+    return await this.customer.update(id, { banned: true });
+  }
+
+  async unBannedExecutor(id: number): Promise<UpdateResult> {
+    return await this.executor.update(id, { banned: true });
+  }
+
   async getListUsers(page, limit, role: Role, banned: boolean, search, date, verified: boolean): Promise<Pagination<any>> {
     let data: any = [];
     const searchText = decodeURI(search).toLowerCase();
@@ -102,7 +110,7 @@ export class AdminService {
       data.andWhere("e.verified = :verified", { verified: verified });
 
     data.select(["e.id", "e.fio", "e.createdAt", "e.avatar"]);
-    data.orderBy("e.createdAt", "ASC");
+    data.orderBy("e.createdAt", "DESC");
     return paginate(data, { page, limit });
   }
 

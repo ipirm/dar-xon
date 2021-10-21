@@ -190,6 +190,7 @@ export class ChatService {
   }
 
   async getMessages(page, limit, id, user, started): Promise<Pagination<Message>> {
+    console.log(user);
     let unRead = null;
 
     const messages = this.message.createQueryBuilder("m")
@@ -215,7 +216,7 @@ export class ChatService {
 
     if (started) {
       console.log("stated")
-      messages.andWhere("task.createdAt > :start_at", { start_at: started });
+      messages.andWhere("task.createdAt < :start_at", { start_at: started });
     }
 
     if (user.role === Role.Executor) {
@@ -224,31 +225,38 @@ export class ChatService {
       messages.leftJoin("m.read_by_executors", "rbe", "rbe.executor.id = :user", { user: user.id });
 
       unRead = await this.messageReadExecutor.createQueryBuilder("m")
-        .select(["m.id", "message.id", "executor.id", "chat.id"])
+        .select(["m.id", "message.id", "executor.id", "chat.id","m.read"])
         .leftJoin("m.message", "message")
         .leftJoin("message.chat", "chat")
         .andWhere("chat.id = :ch", { ch: id })
         .leftJoin("m.executor", "executor")
         .andWhere("executor.id = :user", { user: user.id })
+        .andWhere("m.read = :rd",{rd: false})
         .getMany();
+
+      for (const value of unRead) {
+        await this.messageReadExecutor.update(value.id, { read: true });
+      }
     }
     if (user.role === Role.Customer) {
       messages.addSelect(["rbc.id", "rbc.read"]);
       messages.leftJoin("m.read_by_customers", "rbc", "rbc.customer.id = :user", { user: user.id });
 
-      unRead = await this.messageReadExecutor.createQueryBuilder("m")
-        .select(["m.id", "message.id", "customer.id", "chat.id"])
+      unRead = await this.messagesReadCustomer.createQueryBuilder("m")
+        .select(["m.id", "message.id", "customer.id", "chat.id","m.read"])
         .leftJoin("m.message", "message")
         .leftJoin("message.chat", "chat")
         .andWhere("chat.id = :ch", { ch: id })
         .leftJoin("m.customer", "customer")
         .andWhere("customer.id = :user", { user: user.id })
+        .andWhere("m.read = :rd",{rd: false})
         .getMany();
+
+      for (const value of unRead) {
+        await this.messagesReadCustomer.update(value.id, { read: true });
+      }
     }
 
-    for (const value of unRead) {
-      await this.messageReadExecutor.update(value.id, { read: true });
-    }
 
     const data = await paginate(messages, { page, limit });
     Object.assign(data.meta, { timestamp: new Date() });
