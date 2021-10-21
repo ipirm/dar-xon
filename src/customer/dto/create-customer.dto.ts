@@ -50,7 +50,8 @@ export class CreateCustomerDto {
   @IsString()
   ogrn: string;
 
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
+ // @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
+  @Matches(/^(?=.*[A-Z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&\/\ ]{6,}$/g, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
   password: string;
 

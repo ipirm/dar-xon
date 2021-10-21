@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsString, Matches } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 
@@ -17,7 +17,7 @@ export class CreateExecutorDto {
   phone: string;
 
   @ApiProperty({ example: "password112", description: "Пароль", required: false })
-  @IsString()
+  @Matches(/^(?=.*[A-Z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&\/\ ]{6,}$/g, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
   password: string;
 
   @ApiProperty({ example: "Берлин", description: "Город", required: false })
