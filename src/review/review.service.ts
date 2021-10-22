@@ -61,8 +61,8 @@ export class ReviewService {
 
   async findOne(page, limit, id: number, with_comment: boolean, task: number): Promise<Pagination<Review>> {
     const data = this.review.createQueryBuilder("r")
-      .select(["r.id", "r.comment", "r.rating", ""])
-      .leftJoinAndSelect("r.executor", "e")
+      .select(["r.id", "r.comment", "r.rating", "e.id", "e.fio", "e.avatar"])
+      .leftJoin("r.executor", "e")
       .andWhere("e.id = :id", { id: id });
     if (with_comment) {
       data.leftJoinAndSelect("r.comments", "c");
