@@ -47,7 +47,7 @@ export class ReviewService {
     });
 
     // @ts-ignore
-    await this.executor.update(createReviewDto.executor, { rating: rating / executor?.reviewsCount });
+    await this.executor.update(createReviewDto.executor, { rating: rating / parseInt(executor?.reviewsCount) });
 
     Object.assign(createReviewDto, { customer: user.id });
     return await this.review.save(this.review.create(createReviewDto));
