@@ -34,9 +34,7 @@ export class PortfolioController {
   ) {
   }
 
-  @ApiBearerAuth()
-  @hasRoles(Role.Executor)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  
   @Get("")
   @ApiOperation({ summary: "Получить все портфолио" })
   @ApiImplicitQuery({
