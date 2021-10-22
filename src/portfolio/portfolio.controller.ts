@@ -24,6 +24,7 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { DeleteResult, UpdateResult } from "typeorm";
+import { ApiImplicitParam } from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
 
 @ApiTags("Portfolio")
 @Controller("portfolio")
@@ -85,7 +86,7 @@ export class PortfolioController {
 
   @Get(":id")
   @ApiOperation({ summary: "Получить портфолио id" })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number
@@ -97,7 +98,7 @@ export class PortfolioController {
   })
   getOne(
     @Param("id") id: number,
-    @Param("user_id") userId: number
+    @Query("user_id") userId: number
   ): Promise<Portfolio> {
     return this.portfolio.findOne(id,userId);
   }
