@@ -45,11 +45,11 @@ export class PortfolioService {
     return await this.portfolio.save(this.portfolio.create(createPortfolioDto));
   }
 
-  async getAll(page, limit, user, cat): Promise<Pagination<Portfolio>> {
+  async getAll(page, limit, userId, cat): Promise<Pagination<Portfolio>> {
     const data = this.portfolio.createQueryBuilder("p")
       .leftJoinAndSelect("portfolio.executor", "executor")
       .leftJoinAndSelect("portfolio.category", "category")
-      .where("executor.id = :id", { id: user.id });
+      .where("executor.id = :id", { id: userId });
 
     if (cat)
       data.andWhere("category.id = :cat", { cat: cat });

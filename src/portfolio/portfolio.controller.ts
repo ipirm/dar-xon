@@ -55,13 +55,19 @@ export class PortfolioController {
     description: "ID Категории",
     type: Number
   })
+  @ApiImplicitQuery({
+    name: "user_id",
+    required: false,
+    description: "ID Пользователя",
+    type: Number
+  })
   getAll(
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
-    @UserDecorator("user") user: any,
+    @Query("user_id") userId: any,
     @Query("cat") cat: number
   ): Promise<Pagination<Portfolio>> {
-    return this.portfolio.getAll(page, limit, user, cat);
+    return this.portfolio.getAll(page, limit, userId, cat);
   }
 
   @ApiConsumes("multipart/form-data")
