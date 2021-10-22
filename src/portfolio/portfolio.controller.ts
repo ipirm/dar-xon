@@ -34,7 +34,7 @@ export class PortfolioController {
   ) {
   }
 
-  
+
   @Get("")
   @ApiOperation({ summary: "Получить все портфолио" })
   @ApiImplicitQuery({
