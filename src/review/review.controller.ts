@@ -51,7 +51,7 @@ export class ReviewController {
   @ApiOperation({ summary: "Получить отзыв по id исполнителя" })
   @ApiParam({
     name: "id",
-    required: true,
+    required: false,
     type: Number,
     description: "İd исполнителя"
   })

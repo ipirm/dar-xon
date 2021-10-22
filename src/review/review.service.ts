@@ -61,16 +61,18 @@ export class ReviewService {
 
   async findOne(page, limit, id: number, with_comment: boolean, task: number): Promise<Pagination<Review>> {
     const data = this.review.createQueryBuilder("r")
-      .select(["r.id", "r.comment", "r.rating", "e.id", "e.fio", "e.avatar"])
+      .select(["r.id", "r.comment", "r.createdAt", "r.rating", "e.id", "e.fio", "e.avatar", "t.id", "t.title", "c.id", "c.fio", "c.avatar","c.company_name"])
       .leftJoin("r.executor", "e")
-      .andWhere("e.id = :id", { id: id });
+      .leftJoin("r.task", "t")
+      .leftJoin("t.created_by", "c");
     if (with_comment) {
       data.leftJoinAndSelect("r.comments", "c");
     }
+    if (id) {
+      data.andWhere("e.id = :id", { id: id });
+    }
     if (task) {
-      data.addSelect(["t.id"])
-        .leftJoin("r.task", "t")
-        .andWhere("t.id = :task", { task: task });
+      data.andWhere("t.id = :task", { task: task });
     }
 
     return await paginate(data, { page, limit });

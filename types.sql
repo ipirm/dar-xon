@@ -1,1 +1,0 @@
-INSERT INTO public."task-types"(id, "createdAt", "updatedAt", name, "categoryId", "tasksId") VALUES (?, ?, ?, ?, ?, ?);
