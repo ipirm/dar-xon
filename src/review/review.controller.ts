@@ -57,13 +57,13 @@ export class ReviewController {
   })
   @ApiImplicitQuery({
     name: "with_comment",
-    required: true,
+    required: false,
     type: Boolean,
     description: "С коментариями"
   })
   @ApiImplicitQuery({
     name: "task",
-    required: true,
+    required: false,
     type: Number,
     description: "İd задачи"
   })
