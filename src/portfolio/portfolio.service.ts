@@ -57,15 +57,15 @@ export class PortfolioService {
     return await paginate(data, { page, limit });
   }
 
-  async findOne(id: number, portfolioId: number): Promise<Portfolio> {
+  async findOne(id: number, userId: number): Promise<Portfolio> {
     const data = this.portfolio.createQueryBuilder("portfolio")
       .leftJoinAndSelect("portfolio.executor", "executor")
-      .where("executor.id = :id", { id: id })
+      .andWhere("portfolio.id = :id", { id: id })
       .leftJoinAndSelect("portfolio.category", "category")
       .leftJoinAndSelect("category.parent", "parent");
 
-    if (portfolioId)
-      data.where("portfolio.id = :id", { id: portfolioId });
+    if (userId)
+      data.andWhere("executor.id = :id", { id: userId });
 
     if (id)
       data.andWhere("executor.id = :id", { id: id });
