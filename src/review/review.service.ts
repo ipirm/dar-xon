@@ -66,7 +66,7 @@ export class ReviewService {
       .leftJoin("r.task", "t")
       .leftJoin("t.created_by", "c");
     if (with_comment) {
-      data.leftJoinAndSelect("r.comments", "c");
+      data.leftJoinAndSelect("r.comments", "cs");
     }
     if (id) {
       data.andWhere("e.id = :id", { id: id });
