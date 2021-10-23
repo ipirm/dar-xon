@@ -20,7 +20,7 @@ export class CreatePortfolioDto {
   @ApiProperty({ example: "ссылка", description: "Ссылка на сайт", required: false })
   site: string;
 
-  @IsBoolean()
+  @IsString()
   @ApiProperty({ example: true, description: "Спонсоры", default: false })
   sponsors: boolean;
 

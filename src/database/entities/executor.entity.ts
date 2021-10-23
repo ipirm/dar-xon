@@ -8,7 +8,6 @@ import { Message } from "./message.entity";
 import { ChatRoom } from "./chat-room.entity";
 import { Review } from "./review.entity";
 import { Mail } from "./mail.entity";
-import { RefreshToken } from "./refresh-token.entity";
 import { MessagesReadExecutor } from "./messages-read-executor.entity";
 
 @Entity("executor")
@@ -122,8 +121,11 @@ export class Executor extends BaseEntity {
   @Column({ nullable: true })
   city: string;
 
-  @OneToMany(type => RefreshToken, c => c.executor)
-  refresh_tokens: RefreshToken[];
+  @Column({
+    nullable: true,
+    select: false
+  })
+  public currentHashedRefreshToken?: string;
 
   @OneToMany(() => MessagesReadExecutor, c => c.executor)
   readBy?: MessagesReadExecutor[];

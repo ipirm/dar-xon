@@ -6,7 +6,6 @@ import { Task } from "./task.entity";
 import { Message } from "./message.entity";
 import { Review } from "./review.entity";
 import { Mail } from "./mail.entity";
-import { RefreshToken } from "./refresh-token.entity";
 import { MessagesReadCustomer } from "./messages-read-customer.entity";
 import { ChatRoom } from "./chat-room.entity";
 
@@ -105,6 +104,12 @@ export class Customer extends BaseEntity {
   @Column("enum", { enum: CustomerTypeEnum, default: CustomerTypeEnum.SELF })
   customer_type: CustomerTypeEnum;
 
+  @Column({
+    nullable: true,
+    select: false
+  })
+  public currentHashedRefreshToken?: string;
+
   @Column({ default: "123456", select: false })
   confirmation: string;
 
@@ -131,9 +136,6 @@ export class Customer extends BaseEntity {
 
   @OneToMany(type => Mail, t => t.customer)
   forms: Mail[];
-
-  @OneToMany(type => RefreshToken, c => c.executor)
-  refresh_tokens: RefreshToken[];
 
   @OneToMany(type => MessagesReadCustomer, c => c.customer)
   readBy?: MessagesReadCustomer[];

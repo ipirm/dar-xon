@@ -106,4 +106,5 @@ export class AuthService {
     }
     return await this.contact.save(this.contact.create(createContactDto));
   }
+
 }
