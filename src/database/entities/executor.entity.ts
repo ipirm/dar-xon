@@ -76,22 +76,28 @@ export class Executor extends BaseEntity {
   @BeforeUpdate()
   async generatePasswordHashUpdate(): Promise<void> {
     if(this.password !== this.password)
-    this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
+      this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
 
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
 
   @Column({ default: "123456", select: false })
-  confirmation: string;
+  confirmation_email: string;
 
   @Column({ default: false, select: false })
-  confirmed: Boolean;
+  confirmed_email: Boolean;
 
-  @OneToMany(type => TaskResponses, t => t.executor,{cascade: true})
+  @Column({ default: "123456", select: false })
+  confirmation_phone: string;
+
+  @Column({ default: false, select: false })
+  confirmed_phone: Boolean;
+
+  @OneToMany(type => TaskResponses, t => t.executor, { cascade: true })
   responses?: TaskResponses[];
 
-  @ManyToMany(() => Task, c => c.executors,{cascade: true})
+  @ManyToMany(() => Task, c => c.executors, { cascade: true })
   tasks: Task[];
 
   @OneToMany(type => Portfolio, t => t.executor)

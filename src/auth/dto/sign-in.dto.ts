@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class SignInDto {
 
   @IsString()
-  @ApiProperty({ example: "ilham.pirm2@gmail.com", description: "Почта или Номер", required: true })
+  @ApiProperty({ example: "ilham.pirm2@gmail.com", description: "Почта,Логин или Номер", required: true })
   nickname: string;
 
   @IsString()

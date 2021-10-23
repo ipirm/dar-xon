@@ -4,10 +4,10 @@ import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import { paginate, Pagination } from "nestjs-typeorm-paginate";
 import { Customer } from "../database/entities/customer.entity";
 import { CreateCustomerDto } from "./dto/create-customer.dto";
-import * as bcrypt from "bcrypt";
 import { AwsService } from "../aws/aws.service";
 import { ConfirmDto } from "../auth/dto/confirm.dto";
 import { RegistrationCustomerDto } from "../auth/dto/registration-customer.dto";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class CustomerService {
@@ -47,7 +47,16 @@ export class CustomerService {
   }
 
   async getOne(id: number): Promise<Customer> {
-    return await this.customer.findOne(id);
+    let full: object = {};
+    const user = await this.customer.findOne(id);
+    for (const [key, value] of Object.entries(user)) {
+      if (value !== null) {
+        console.log(value);
+        Object.assign(full, { [key]: value });
+      }
+    }
+    Object.assign(user, { fullness: Math.ceil(Object.entries(full).length / Object.entries(user).length * 100) });
+    return user;
   }
 
   async updateCustomer(id: number, createCustomerDto: CreateCustomerDto, files: Express.Multer.File[]): Promise<UpdateResult> {
@@ -128,15 +137,15 @@ export class CustomerService {
   }
 
   async confirmNumber(confirmDto: ConfirmDto): Promise<Customer> {
-    const user = await this.customer.createQueryBuilder("e").addSelect(["e.confirmation"]).getOne();
+    const user = await this.customer.createQueryBuilder("e").addSelect(["e.confirmation_phone"]).getOne();
 
-    if (user.confirmation !== confirmDto.value)
+    if (user.confirmation_phone !== confirmDto.value)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
         error: "Неверный код"
       }, HttpStatus.CONFLICT);
 
-    await this.customer.update(confirmDto.user_id, { confirmed: true });
+    await this.customer.update(confirmDto.user_id, { confirmed_phone: true });
     return await this.customer.findOne(confirmDto.user_id);
   }
 
@@ -151,8 +160,8 @@ export class CustomerService {
     return data;
   }
 
-  async setOnline(user,status):Promise<UpdateResult>{
-    return await this.customer.update(user.id,{online: status})
+  async updateRefresh(user, token: string): Promise<UpdateResult> {
+    return await this.customer.update(user.id, { currentHashedRefreshToken: token });
   }
 
 }

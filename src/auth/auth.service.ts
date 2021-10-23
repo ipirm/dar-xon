@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { SignInDto } from "./dto/sign-in.dto";
 import { CustomerService } from "../customer/customer.service";
@@ -13,6 +13,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateContactDto } from "./dto/create-contact.dto";
 import { AwsService } from "../aws/aws.service";
+import { MailerService } from "@nestjs-modules/mailer";
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,8 @@ export class AuthService {
     private executor: ExecutorService,
     private readonly admin: AdminService,
     private readonly aws: AwsService,
-    @InjectRepository(Mail) private readonly contact: Repository<Mail>
+    @InjectRepository(Mail) private readonly contact: Repository<Mail>,
+    private readonly mailerService: MailerService
   ) {
   }
 
@@ -38,11 +40,17 @@ export class AuthService {
     if (user.role === Role.Admin)
       loggedUser = await this.admin.getOne(user.id);
 
+
     return { ...loggedUser, ...{ role: user.role } };
   }
 
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<any> {
     const user = await this.customer.registrationCustomer(registrationCustomerDto);
+
+    if (registrationCustomerDto.email) {
+
+    }
+
     return { id: user.id, role: Role.Customer };
   }
 
@@ -69,6 +77,7 @@ export class AuthService {
     if (role === Role.Customer)
       user = await this.customer.findOne(signInDto.nickname, signInDto.password);
 
+
     if (role === Role.Executor)
       user = await this.executor.findOne(signInDto.nickname, signInDto.password);
 
@@ -78,6 +87,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign({ ...user, role })
     };
+
   }
 
   async getAllTasksByStatus(user): Promise<any> {

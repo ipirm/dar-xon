@@ -33,7 +33,16 @@ export class ExecutorService {
   }
 
   async getOne(id: number): Promise<Executor> {
-    return await this.executor.findOne(id);
+    let full: object = {};
+    const user = await this.executor.findOne(id);
+    for (const [key, value] of Object.entries(user)) {
+      if (value !== null) {
+        console.log(value);
+        Object.assign(full, { [key]: value });
+      }
+    }
+    Object.assign(user, { fullness: Math.ceil(Object.entries(full).length / Object.entries(user).length * 100) });
+    return user;
   }
 
   async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<UpdateResult> {
@@ -100,15 +109,15 @@ export class ExecutorService {
   }
 
   async confirmNumber(confirmDto: ConfirmDto): Promise<Executor> {
-    const user = await this.executor.createQueryBuilder("e").addSelect(["e.confirmation"]).getOne();
+    const user = await this.executor.createQueryBuilder("e").addSelect(["e.confirmation_phone"]).getOne();
 
-    if (user.confirmation !== confirmDto.value)
+    if (user.confirmation_phone !== confirmDto.value)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
         error: "Неверный код"
       }, HttpStatus.CONFLICT);
 
-    await this.executor.update(confirmDto.user_id, { confirmed: true });
+    await this.executor.update(confirmDto.user_id, { confirmed_phone: true });
     return await this.executor.findOne(confirmDto.user_id);
   }
 

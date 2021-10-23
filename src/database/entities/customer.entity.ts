@@ -111,10 +111,16 @@ export class Customer extends BaseEntity {
   public currentHashedRefreshToken?: string;
 
   @Column({ default: "123456", select: false })
-  confirmation: string;
+  confirmation_email: string;
 
   @Column({ default: false, select: false })
-  confirmed: Boolean;
+  confirmed_email: Boolean;
+
+  @Column({ default: "123456", select: false })
+  confirmation_phone: string;
+
+  @Column({ default: false, select: false })
+  confirmed_phone: Boolean;
 
   @OneToMany(() => Task, c => c.created_by)
   tasks: Task[];
