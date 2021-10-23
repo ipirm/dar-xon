@@ -1,4 +1,4 @@
-import { IsDate, IsString } from "class-validator";
+import { IsDate, IsOptional, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 
@@ -37,12 +37,15 @@ export class CreatePortfolioDto {
   @ApiProperty({ example: "1", description: "Категория/Раздел", required: false })
   cat_type: any;
 
+  @IsOptional()
   @ApiProperty({ type: "array", items: { type: "string", format: "binary", description: "Файлы" }, required: false })
   files?: any[];
 
+  @IsOptional()
   @ApiProperty({ type: "string", format: "binary", description: "Логотип Заказчика", required: false  })
   logo: any;
 
+  @IsOptional()
   @ApiProperty({ type: "string", format: "binary", description: "Обложка Портфолио", required: false  })
   image: any;
 }

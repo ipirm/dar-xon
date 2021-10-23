@@ -12,6 +12,9 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import { CreateContactDto } from "./dto/create-contact.dto";
 import { Mail } from "../database/entities/mail.entity";
 import { ConfirmPhoneDto } from "./dto/confirm-phone.dto";
+import { RateLimit } from "nestjs-rate-limiter";
+import { ConfirmEmailRequestDto } from "./dto/confirm-email-request.dto";
+import { ConfirmEmailDto } from "./dto/confirm-email.dto";
 
 
 @ApiTags("Auth")
@@ -39,27 +42,60 @@ export class AuthController {
   }
 
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: "Запросить потвердить номера" })
+  @ApiOperation({ summary: "Запросить подтверждения номера" })
   @ApiCreatedResponse({ type: ConfirmPhoneDto })
-  @Post("request-confirm")
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @RateLimit({
+    keyPrefix: "request-confirm",
+    points: 1,
+    duration: 60,
+    errorMessage: "Смс можно запрашивать не раньше чем раз в минуту"
+  })
+  @Post("request-confirm-phone/:role")
   confirmRequestNumber(
     @Body() confirmPhoneDto: ConfirmPhoneDto,
-    @UserDecorator() user: any
+    @Param("role") role: Role = Role.Customer
   ): Promise<any> {
-    return this.auth.confirmRequestNumber(confirmPhoneDto, user);
+    return this.auth.confirmRequestNumber(confirmPhoneDto, role);
   }
 
-  @ApiOperation({ summary: "Потвердить номер" })
+  @ApiOperation({ summary: "Подтвердить номер" })
   @ApiCreatedResponse({ type: ConfirmDto })
-  @ApiParam({ name: "role", enum: Role })
-  @Post("confirm/:role")
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @Post("confirm-phone/:role")
   confirmNumber(
     @Body() confirmDto: ConfirmDto,
     @Param("role") role: Role = Role.Customer
   ): Promise<any> {
     return this.auth.confirmNumber(confirmDto, role);
+  }
+
+  @ApiOperation({ summary: "Запросить подтверждения почты" })
+  @ApiCreatedResponse({ type: ConfirmEmailRequestDto })
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @RateLimit({
+    keyPrefix: "request-confirm",
+    points: 1,
+    duration: 60,
+    errorMessage: "Смс можно запрашивать не раньше чем раз в минуту"
+  })
+  @Post("request-confirm-email/:role")
+  confirmRequestEmail(
+    @Body() confirmEmailRequestDto: ConfirmEmailRequestDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.confirmRequestEmail(confirmEmailRequestDto, role);
+  }
+
+  @ApiOperation({ summary: "Подтвердить почту" })
+  @ApiCreatedResponse({ type: ConfirmEmailDto })
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @Post("confirm-email/:role")
+  confirmEmail(
+    @Body() confirmEmailDto: ConfirmEmailDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.confirmEmail(confirmEmailDto, role);
   }
 
   @ApiBearerAuth()
@@ -68,7 +104,7 @@ export class AuthController {
   @ApiParam({ name: "role", enum: Role })
   @Get("tasks/:role")
   getAllTasksByStatus(
-    @UserDecorator() user: any,
+    @UserDecorator() user: any
   ): Promise<any> {
     return this.auth.getAllTasksByStatus(user);
   }
@@ -100,7 +136,7 @@ export class AuthController {
   @ApiOperation({ summary: "Отправить форму обратной связи" })
   @ApiCreatedResponse({ type: CreateContactDto })
   @UseInterceptors(FilesInterceptor("files", 10))
-  @Post("")
+  @Post("/send-form")
   contactUs(
     @Body() createContactDto: CreateContactDto,
     @UserDecorator() user: any,

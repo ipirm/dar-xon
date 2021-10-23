@@ -14,6 +14,7 @@ import { AwsModule } from "../aws/aws.module";
 import { Admin } from "../database/entities/admin.entity";
 import { AdminService } from "../admin/admin.service";
 import { Mail } from "../database/entities/mail.entity";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { Mail } from "../database/entities/mail.entity";
       secret: jwtConstants.secret,
       signOptions: { expiresIn: "286400s" }
     }),
+    HttpModule,
     TypeOrmModule.forFeature([Customer, Executor, Admin, Mail]),
     AwsModule
   ],

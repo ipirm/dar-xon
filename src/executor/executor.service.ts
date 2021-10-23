@@ -8,6 +8,7 @@ import { AwsService } from "../aws/aws.service";
 import * as bcrypt from "bcrypt";
 import { ConfirmDto } from "../auth/dto/confirm.dto";
 import { RegistrationExecutorDto } from "../auth/dto/registration-executor.dto";
+import { ConfirmEmailDto } from "../auth/dto/confirm-email.dto";
 
 @Injectable()
 export class ExecutorService {
@@ -38,7 +39,6 @@ export class ExecutorService {
     const user = await this.executor.findOne(id);
     for (const [key, value] of Object.entries(user)) {
       if (value !== null) {
-        console.log(value);
         Object.assign(full, { [key]: value });
       }
     }
@@ -62,7 +62,7 @@ export class ExecutorService {
 
   async findOne(nickname: string, password: string): Promise<Executor> {
     const user = await this.executor.createQueryBuilder("executor")
-      .addSelect(["executor.password", "executor.confirmed", "executor.banned"])
+      .addSelect(["executor.password", "executor.banned"])
       .where("executor.phone = :nickname OR executor.login = :nickname", { nickname })
       .getOne();
 
@@ -110,7 +110,11 @@ export class ExecutorService {
   }
 
   async confirmNumber(confirmDto: ConfirmDto): Promise<Executor> {
-    const user = await this.executor.createQueryBuilder("e").addSelect(["e.confirmation_phone"]).getOne();
+    const user = await this.executor.createQueryBuilder("e")
+      .where("e.id = :id", { id: confirmDto.user_id })
+      .addSelect(["e.confirmation_phone"])
+      .getOne();
+
 
     if (user.confirmation_phone !== confirmDto.value)
       throw new HttpException({
@@ -118,9 +122,27 @@ export class ExecutorService {
         error: "Неверный код"
       }, HttpStatus.CONFLICT);
 
-    await this.executor.update(confirmDto.user_id, { confirmed_phone: true });
+    await this.executor.update(user.id, { confirmed_phone: true });
     return await this.executor.findOne(confirmDto.user_id);
   }
+
+  async confirmEmail(confirmEmailDto: ConfirmEmailDto): Promise<Executor> {
+    const user = await this.executor.createQueryBuilder("e")
+      .where("e.id = :id", { id: confirmEmailDto.user_id })
+      .addSelect(["e.confirmation_email"])
+      .getOne();
+
+
+    if (user.confirmation_email !== confirmEmailDto.value)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Неверный код"
+      }, HttpStatus.CONFLICT);
+
+    await this.executor.update(user.id, { confirmed_email: true });
+    return await this.executor.findOne(confirmEmailDto.user_id);
+  }
+
 
   async getTasksStatus(user): Promise<Executor> {
     const data = await this.executor.createQueryBuilder("c")
@@ -134,7 +156,11 @@ export class ExecutorService {
     return data;
   }
 
-  async setOnline(user, status): Promise<UpdateResult> {
-    return await this.executor.update(user.id, { online: status });
+  async updateConfirmNumber(user, authCode: string): Promise<UpdateResult> {
+    return await this.executor.update(user, { confirmation_phone: authCode });
+  }
+
+  async updateConfirmEmail(user, authCode: string): Promise<UpdateResult> {
+    return await this.executor.update(user, { confirmation_email: authCode });
   }
 }

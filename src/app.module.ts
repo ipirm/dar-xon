@@ -18,22 +18,24 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { ReviewModule } from "./review/review.module";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
+import { RateLimiterModule } from "nestjs-rate-limiter";
 
-
+console.log(process.cwd())
 @Module({
   imports: [
+    RateLimiterModule,
     ConfigModule.forRoot({
       envFilePath: ".env",
       isGlobal: true
     }),
     MailerModule.forRoot({
       transport: {
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // true for 465, false for other ports
+        host: "smtp.yandex.ru",
+        port: 465,
+        secure: true, // true for 465, false for other ports
         auth: {
-          user: "birji62598@gmail.com", // generated ethereal user
-          pass: "2587889e" // generated ethereal password
+          user: "hello@tviser.agency", // generated ethereal user
+          pass: "ilham564" // generated ethereal password
         }
       },
       template: {

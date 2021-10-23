@@ -8,6 +8,7 @@ import { AwsService } from "../aws/aws.service";
 import { ConfirmDto } from "../auth/dto/confirm.dto";
 import { RegistrationCustomerDto } from "../auth/dto/registration-customer.dto";
 import * as bcrypt from "bcrypt";
+import { ConfirmEmailDto } from "../auth/dto/confirm-email.dto";
 
 @Injectable()
 export class CustomerService {
@@ -51,7 +52,6 @@ export class CustomerService {
     const user = await this.customer.findOne(id);
     for (const [key, value] of Object.entries(user)) {
       if (value !== null) {
-        console.log(value);
         Object.assign(full, { [key]: value });
       }
     }
@@ -89,7 +89,7 @@ export class CustomerService {
 
   async findOne(nickname: string, password: string): Promise<Customer> {
     const user = await this.customer.createQueryBuilder("customer")
-      .addSelect(["customer.password", "customer.confirmed", "customer.banned"])
+      .addSelect(["customer.password", "customer.banned"])
       .where("customer.email = :nickname OR customer.phone = :nickname OR customer.login = :nickname", { nickname })
       .getOne();
 
@@ -120,12 +120,12 @@ export class CustomerService {
 
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<Customer> {
     let data = await this.customer.createQueryBuilder("customer")
-      .addSelect(["customer.confirmed"])
       .where("customer.email = :email OR customer.phone = :phone OR customer.login = :login", {
         email: registrationCustomerDto.email,
         phone: registrationCustomerDto.phone,
         login: registrationCustomerDto.login
       }).getOne();
+
 
     if (data)
       throw new HttpException({
@@ -137,7 +137,10 @@ export class CustomerService {
   }
 
   async confirmNumber(confirmDto: ConfirmDto): Promise<Customer> {
-    const user = await this.customer.createQueryBuilder("e").addSelect(["e.confirmation_phone"]).getOne();
+    const user = await this.customer.createQueryBuilder("c")
+      .where("c.id = :id", { id: confirmDto.user_id })
+      .addSelect(["c.confirmation_phone"])
+      .getOne();
 
     if (user.confirmation_phone !== confirmDto.value)
       throw new HttpException({
@@ -147,6 +150,23 @@ export class CustomerService {
 
     await this.customer.update(confirmDto.user_id, { confirmed_phone: true });
     return await this.customer.findOne(confirmDto.user_id);
+  }
+
+  async confirmEmail(confirmEmailDto: ConfirmEmailDto): Promise<Customer> {
+    const user = await this.customer.createQueryBuilder("c")
+      .where("c.id = :id", { id: confirmEmailDto.user_id })
+      .addSelect(["c.confirmation_email"])
+      .getOne();
+
+
+    if (user.confirmation_email !== confirmEmailDto.value)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Неверный код"
+      }, HttpStatus.CONFLICT);
+
+    await this.customer.update(user.id, { confirmed_email: true });
+    return await this.customer.findOne(confirmEmailDto.user_id);
   }
 
   async getTasksStatus(user): Promise<Customer> {
@@ -160,8 +180,12 @@ export class CustomerService {
     return data;
   }
 
-  async updateRefresh(user, token: string): Promise<UpdateResult> {
-    return await this.customer.update(user.id, { currentHashedRefreshToken: token });
+  async updateConfirmNumber(user, authCode: string): Promise<UpdateResult> {
+    return await this.customer.update(user, { confirmation_phone: authCode });
+  }
+
+  async updateConfirmEmail(user, authCode: string): Promise<UpdateResult> {
+    return await this.customer.update(user, { confirmation_email: authCode });
   }
 
 }

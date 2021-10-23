@@ -15,6 +15,10 @@ import { CreateContactDto } from "./dto/create-contact.dto";
 import { AwsService } from "../aws/aws.service";
 import { MailerService } from "@nestjs-modules/mailer";
 import { ConfirmPhoneDto } from "./dto/confirm-phone.dto";
+import { HttpService } from "@nestjs/axios";
+import { map } from "rxjs";
+import { ConfirmEmailRequestDto } from "./dto/confirm-email-request.dto";
+import { ConfirmEmailDto } from "./dto/confirm-email.dto";
 
 @Injectable()
 export class AuthService {
@@ -25,7 +29,8 @@ export class AuthService {
     private readonly admin: AdminService,
     private readonly aws: AwsService,
     @InjectRepository(Mail) private readonly contact: Repository<Mail>,
-    private readonly mailerService: MailerService
+    private readonly mailerService: MailerService,
+    private readonly httpService: HttpService
   ) {
   }
 
@@ -51,18 +56,53 @@ export class AuthService {
     return { id: user.id, role: Role.Customer };
   }
 
+  async confirmRequestNumber(confirmPhoneDto: ConfirmPhoneDto, role: Role): Promise<any> {
+    const random = Math.floor(100000 + Math.random() * 900000);
 
-  async confirmRequestNumber(confirmPhoneDto: ConfirmPhoneDto, user): Promise<any> {
+    if (role === Role.Executor)
+      await this.executor.updateConfirmNumber(confirmPhoneDto.user_id, random.toString());
 
-    console.log(user);
-    console.log(confirmPhoneDto);
+    if (role === Role.Executor)
+      await this.customer.updateConfirmNumber(confirmPhoneDto.user_id, random.toString());
+
+    return this.httpService.get(`https://sms.ru/sms/send?api_id=DE407681-AE64-289F-D589-F3FBCC9457C4&to=${confirmPhoneDto.phone.substring(1)}&msg=${random}&json=1`)
+      .pipe(
+        map(response => response.data)
+      );
   }
 
-  async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<any> {
-    const user = await this.executor.registrationExecutor(registrationExecutorDto);
-    return { id: user.id, role: Role.Executor };
+  async confirmRequestEmail(confirmEmailRequestDto: ConfirmEmailRequestDto, role: Role): Promise<any> {
+    const random = Math.floor(100000 + Math.random() * 900000);
+
+    if (role === Role.Executor)
+      await this.executor.updateConfirmEmail(confirmEmailRequestDto.user_id, random.toString());
+
+    if (role === Role.Executor)
+      await this.customer.updateConfirmEmail(confirmEmailRequestDto.user_id, random.toString());
+
+    return await this.mailerService.sendMail({
+      to: confirmEmailRequestDto.email,
+      from: "hello@tviser.agency",
+      subject: "Потвердите почту",
+      template: `${process.cwd()}/templates/confirmation`,
+      context: {
+        authCode: `${random}`,
+        email: confirmEmailRequestDto.email
+      }
+    });
   }
 
+  async confirmEmail(confirmEmailDto: ConfirmEmailDto, role: Role): Promise<any> {
+    let user: any = null;
+
+    if (role === Role.Customer)
+      user = await this.customer.confirmNumber(confirmEmailDto);
+
+    if (role === Role.Executor)
+      user = await this.executor.confirmEmail(confirmEmailDto);
+
+    return { ...user, role: role };
+  }
 
   async confirmNumber(confirmDto: ConfirmDto, role: Role): Promise<any> {
     let user: any = null;
@@ -76,12 +116,16 @@ export class AuthService {
     return { ...user, role: role };
   }
 
+  async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<any> {
+    const user = await this.executor.registrationExecutor(registrationExecutorDto);
+    return { id: user.id, role: Role.Executor };
+  }
+
   async signIn(signInDto: SignInDto, role: Role): Promise<any> {
     let user: any = null;
 
     if (role === Role.Customer)
       user = await this.customer.findOne(signInDto.nickname, signInDto.password);
-
 
     if (role === Role.Executor)
       user = await this.executor.findOne(signInDto.nickname, signInDto.password);

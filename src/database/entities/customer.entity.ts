@@ -110,13 +110,13 @@ export class Customer extends BaseEntity {
   })
   public currentHashedRefreshToken?: string;
 
-  @Column({ default: "123456", select: false })
+  @Column({ default: null, select: false })
   confirmation_email: string;
 
   @Column({ default: false })
   confirmed_email: Boolean;
 
-  @Column({ default: "123456", select: false })
+  @Column({ default: null, select: false })
   confirmation_phone: string;
 
   @Column({ default: false })
