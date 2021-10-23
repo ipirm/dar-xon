@@ -14,6 +14,7 @@ import { Repository } from "typeorm";
 import { CreateContactDto } from "./dto/create-contact.dto";
 import { AwsService } from "../aws/aws.service";
 import { MailerService } from "@nestjs-modules/mailer";
+import { ConfirmPhoneDto } from "./dto/confirm-phone.dto";
 
 @Injectable()
 export class AuthService {
@@ -47,17 +48,21 @@ export class AuthService {
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<any> {
     const user = await this.customer.registrationCustomer(registrationCustomerDto);
 
-    if (registrationCustomerDto.email) {
-
-    }
-
     return { id: user.id, role: Role.Customer };
+  }
+
+
+  async confirmRequestNumber(confirmPhoneDto: ConfirmPhoneDto, user): Promise<any> {
+
+    console.log(user);
+    console.log(confirmPhoneDto);
   }
 
   async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<any> {
     const user = await this.executor.registrationExecutor(registrationExecutorDto);
     return { id: user.id, role: Role.Executor };
   }
+
 
   async confirmNumber(confirmDto: ConfirmDto, role: Role): Promise<any> {
     let user: any = null;

@@ -32,6 +32,7 @@ export class ExecutorService {
     return await this.executor.save(this.executor.create(createExecutorDto));
   }
 
+
   async getOne(id: number): Promise<Executor> {
     let full: object = {};
     const user = await this.executor.findOne(id);

@@ -11,6 +11,7 @@ import { RegistrationExecutorDto } from "./dto/registration-executor.dto";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { CreateContactDto } from "./dto/create-contact.dto";
 import { Mail } from "../database/entities/mail.entity";
+import { ConfirmPhoneDto } from "./dto/confirm-phone.dto";
 
 
 @ApiTags("Auth")
@@ -37,7 +38,20 @@ export class AuthController {
     return this.auth.registrationExecutor(registrationExecutorDto);
   }
 
-  @ApiOperation({ summary: "Потвердить номер или почту" })
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Запросить потвердить номера" })
+  @ApiCreatedResponse({ type: ConfirmPhoneDto })
+  @Post("request-confirm")
+  confirmRequestNumber(
+    @Body() confirmPhoneDto: ConfirmPhoneDto,
+    @UserDecorator() user: any
+  ): Promise<any> {
+    return this.auth.confirmRequestNumber(confirmPhoneDto, user);
+  }
+
+  @ApiOperation({ summary: "Потвердить номер" })
   @ApiCreatedResponse({ type: ConfirmDto })
   @ApiParam({ name: "role", enum: Role })
   @Post("confirm/:role")
