@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsString } from "class-validator";
+import { IsDate, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 
@@ -21,7 +21,7 @@ export class CreatePortfolioDto {
   site: string;
 
   @IsString()
-  @ApiProperty({ example: true, description: "Спонсоры", default: false })
+  @ApiProperty({ example: true, description: "Спонсоры", default: "false", required: false })
   sponsors: boolean;
 
   @IsDate()

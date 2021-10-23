@@ -58,9 +58,10 @@ export class PortfolioService {
   }
 
   async findOne(id: number, userId: number): Promise<Portfolio> {
+    console.log(id)
+    console.log(userId)
     const data = this.portfolio.createQueryBuilder("portfolio")
       .leftJoinAndSelect("portfolio.executor", "executor")
-      .andWhere("portfolio.id = :id", { id: id })
       .leftJoinAndSelect("portfolio.category", "category")
       .leftJoinAndSelect("category.parent", "parent");
 
@@ -68,7 +69,7 @@ export class PortfolioService {
       data.andWhere("executor.id = :id", { id: userId });
 
     if (id)
-      data.andWhere("executor.id = :id", { id: id });
+      data.andWhere("portfolio.id = :id", { id: id });
 
     return await data.getOne();
   }

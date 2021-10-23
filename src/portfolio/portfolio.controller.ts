@@ -88,9 +88,9 @@ export class PortfolioController {
     return this.portfolio.savePortfolio(createPortfolioDto, files, user);
   }
 
-  @Get(":id")
+  @Get("/get-one")
   @ApiOperation({ summary: "Получить портфолио id" })
-  @ApiImplicitParam({
+  @ApiImplicitQuery({
     name: "id",
     required: true,
     type: Number
@@ -101,7 +101,7 @@ export class PortfolioController {
     type: Number
   })
   getOne(
-    @Param("id") id: number,
+    @Query("id") id: number,
     @Query("user_id") userId: number
   ): Promise<Portfolio> {
     return this.portfolio.findOne(id,userId);
