@@ -85,13 +85,13 @@ export class Executor extends BaseEntity {
   @Column({ default: "123456", select: false })
   confirmation_email: string;
 
-  @Column({ default: false, select: false })
+  @Column({ default: false })
   confirmed_email: Boolean;
 
   @Column({ default: "123456", select: false })
   confirmation_phone: string;
 
-  @Column({ default: false, select: false })
+  @Column({ default: false })
   confirmed_phone: Boolean;
 
   @OneToMany(type => TaskResponses, t => t.executor, { cascade: true })

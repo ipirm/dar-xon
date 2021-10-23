@@ -92,7 +92,7 @@ export class PortfolioController {
   @ApiOperation({ summary: "Получить портфолио id" })
   @ApiImplicitQuery({
     name: "id",
-    required: true,
+    required: false,
     type: Number
   })
   @ApiImplicitQuery({
