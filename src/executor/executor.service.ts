@@ -94,7 +94,6 @@ export class ExecutorService {
 
   async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<Executor> {
     let data = await this.executor.createQueryBuilder("executor")
-      .addSelect(["executor.confirmed"])
       .where("executor.phone = :phone OR executor.login = :login", {
         phone: registrationExecutorDto.phone,
         login: registrationExecutorDto.login
