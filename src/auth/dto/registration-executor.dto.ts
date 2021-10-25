@@ -8,8 +8,9 @@ export class RegistrationExecutorDto {
   phone: string;
 
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
-  @Matches(/^(?=.*\d)(?=.*[A-Z])[A-Za-z\d@$!%*#?&\/\ ].{6,}$/g, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
+  @IsString()
   password: string;
+  // @Matches(/^(?=.*\d)(?=.*[A-Z])[A-Za-z\d@$!%*#?&\/\ ].{6,}$/g, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
 
   @ApiProperty({ example: "w33haaa", description: "Логин", required: false })
   @IsString()

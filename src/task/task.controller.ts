@@ -311,6 +311,7 @@ export class TaskController {
     @Query("task_type") taskType: string,
     @Query("participants_count") participantsCount: Boolean = false
   ): Promise<Pagination<Task>> {
+    console.log(taskType)
     return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
   }
 

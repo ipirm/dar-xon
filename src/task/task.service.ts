@@ -70,6 +70,7 @@ export class TaskService {
       data.andWhere("task.participants > 1");
     }
 
+
     if (taskType) {
       data.andWhere("task_type.id IN (:...tt)", { tt: [...taskType.split(",")] });
     }
@@ -217,11 +218,11 @@ export class TaskService {
         error: "Вы не являетесь создателем данной задачи"
       }, HttpStatus.FORBIDDEN);
 
-    if (!(task.participants >= startTaskDto.executors.length))
-      throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
-        error: `У задачи максимально ${task.participants} исполнителя`
-      }, HttpStatus.FORBIDDEN);
+    // if (!(task.participants >= startTaskDto.executors.length))
+    //   throw new HttpException({
+    //     status: HttpStatus.FORBIDDEN,
+    //     error: `У задачи максимально ${task.participants} исполнителя`
+    //   }, HttpStatus.FORBIDDEN);
 
     const executors = await this.executor.findByIds(startTaskDto.executors);
 
@@ -306,7 +307,6 @@ export class TaskService {
         "parent1.name",
         "category.id",
         "category.name",
-        "executors.id",
         "executor1.id",
         "criteria.id",
         "criteria.name",
@@ -324,7 +324,7 @@ export class TaskService {
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
       .leftJoin("parent.parent", "parent1")
-      .leftJoin("task.executors", "executors")
+      .leftJoin("task.executors", "executor")
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor1")
       .leftJoin("task.criteria", "criteria")
@@ -356,7 +356,7 @@ export class TaskService {
 
     if (state === ExecutorTypeTaskEnum.Execution) {
       data.andWhere("task.status = :started", { started: "started" });
-      data.andWhere("executors.id IN (:...executor)", { executor: [user.id] });
+      data.andWhere("executor.id IN (:...executor)", { executor: [user.id] });
     }
 
     if (state === ExecutorTypeTaskEnum.Сonsideration) {
