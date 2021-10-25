@@ -40,6 +40,14 @@ export class CreateExecutorDto {
   @IsString()
   passport_number: string;
 
+  @ApiProperty({ example: "AZE", description: "Сайт", required: false })
+  @IsString()
+  site: string;
+
+  @ApiProperty({ example: "ilham.pirm@gmail.com", description: "почта", required: false })
+  @IsString()
+  email: string;
+
   @ApiProperty({ example: "AZE", description: "Серия паспорта", required: false })
   @IsString()
   passport_issuer: string;

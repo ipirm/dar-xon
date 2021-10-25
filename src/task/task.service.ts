@@ -115,8 +115,10 @@ export class TaskService {
       Object.assign(createTaskDto, { files: images });
     }
     Object.assign(createTaskDto, { created_by: user.id });
-    const criteria = await this.criteria.findByIds(createTaskDto.criteria.split(","));
-    Object.assign(createTaskDto, { criteria: criteria });
+    if (createTaskDto.criteria) {
+      const criteria = await this.criteria.findByIds(createTaskDto.criteria.split(","));
+      Object.assign(createTaskDto, { criteria: criteria });
+    }
     return await this.task.save(this.task.create(createTaskDto));
   }
 
@@ -416,7 +418,8 @@ export class TaskService {
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor")
       .leftJoin("task.task_type", "task_type")
-      .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
+      .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
+      .andWhere("created_by.id = :created_by", { created_by: user.id });
 
     if (participantsCount) {
       data.andWhere("task.participants > 1");
@@ -433,8 +436,8 @@ export class TaskService {
     if (criteria) {
       data.andWhere("criteria.id IN (:...ids)", { ids: [...criteria.split(",")] });
     }
+
     if (cat) {
-      console.log(cat);
       data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat) OR parent1.id IN (:...cat))", { cat: [...cat.split(",")] });
     }
 
@@ -445,32 +448,22 @@ export class TaskService {
 
     if (state === CustomerTypeTaskEnum.Execution) {
       data.andWhere("task.status = :started", { started: "started" });
-      data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
 
     if (state === CustomerTypeTaskEnum.Archive) {
       data.andWhere("task.status = :archive", { archive: "finished" });
-      data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
 
     if (state === CustomerTypeTaskEnum.Consideration) {
-      data.andWhere("created_by.id = :created_by", { created_by: user.id });
       data.andWhere("task.status = :started", { started: "created" });
     }
 
     if (state === CustomerTypeTaskEnum.Current) {
       data.andWhere("(task.status = :started OR task.status = :created)", { started: "started", created: "created" });
-      data.andWhere("created_by.id = :created_by", { created_by: user.id });
     }
-
-    if (state === CustomerTypeTaskEnum.All) {
-      data.andWhere("created_by.id = :created_by", { created_by: user.id });
-    }
-
 
     return paginate(data, { page, limit });
-
   }
 
   async deleteTask(id: number): Promise<DeleteResult> {

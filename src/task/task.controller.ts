@@ -98,8 +98,7 @@ export class TaskController {
   @ApiQuery({
     name: "participants_count",
     required: false,
-    type: Boolean,
-    example: false
+    type: Boolean
   })
   @ApiOperation({ summary: "Получить все задачи" })
   @Get("")
@@ -112,7 +111,7 @@ export class TaskController {
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
     @Query("task_type") taskType: string,
-    @Query("participants_count") participantsCount: Boolean = false
+    @Query("participants_count") participantsCount: Boolean
   ): Promise<Pagination<Task>> {
     return this.task.getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount);
   }
@@ -217,8 +216,7 @@ export class TaskController {
   @ApiQuery({
     name: "participants_count",
     required: false,
-    type: Boolean,
-    example: false
+    type: Boolean
   })
   @ApiBearerAuth()
   @hasRoles(Role.Executor)
@@ -235,7 +233,7 @@ export class TaskController {
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
     @Query("task_type") taskType: string,
-    @Query("participants_count") participantsCount: Boolean = false
+    @Query("participants_count") participantsCount: Boolean
   ): Promise<Pagination<Task>> {
     return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
   }
@@ -291,8 +289,7 @@ export class TaskController {
   @ApiQuery({
     name: "participants_count",
     required: false,
-    type: Boolean,
-    example: false
+    type: Boolean
   })
   @ApiBearerAuth()
   @hasRoles(Role.Customer)
@@ -309,9 +306,8 @@ export class TaskController {
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
     @Query("task_type") taskType: string,
-    @Query("participants_count") participantsCount: Boolean = false
+    @Query("participants_count") participantsCount: Boolean
   ): Promise<Pagination<Task>> {
-    console.log(taskType)
     return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
   }
 
