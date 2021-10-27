@@ -15,4 +15,9 @@ export class RegistrationExecutorDto {
   @ApiProperty({ example: "w33haaa", description: "Логин", required: false })
   @IsString()
   login: string;
+
+  @ApiProperty({ example: "ilham.pirm@gmail.com", description: "Мейл", required: false })
+  @IsString()
+  email: string;
+
 }

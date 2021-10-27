@@ -24,15 +24,55 @@ export class ExecutorService {
   }
 
   async saveExecutor(createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<Executor> {
+    let email = false;
+    let phone = false;
+
+    let data = await this.executor.createQueryBuilder("executor")
+      .where("executor.phone = :phone OR executor.login = :login", {
+        phone: createExecutorDto.phone,
+        login: createExecutorDto.login,
+        email: createExecutorDto.email
+      }).getOne();
+
+    if (data) {
+      if (data.confirmed_email) {
+        email = true;
+      } else {
+        await this.executor.update(data.id, { email: null });
+      }
+      if (data.confirmed_phone) {
+        phone = true;
+      } else {
+        await this.executor.update(data.id, { phone: null });
+      }
+    }
+    if (email)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная почта уже зарегестрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (phone)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный номер уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
+    if (data?.login === createExecutorDto.login)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный логин уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
     if (files) {
       for (const [key, value] of Object.entries(files)) {
         const file = await this.aws.uploadPublicFile(value[0]);
         Object.assign(createExecutorDto, { [key]: { url: file.url, name: file.key } });
       }
     }
+
     return await this.executor.save(this.executor.create(createExecutorDto));
   }
-
 
   async getOne(id: number): Promise<Executor> {
     let full: object = {};
@@ -47,12 +87,66 @@ export class ExecutorService {
   }
 
   async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<UpdateResult> {
+    let email = false;
+    let phone = false;
+    let login = false;
+
+    if (createExecutorDto.email) {
+      const data = await this.executor.findOne({ where: { email: createExecutorDto.email } });
+      if (data) {
+        if (data.confirmed_email) {
+          email = true;
+        } else {
+          await this.executor.update(data.id, { email: null });
+          await this.executor.update(id, { confirmed_email: false });
+        }
+      }
+    }
+
+    if (createExecutorDto.phone) {
+      const data = await this.executor.findOne({ where: { phone: createExecutorDto.phone } });
+      if (data) {
+        if (data.confirmed_phone) {
+          phone = true;
+        } else {
+          await this.executor.update(data.id, { phone: null });
+          await this.executor.update(id, { confirmed_phone: false });
+        }
+      }
+    }
+
+    if (createExecutorDto.login) {
+      const data = await this.executor.findOne({ where: { login: createExecutorDto.login } });
+      if (data) {
+        login = true;
+      }
+    }
+
+    if (email)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная почта уже зарегестрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (phone)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный номер уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
+    if (login)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный логин уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
     if (files) {
       for (const [key, value] of Object.entries(files)) {
         const file = await this.aws.uploadPublicFile(value[0]);
         Object.assign(createExecutorDto, { [key]: { name: file.key, url: file.url } });
       }
     }
+
     return await this.executor.update(id, this.executor.create(createExecutorDto));
   }
 
@@ -93,16 +187,45 @@ export class ExecutorService {
   }
 
   async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<Executor> {
+    let email = false;
+    let phone = false;
+
     let data = await this.executor.createQueryBuilder("executor")
       .where("executor.phone = :phone OR executor.login = :login", {
         phone: registrationExecutorDto.phone,
-        login: registrationExecutorDto.login
+        login: registrationExecutorDto.login,
+        email: registrationExecutorDto.email
       }).getOne();
 
-    if (data)
+    if (data) {
+      if (data.confirmation_email) {
+        email = true;
+      } else {
+        await this.executor.update(data.id, { email: null });
+      }
+      if (data.confirmation_phone) {
+        phone = true;
+      } else {
+        await this.executor.update(data.id, { phone: null });
+      }
+    }
+
+    if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный пользователь уже зарегестрирован"
+        error: "Данная почта уже зарегестрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (phone)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный номер уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
+    if (data?.login === registrationExecutorDto.login)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный логин уже зарегестрирован"
       }, HttpStatus.CONFLICT);
 
     return await this.executor.save(this.executor.create(registrationExecutorDto));
@@ -141,8 +264,7 @@ export class ExecutorService {
     await this.executor.update(user.id, { confirmed_email: true });
     return await this.executor.findOne(confirmEmailDto.user_id);
   }
-
-
+  
   async getTasksStatus(user): Promise<Executor> {
     const data = await this.executor.createQueryBuilder("c")
       .select(["c.id"])

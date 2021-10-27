@@ -24,6 +24,47 @@ export class CustomerService {
   }
 
   async saveCustomer(createCustomerDto: CreateCustomerDto, files: Express.Multer.File[] = undefined): Promise<Customer> {
+    let email = false;
+    let phone = false;
+
+    let data = await this.customer.createQueryBuilder("customer")
+      .where("customer.email = :email OR customer.phone = :phone OR customer.login = :login", {
+        email: createCustomerDto.email,
+        phone: createCustomerDto.phone,
+        login: createCustomerDto.login
+      }).getOne();
+
+    if (data) {
+      if (data.confirmed_email) {
+        email = true;
+      } else {
+        await this.customer.update(data.id, { email: null });
+      }
+      if (data.confirmed_phone) {
+        phone = true;
+      } else {
+        await this.customer.update(data.id, { phone: null });
+      }
+    }
+
+    if (email)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная почта уже зарегестрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (phone)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный номер уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
+    if (data?.login === createCustomerDto.login)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный логин уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
     if (files) {
       for (const [key, value] of Object.entries(files)) {
         if (key === "avatar") {
@@ -44,6 +85,7 @@ export class CustomerService {
         }
       }
     }
+
     return await this.customer.save(this.customer.create(createCustomerDto));
   }
 
@@ -60,11 +102,63 @@ export class CustomerService {
   }
 
   async updateCustomer(id: number, createCustomerDto: CreateCustomerDto, files: Express.Multer.File[]): Promise<UpdateResult> {
+    let email = false;
+    let phone = false;
+    let login = false;
+
+    if (createCustomerDto.email) {
+      const data = await this.customer.findOne({ where: { email: createCustomerDto.email } });
+      if (data) {
+        if (data.confirmed_email) {
+          email = true;
+        } else {
+          await this.customer.update(data.id, { email: null });
+          await this.customer.update(id, { confirmed_email: false });
+        }
+      }
+    }
+
+    if (createCustomerDto.phone) {
+      const data = await this.customer.findOne({ where: { phone: createCustomerDto.phone } });
+      if (data) {
+        if (data.confirmed_phone) {
+          phone = true;
+        } else {
+          await this.customer.update(data.id, { phone: null });
+          await this.customer.update(id, { confirmed_phone: false });
+        }
+      }
+    }
+
+    if (createCustomerDto.login) {
+      const data = await this.customer.findOne({ where: { login: createCustomerDto.login } });
+      if (data) {
+        login = true;
+      }
+    }
+
+    if (email)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная почта уже зарегестрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (phone)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная почта уже зарегестрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (login)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный логин уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
     if (files) {
       for (const [key, value] of Object.entries(files)) {
         if (key === "avatar") {
           const file = await this.aws.uploadPublicFile(value[0]);
-          console.log(file);
           Object.assign(createCustomerDto, { avatar: { name: file.key, url: file.url } });
         } else {
           const uploadedFiles = [];
@@ -80,6 +174,7 @@ export class CustomerService {
         }
       }
     }
+
     return await this.customer.update(id, this.customer.create(createCustomerDto));
   }
 
@@ -119,6 +214,9 @@ export class CustomerService {
   }
 
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<Customer> {
+    let email = false;
+    let phone = false;
+
     let data = await this.customer.createQueryBuilder("customer")
       .where("customer.email = :email OR customer.phone = :phone OR customer.login = :login", {
         email: registrationCustomerDto.email,
@@ -126,11 +224,35 @@ export class CustomerService {
         login: registrationCustomerDto.login
       }).getOne();
 
+    if (data) {
+      if (data.confirmed_email) {
+        email = true;
+      } else {
+        await this.customer.update(data.id, { email: null });
+      }
+      if (data.confirmed_phone) {
+        phone = true;
+      } else {
+        await this.customer.update(data.id, { phone: null });
+      }
+    }
 
-    if (data)
+    if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный пользователь уже зарегестрирован"
+        error: "Данная почта уже зарегестрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (phone)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный номер уже зарегестрирован"
+      }, HttpStatus.CONFLICT);
+
+    if (data?.login === registrationCustomerDto.login)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный логин уже зарегестрирован"
       }, HttpStatus.CONFLICT);
 
     return await this.customer.save(this.customer.create(registrationCustomerDto));
