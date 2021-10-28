@@ -65,7 +65,7 @@ export class Executor extends BaseEntity {
   @Column({ type: "numeric", default: 5 })
   rating: number;
 
-  @Column({ select: false, nullable: true })
+  @Column({ select: true, nullable: true })
   password: string;
 
   @BeforeInsert()
@@ -135,5 +135,8 @@ export class Executor extends BaseEntity {
 
   @OneToMany(() => MessagesReadExecutor, c => c.executor)
   readBy?: MessagesReadExecutor[];
+
+  @Column({ default: null, select: false })
+  password_code: number;
 
 }

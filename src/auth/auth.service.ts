@@ -19,6 +19,10 @@ import { HttpService } from "@nestjs/axios";
 import { map } from "rxjs";
 import { ConfirmEmailRequestDto } from "./dto/confirm-email-request.dto";
 import { ConfirmEmailDto } from "./dto/confirm-email.dto";
+import { EmailRequestDto } from "./dto/email-request.dto";
+import { PasswordDto } from "./dto/password.dto";
+import { PhoneRequestDto } from "./dto/phone-request.dto";
+import { PasswordPhoneDto } from "./dto/password-phone.dto";
 
 @Injectable()
 export class AuthService {
@@ -52,7 +56,6 @@ export class AuthService {
 
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<any> {
     const user = await this.customer.registrationCustomer(registrationCustomerDto);
-
     return { id: user.id, role: Role.Customer };
   }
 
@@ -65,7 +68,7 @@ export class AuthService {
     if (role === Role.Executor)
       await this.customer.updateConfirmNumber(confirmPhoneDto.user_id, random.toString());
 
-    return this.httpService.get(`https://sms.ru/sms/send?api_id=DE407681-AE64-289F-D589-F3FBCC9457C4&to=${confirmPhoneDto.phone.substring(1)}&msg=${random}&json=1`)
+    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${confirmPhoneDto.phone.substring(1)}&msg=${random}&json=1`)
       .pipe(
         map(response => response.data)
       );
@@ -96,7 +99,7 @@ export class AuthService {
     let user: any = null;
 
     if (role === Role.Customer)
-      user = await this.customer.confirmNumber(confirmEmailDto);
+      user = await this.customer.confirmEmail(confirmEmailDto);
 
     if (role === Role.Executor)
       user = await this.executor.confirmEmail(confirmEmailDto);
@@ -164,6 +167,70 @@ export class AuthService {
       Object.assign(createContactDto, { executor: user.id });
     }
     return await this.contact.save(this.contact.create(createContactDto));
+  }
+
+  async requestNewPassword(emailRequestDto: EmailRequestDto, role: Role): Promise<any> {
+    const random = Math.floor(100000 + Math.random() * 900000);
+    let user;
+
+    if (role === Role.Customer)
+      user = await this.customer.requestNewPassword(emailRequestDto, random);
+
+    if (role === Role.Executor)
+      user = await this.executor.requestNewPassword(emailRequestDto, random);
+
+
+    await this.mailerService.sendMail({
+      to: emailRequestDto.email,
+      from: "hello@tviser.agency",
+      subject: "Ваш код для подтверждения почты",
+      template: `${process.cwd()}/templates/confirmation`,
+      context: {
+        authCode: `${random}`,
+        email: emailRequestDto.email
+      }
+    });
+
+    return user;
+  }
+
+  async confirmNewPassword(passwordDto: PasswordDto, role: Role): Promise<any> {
+    let user;
+
+    if (role === Role.Customer)
+      user = await this.customer.confirmNewPassword(passwordDto);
+
+    if (role === Role.Executor)
+      user = await this.executor.confirmNewPassword(passwordDto);
+
+    return user;
+  }
+
+  async requestNewPasswordPhone(phoneRequestDto: PhoneRequestDto, role: Role): Promise<any> {
+    const random = Math.floor(100000 + Math.random() * 900000);
+
+    if (role === Role.Customer)
+      await this.customer.requestNewPasswordPhone(phoneRequestDto, random);
+
+    if (role === Role.Executor)
+      await this.executor.requestNewPasswordPhone(phoneRequestDto, random);
+
+    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${phoneRequestDto.phone.substring(1)}&msg=${random}&json=1`)
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  async confirmNewPasswordPhone(passwordPhoneDto: PasswordPhoneDto, role: Role): Promise<any> {
+    let user;
+
+    if (role === Role.Customer)
+      user = await this.customer.confirmNewPasswordPhone(passwordPhoneDto);
+
+    if (role === Role.Executor)
+      user = await this.executor.confirmNewPasswordPhone(passwordPhoneDto);
+
+    return user;
   }
 
 }

@@ -15,6 +15,10 @@ import { ConfirmPhoneDto } from "./dto/confirm-phone.dto";
 import { RateLimit } from "nestjs-rate-limiter";
 import { ConfirmEmailRequestDto } from "./dto/confirm-email-request.dto";
 import { ConfirmEmailDto } from "./dto/confirm-email.dto";
+import { EmailRequestDto } from "./dto/email-request.dto";
+import { PasswordDto } from "./dto/password.dto";
+import { PhoneRequestDto } from "./dto/phone-request.dto";
+import { PasswordPhoneDto } from "./dto/password-phone.dto";
 
 
 @ApiTags("Auth")
@@ -143,5 +147,49 @@ export class AuthController {
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<Mail> {
     return this.auth.contactUs(createContactDto, user, files);
+  }
+
+  @ApiOperation({ summary: "Запросить сброс пароля почта" })
+  @ApiCreatedResponse({ type: EmailRequestDto })
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @Post("request-new-password-email/:role")
+  requestNewPasswordEmail(
+    @Body() emailRequestDto: EmailRequestDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.requestNewPassword(emailRequestDto, role);
+  }
+
+  @ApiOperation({ summary: "Сбросить пароль почта" })
+  @ApiCreatedResponse({ type: PasswordDto })
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @Post("confirm-new-password-email/:role")
+  confirmNewPassword(
+    @Body() passwordDto: PasswordDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.confirmNewPassword(passwordDto, role);
+  }
+
+  @ApiOperation({ summary: "Запросить сброс пароля номер" })
+  @ApiCreatedResponse({ type: PhoneRequestDto })
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @Post("request-new-password-phone/:role")
+  requestNewPasswordPhone(
+    @Body() phoneRequestDto: PhoneRequestDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.requestNewPasswordPhone(phoneRequestDto, role);
+  }
+
+  @ApiOperation({ summary: "Сбросить пароль номер" })
+  @ApiCreatedResponse({ type: PasswordPhoneDto })
+  @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @Post("confirm-new-password-phone/:role")
+  confirmNewPasswordPhone(
+    @Body() passwordPhoneDto: PasswordPhoneDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.confirmNewPasswordPhone(passwordPhoneDto, role);
   }
 }

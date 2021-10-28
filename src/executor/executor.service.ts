@@ -9,6 +9,10 @@ import * as bcrypt from "bcrypt";
 import { ConfirmDto } from "../auth/dto/confirm.dto";
 import { RegistrationExecutorDto } from "../auth/dto/registration-executor.dto";
 import { ConfirmEmailDto } from "../auth/dto/confirm-email.dto";
+import { EmailRequestDto } from "../auth/dto/email-request.dto";
+import { PasswordDto } from "../auth/dto/password.dto";
+import { PhoneRequestDto } from "../auth/dto/phone-request.dto";
+import { PasswordPhoneDto } from "../auth/dto/password-phone.dto";
 
 @Injectable()
 export class ExecutorService {
@@ -264,7 +268,7 @@ export class ExecutorService {
     await this.executor.update(user.id, { confirmed_email: true });
     return await this.executor.findOne(confirmEmailDto.user_id);
   }
-  
+
   async getTasksStatus(user): Promise<Executor> {
     const data = await this.executor.createQueryBuilder("c")
       .select(["c.id"])
@@ -283,5 +287,100 @@ export class ExecutorService {
 
   async updateConfirmEmail(user, authCode: string): Promise<UpdateResult> {
     return await this.executor.update(user, { confirmation_email: authCode });
+  }
+
+  async requestNewPassword(emailRequestDto: EmailRequestDto, emailCode: number): Promise<any> {
+    const user = await this.executor.createQueryBuilder("c")
+      .where("c.email = :email", { email: emailRequestDto.email })
+      .getOne();
+
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Пользователь не найден"
+      }, HttpStatus.CONFLICT);
+
+    if (!user.confirmed_email)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Почта не подтверждена"
+      }, HttpStatus.CONFLICT);
+
+    await this.executor.update(user.id, { password_code: emailCode });
+
+    return {
+      status: HttpStatus.OK,
+      message: `Код выслан на почту ${user.email}`
+    };
+  }
+
+  async confirmNewPassword(passwordDto: PasswordDto): Promise<any> {
+    const user = await this.executor.createQueryBuilder("c")
+      .where("c.email = :email", { email: passwordDto.email })
+      .addSelect(["c.password_code"])
+      .getOne();
+
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Пользователь не найден"
+      }, HttpStatus.CONFLICT);
+
+    if (user.password_code !== passwordDto.code)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Неверный код"
+      }, HttpStatus.CONFLICT);
+
+    const pass = await bcrypt.hashSync(passwordDto.password, bcrypt.genSaltSync(10));
+    await this.executor.update(user.id, { password: pass });
+
+    return {
+      status: HttpStatus.OK,
+      message: `Пароль для пользователя ${user.email} изменен`
+    };
+  }
+
+  async requestNewPasswordPhone(phoneRequestDto: PhoneRequestDto, phoneCode: number): Promise<any> {
+    const user = await this.executor.createQueryBuilder("c")
+      .where("c.phone = :phone", { phone: phoneRequestDto.phone })
+      .getOne();
+
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Пользователь не найден"
+      }, HttpStatus.CONFLICT);
+
+    await this.executor.update(user.id, { password_code: phoneCode });
+
+  }
+
+  async confirmNewPasswordPhone(passwordPhoneDto: PasswordPhoneDto): Promise<any> {
+    const user = await this.executor.createQueryBuilder("c")
+      .where("c.phone = :phone", { phone: passwordPhoneDto.phone })
+      .addSelect(["c.password_code"])
+      .getOne();
+
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Пользователь не найден"
+      }, HttpStatus.CONFLICT);
+
+    if (user.password_code !== passwordPhoneDto.code)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Неверный код"
+      }, HttpStatus.CONFLICT);
+
+
+    const pass = await bcrypt.hashSync(passwordPhoneDto.password, bcrypt.genSaltSync(10));
+    await this.executor.update(user.id, { password: pass });
+
+    return {
+      status: HttpStatus.OK,
+      message: `Пароль для пользователя ${user.phone} изменен`
+    };
   }
 }

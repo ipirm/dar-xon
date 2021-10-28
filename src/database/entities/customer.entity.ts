@@ -148,5 +148,8 @@ export class Customer extends BaseEntity {
 
   @OneToMany(type => ChatRoom, c => c.customer)
   chats: ChatRoom[];
+
+  @Column({ default: null, select: false })
+  password_code: number;
 }
 
