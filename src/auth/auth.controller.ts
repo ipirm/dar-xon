@@ -129,7 +129,7 @@ export class AuthController {
   @ApiCreatedResponse({ type: SignInDto })
   @ApiParam({ name: "role", enum: Role })
   @Post("login/:role")
-  @Recaptcha()
+  @Recaptcha({ action: 'SignIn'})
   signIn(
     @Body() signInDto: SignInDto,
     @Param("role") role: Role = Role.Customer
