@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class ConfirmEmailDto {
@@ -7,7 +7,7 @@ export class ConfirmEmailDto {
   @IsString()
   user_id: string;
 
-  @ApiProperty({ example: "123456", description: "Код", required: false })
-  @IsString()
-  value: string;
+  @ApiProperty({ example: 123456, description: "Код", required: false })
+  @IsNumber()
+  value: number;
 }

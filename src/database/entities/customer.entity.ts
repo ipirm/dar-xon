@@ -54,8 +54,6 @@ export class Customer extends BaseEntity {
   @Column({ nullable: true })
   company_real_address: string;
 
-
-
   @Column({ nullable: true })
   position: string;
 
@@ -110,14 +108,14 @@ export class Customer extends BaseEntity {
   })
   public currentHashedRefreshToken?: string;
 
-  @Column({ default: null, select: false })
-  confirmation_email: string;
+  @Column({ default: 0, select: false })
+  confirmation_email: number;
 
   @Column({ default: false })
   confirmed_email: Boolean;
 
-  @Column({ default: null, select: false })
-  confirmation_phone: string;
+  @Column({ default: 0, select: false })
+  confirmation_phone: number;
 
   @Column({ default: false })
   confirmed_phone: Boolean;

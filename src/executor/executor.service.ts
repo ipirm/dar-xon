@@ -288,11 +288,11 @@ export class ExecutorService {
     return data;
   }
 
-  async updateConfirmNumber(user, authCode: string): Promise<UpdateResult> {
+  async updateConfirmNumber(user, authCode: number): Promise<UpdateResult> {
     return await this.executor.update(user, { confirmation_phone: authCode });
   }
 
-  async updateConfirmEmail(user, authCode: string): Promise<UpdateResult> {
+  async updateConfirmEmail(user, authCode: number): Promise<UpdateResult> {
     return await this.executor.update(user, { confirmation_email: authCode });
   }
 

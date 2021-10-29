@@ -82,14 +82,14 @@ export class Executor extends BaseEntity {
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
 
-  @Column({ default: null, select: false })
-  confirmation_email: string;
+  @Column({ default: 0, select: false })
+  confirmation_email: number;
 
   @Column({ default: false })
   confirmed_email: Boolean;
 
-  @Column({ default: null, select: false })
-  confirmation_phone: string;
+  @Column({ default: 0, select: false })
+  confirmation_phone: number;
 
   @Column({ default: false })
   confirmed_phone: Boolean;

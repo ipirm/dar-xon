@@ -19,8 +19,11 @@ import { ReviewModule } from "./review/review.module";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { RateLimiterModule } from "nestjs-rate-limiter";
+import { GoogleRecaptchaModule } from "@nestlab/google-recaptcha";
+import { IncomingMessage } from "http";
 
-console.log(process.cwd())
+console.log(process.cwd());
+
 @Module({
   imports: [
     RateLimiterModule,
@@ -45,6 +48,13 @@ console.log(process.cwd())
           strict: true
         }
       }
+    }),
+    GoogleRecaptchaModule.forRoot({
+      secretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
+      response: (req: IncomingMessage) => (req.headers.recaptcha || "").toString(),
+      skipIf: process.env.NODE_ENV !== "production",
+      actions: ["SignUp", "SignIn"],
+      score: 0.8
     }),
     TypeOrmModule.forRoot(ormConfig),
     AuthModule,

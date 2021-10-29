@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { config } from "aws-sdk";
 import { ValidationPipe } from "@nestjs/common";
+import { GoogleRecaptchaFilter } from "./filters/google.exception";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,7 +29,7 @@ async function bootstrap() {
   }));
   // app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();
-
+  // app.useGlobalFilters( new GoogleRecaptchaFilter())
 
   SwaggerModule.setup("api", app, document);
   const port = process.env.PORT || 3000;

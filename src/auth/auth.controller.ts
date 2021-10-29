@@ -20,6 +20,7 @@ import { PasswordDto } from "./dto/password.dto";
 import { PhoneRequestDto } from "./dto/phone-request.dto";
 import { PasswordPhoneDto } from "./dto/password-phone.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
+import { Recaptcha } from "@nestlab/google-recaptcha";
 
 
 @ApiTags("Auth")
@@ -128,6 +129,7 @@ export class AuthController {
   @ApiCreatedResponse({ type: SignInDto })
   @ApiParam({ name: "role", enum: Role })
   @Post("login/:role")
+  @Recaptcha()
   signIn(
     @Body() signInDto: SignInDto,
     @Param("role") role: Role = Role.Customer
