@@ -121,7 +121,7 @@ export class AdminService {
 
   async findOneSign(nickname: string, password: string): Promise<Admin> {
     const user = await this.admin.createQueryBuilder("a")
-      .addSelect(["a.password"])
+      .addSelect(["a.password", "a.currentHashedRefreshToken"])
       .where("a.email = :nickname", { nickname })
       .getOne();
 
@@ -139,13 +139,40 @@ export class AdminService {
         error: "Неверный пароль"
       }, HttpStatus.FORBIDDEN);
     }
+
+    let tokenGen = {
+      currentHashedRefreshToken: await bcrypt.hashSync(user.id.toString(), bcrypt.genSaltSync(12))
+    };
+
+    await this.executor.update(user.id, tokenGen);
+
+    Object.assign(user, tokenGen);
+
     return user;
   }
 
-  async getAllMails(page,limit):Promise<Pagination<Mail>>{
+  async getAllMails(page, limit): Promise<Pagination<Mail>> {
     const data = this.mail.createQueryBuilder("m")
       .leftJoinAndSelect("m.customer", "customer")
-      .leftJoinAndSelect("m.executor", "executor")
-    return await paginate(data,{page,limit})
+      .leftJoinAndSelect("m.executor", "executor");
+    return await paginate(data, { page, limit });
+  }
+
+  async verifyRefreshToken(token: string): Promise<Admin> {
+    const user = await this.admin.findOne({ where: { currentHashedRefreshToken: token } });
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Пользователь не найден"
+      }, HttpStatus.CONFLICT);
+
+    let tokenGen = {
+      currentHashedRefreshToken: await bcrypt.hashSync(user.id.toString(), bcrypt.genSaltSync(12))
+    };
+
+    await this.admin.update(user.id, tokenGen);
+
+    Object.assign(user, tokenGen);
+    return user;
   }
 }

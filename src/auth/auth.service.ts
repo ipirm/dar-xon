@@ -23,6 +23,7 @@ import { EmailRequestDto } from "./dto/email-request.dto";
 import { PasswordDto } from "./dto/password.dto";
 import { PhoneRequestDto } from "./dto/phone-request.dto";
 import { PasswordPhoneDto } from "./dto/password-phone.dto";
+import { RefreshTokenDto } from "./dto/refresh-token.dto";
 
 @Injectable()
 export class AuthService {
@@ -137,7 +138,8 @@ export class AuthService {
       user = await this.admin.findOneSign(signInDto.nickname, signInDto.password);
 
     return {
-      access_token: this.jwtService.sign({ ...user, role })
+      access_token: this.jwtService.sign({ ...user, role }),
+      refresh_token: user?.currentHashedRefreshToken
     };
 
   }
@@ -231,6 +233,24 @@ export class AuthService {
       user = await this.executor.confirmNewPasswordPhone(passwordPhoneDto);
 
     return user;
+  }
+
+  async verifyRefreshToken(refreshTokenDto: RefreshTokenDto, role: Role): Promise<any> {
+    let user: any = null;
+
+    if (role === Role.Customer)
+      user = await this.customer.verifyRefreshToken(refreshTokenDto.token);
+
+    if (role === Role.Executor)
+      user = await this.executor.verifyRefreshToken(refreshTokenDto.token);
+
+    if (role === Role.Admin)
+      user = await this.admin.verifyRefreshToken(refreshTokenDto.token);
+
+    return {
+      access_token: this.jwtService.sign({ ...user, role }),
+      refresh_token: user?.currentHashedRefreshToken
+    };
   }
 
 }

@@ -139,4 +139,6 @@ export class Executor extends BaseEntity {
   @Column({ default: null, select: false })
   password_code: number;
 
+
+
 }

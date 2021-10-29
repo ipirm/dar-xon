@@ -25,4 +25,10 @@ export class Admin extends BaseEntity {
 
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
+
+  @Column({
+    nullable: true,
+    select: false
+  })
+  public currentHashedRefreshToken?: string;
 }

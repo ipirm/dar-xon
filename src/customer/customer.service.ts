@@ -188,7 +188,7 @@ export class CustomerService {
 
   async findOne(nickname: string, password: string): Promise<Customer> {
     const user = await this.customer.createQueryBuilder("customer")
-      .addSelect(["customer.password", "customer.banned"])
+      .addSelect(["customer.password", "customer.banned", "customer.currentHashedRefreshToken"])
       .where("customer.email = :nickname OR customer.phone = :nickname OR customer.login = :nickname", { nickname })
       .getOne();
 
@@ -213,6 +213,14 @@ export class CustomerService {
         error: "Пользователь заблокирован"
       }, HttpStatus.FORBIDDEN);
     }
+
+    let tokenGen = {
+      currentHashedRefreshToken: await bcrypt.hashSync(user.id.toString(), bcrypt.genSaltSync(12))
+    };
+
+    await this.customer.update(user.id, tokenGen);
+
+    Object.assign(user, tokenGen);
 
     return user;
   }
@@ -410,4 +418,21 @@ export class CustomerService {
     };
   }
 
+  async verifyRefreshToken(token: string): Promise<Customer> {
+    const user = await this.customer.findOne({ where: { currentHashedRefreshToken: token } });
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Пользователь не найден"
+      }, HttpStatus.CONFLICT);
+
+    let tokenGen = {
+      currentHashedRefreshToken: await bcrypt.hashSync(user.id.toString(), bcrypt.genSaltSync(12))
+    };
+
+    await this.customer.update(user.id, tokenGen);
+
+    Object.assign(user, tokenGen);
+    return user;
+  }
 }

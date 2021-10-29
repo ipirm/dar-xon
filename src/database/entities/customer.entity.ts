@@ -106,7 +106,7 @@ export class Customer extends BaseEntity {
 
   @Column({
     nullable: true,
-    select: false
+    select: true
   })
   public currentHashedRefreshToken?: string;
 

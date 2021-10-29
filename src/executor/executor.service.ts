@@ -160,7 +160,7 @@ export class ExecutorService {
 
   async findOne(nickname: string, password: string): Promise<Executor> {
     const user = await this.executor.createQueryBuilder("executor")
-      .addSelect(["executor.password", "executor.banned"])
+      .addSelect(["executor.password", "executor.banned", "executor.currentHashedRefreshToken"])
       .where("executor.phone = :nickname OR executor.login = :nickname", { nickname })
       .getOne();
 
@@ -186,6 +186,13 @@ export class ExecutorService {
       }, HttpStatus.FORBIDDEN);
     }
 
+    let tokenGen = {
+      currentHashedRefreshToken: await bcrypt.hashSync(user.id.toString(), bcrypt.genSaltSync(12))
+    };
+
+    await this.executor.update(user.id, tokenGen);
+
+    Object.assign(user, tokenGen);
 
     return user;
   }
@@ -382,5 +389,23 @@ export class ExecutorService {
       status: HttpStatus.OK,
       message: `Пароль для пользователя ${user.phone} изменен`
     };
+  }
+
+  async verifyRefreshToken(token: string): Promise<Executor> {
+    const user = await this.executor.findOne({ where: { currentHashedRefreshToken: token } });
+    if (!user)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Пользователь не найден"
+      }, HttpStatus.CONFLICT);
+
+    let tokenGen = {
+      currentHashedRefreshToken: await bcrypt.hashSync(user.id.toString(), bcrypt.genSaltSync(12))
+    };
+
+    await this.executor.update(user.id, tokenGen);
+
+    Object.assign(user, tokenGen);
+    return user;
   }
 }

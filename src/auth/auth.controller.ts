@@ -19,6 +19,7 @@ import { EmailRequestDto } from "./dto/email-request.dto";
 import { PasswordDto } from "./dto/password.dto";
 import { PhoneRequestDto } from "./dto/phone-request.dto";
 import { PasswordPhoneDto } from "./dto/password-phone.dto";
+import { RefreshTokenDto } from "./dto/refresh-token.dto";
 
 
 @ApiTags("Auth")
@@ -191,5 +192,16 @@ export class AuthController {
     @Param("role") role: Role = Role.Customer
   ): Promise<any> {
     return this.auth.confirmNewPasswordPhone(passwordPhoneDto, role);
+  }
+
+  @ApiOperation({ summary: "Войти с помощью Refresh Token" })
+  @ApiCreatedResponse({ type: RefreshTokenDto })
+  @ApiParam({ name: "role", enum: Role })
+  @Post("login-refresh-token/:role")
+  signInWithRefresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.verifyRefreshToken(refreshTokenDto, role);
   }
 }
