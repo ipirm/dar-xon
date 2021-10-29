@@ -32,6 +32,7 @@ export class AuthController {
   @ApiOperation({ summary: "Зарегестироваться как заказчик" })
   @ApiCreatedResponse({ type: RegistrationCustomerDto })
   @Post("registration/customer")
+  @Recaptcha({ action: 'SignUpCustomer'})
   registrationCustomer(
     @Body() registrationCustomerDto: RegistrationCustomerDto
   ): Promise<any> {
@@ -39,7 +40,9 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: "Зарегестироваться как исполнитель" })
+  @Recaptcha({ action: 'SignUpExecutor'})
   @ApiCreatedResponse({ type: RegistrationExecutorDto })
+  @Recaptcha({ action: 'SignIn'})
   @Post("registration/executor")
   registrationExecutor(
     @Body() registrationExecutorDto: RegistrationExecutorDto

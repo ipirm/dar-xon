@@ -52,7 +52,7 @@ import { IncomingMessage } from "http";
       secretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
       response: (req: IncomingMessage) => (req.headers.recaptcha || "").toString(),
       skipIf: process.env.NODE_ENV !== "production",
-      actions: ["SignIn"],
+      actions: ["SignIn", "SignUpCustomer", "SignUpExecutor"],
       score: 0.8
     }),
     TypeOrmModule.forRoot(ormConfig),
