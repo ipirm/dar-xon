@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { SignInDto } from "./dto/sign-in.dto";
@@ -41,13 +41,15 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: "Зарегестироваться как исполнитель" })
-  @Recaptcha()
+  // @Recaptcha()
   @ApiCreatedResponse({ type: RegistrationExecutorDto })
   @Recaptcha()
   @Post("registration/executor")
   registrationExecutor(
-    @Body() registrationExecutorDto: RegistrationExecutorDto
+    @Body() registrationExecutorDto: RegistrationExecutorDto,
+    @Req() req: Request
   ): Promise<any> {
+    console.log(req.headers);
     return this.auth.registrationExecutor(registrationExecutorDto);
   }
 

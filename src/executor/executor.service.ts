@@ -249,7 +249,7 @@ export class ExecutorService {
       .getOne();
 
 
-    if (user.confirmation_phone !== confirmDto.value)
+    if (user.confirmation_phone !== confirmDto.value || confirmDto.value === 363547)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
         error: "Неверный код"
@@ -266,7 +266,7 @@ export class ExecutorService {
       .getOne();
 
 
-    if (user.confirmation_email !== confirmEmailDto.value)
+    if (user.confirmation_email !== confirmEmailDto.value || confirmEmailDto.value === 363547)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
         error: "Неверный код"
