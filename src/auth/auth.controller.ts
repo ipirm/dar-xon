@@ -20,7 +20,8 @@ import { PasswordDto } from "./dto/password.dto";
 import { PhoneRequestDto } from "./dto/phone-request.dto";
 import { PasswordPhoneDto } from "./dto/password-phone.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
-import { Recaptcha } from "@nestlab/google-recaptcha";
+import { Recaptcha, RecaptchaResult } from "@nestlab/google-recaptcha";
+import { GoogleRecaptchaValidationResult } from "@nestlab/google-recaptcha/interfaces/google-recaptcha-validation-result";
 
 
 @ApiTags("Auth")
@@ -31,8 +32,8 @@ export class AuthController {
 
   @ApiOperation({ summary: "Зарегестироваться как заказчик" })
   @ApiCreatedResponse({ type: RegistrationCustomerDto })
+  @Recaptcha()
   @Post("registration/customer")
-  @Recaptcha({ action: 'SignUpCustomer'})
   registrationCustomer(
     @Body() registrationCustomerDto: RegistrationCustomerDto
   ): Promise<any> {
@@ -40,9 +41,9 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: "Зарегестироваться как исполнитель" })
-  @Recaptcha({ action: 'SignUpExecutor'})
+  @Recaptcha()
   @ApiCreatedResponse({ type: RegistrationExecutorDto })
-  @Recaptcha({ action: 'SignIn'})
+  @Recaptcha()
   @Post("registration/executor")
   registrationExecutor(
     @Body() registrationExecutorDto: RegistrationExecutorDto
@@ -131,12 +132,14 @@ export class AuthController {
   @ApiOperation({ summary: "Войти" })
   @ApiCreatedResponse({ type: SignInDto })
   @ApiParam({ name: "role", enum: Role })
+  @Recaptcha()
   @Post("login/:role")
-  @Recaptcha({ action: 'SignIn'})
   signIn(
     @Body() signInDto: SignInDto,
-    @Param("role") role: Role = Role.Customer
+    @Param("role") role: Role = Role.Customer,
+    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult
   ): Promise<any> {
+    console.log(recaptchaResult)
     return this.auth.signIn(signInDto, role);
   }
 
