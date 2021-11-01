@@ -106,11 +106,12 @@ export class CustomerService {
   }
 
   async updateCustomer(id: number, createCustomerDto: CreateCustomerDto, files: Express.Multer.File[]): Promise<UpdateResult> {
+    const user = await this.customer.findOne(id);
     let email = false;
     let phone = false;
     let login = false;
 
-    if (createCustomerDto.email) {
+    if (createCustomerDto?.email !== user.email) {
       const data = await this.customer.findOne({ where: { email: createCustomerDto.email } });
       if (data) {
         if (data.confirmed_email) {
@@ -122,7 +123,7 @@ export class CustomerService {
       }
     }
 
-    if (createCustomerDto.phone) {
+    if (createCustomerDto?.phone !== user.phone) {
       const data = await this.customer.findOne({ where: { phone: createCustomerDto.phone } });
       if (data) {
         if (data.confirmed_phone) {

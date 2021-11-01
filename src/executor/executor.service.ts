@@ -91,11 +91,13 @@ export class ExecutorService {
   }
 
   async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<UpdateResult> {
+    const user = await this.executor.findOne(id);
     let email = false;
     let phone = false;
     let login = false;
 
-    if (createExecutorDto.email) {
+
+    if (createExecutorDto?.email !== user.email) {
       const data = await this.executor.findOne({ where: { email: createExecutorDto.email } });
       if (data) {
         if (data.confirmed_email) {
@@ -107,7 +109,7 @@ export class ExecutorService {
       }
     }
 
-    if (createExecutorDto.phone) {
+    if (createExecutorDto?.phone !== user.phone) {
       const data = await this.executor.findOne({ where: { phone: createExecutorDto.phone } });
       if (data) {
         if (data.confirmed_phone) {
