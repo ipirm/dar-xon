@@ -151,7 +151,7 @@ export class CustomerService {
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегестрирована"
+        error: "Данный номер уже зарегестрирован"
       }, HttpStatus.CONFLICT);
 
     if (login)
