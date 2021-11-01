@@ -41,7 +41,6 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: "Зарегестироваться как исполнитель" })
-  // @Recaptcha()
   @ApiCreatedResponse({ type: RegistrationExecutorDto })
   @Recaptcha()
   @Post("registration/executor")
