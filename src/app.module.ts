@@ -53,7 +53,7 @@ import { IncomingMessage } from 'http';
         (req.headers.recaptcha || '').toString(),
       skipIf: process.env.NODE_ENV !== 'production',
       actions: ['SignIn', 'SignUpCustomer', 'SignUpExecutor'],
-      score: 0.3,
+      score: 0.31,
     }),
     TypeOrmModule.forRoot(ormConfig),
     AuthModule,
