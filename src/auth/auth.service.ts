@@ -69,7 +69,7 @@ export class AuthService {
     if (role === Role.Executor)
       await this.customer.updateConfirmNumber(confirmPhoneDto.user_id, random);
 
-    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${confirmPhoneDto.phone.substring(1)}&msg=${random}&json=1`)
+    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${confirmPhoneDto.phone}&msg=${random}&json=1`)
       .pipe(
         map(response => response.data)
       );
@@ -109,6 +109,7 @@ export class AuthService {
   }
 
   async confirmNumber(confirmDto: ConfirmDto, role: Role): Promise<any> {
+    console.log(confirmDto)
     let user: any = null;
 
     if (role === Role.Customer)
@@ -217,7 +218,7 @@ export class AuthService {
     if (role === Role.Executor)
       await this.executor.requestNewPasswordPhone(phoneRequestDto, random);
 
-    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${phoneRequestDto.phone.substring(1)}&msg=${random}&json=1`)
+    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${phoneRequestDto.phone}&msg=${random}&json=1`)
       .pipe(
         map(response => response.data)
       );
