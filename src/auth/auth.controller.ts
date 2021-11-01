@@ -194,6 +194,7 @@ export class AuthController {
   @ApiOperation({ summary: "Сбросить пароль номер" })
   @ApiCreatedResponse({ type: PasswordPhoneDto })
   @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @Recaptcha()
   @Post("confirm-new-password-phone/:role")
   confirmNewPasswordPhone(
     @Body() passwordPhoneDto: PasswordPhoneDto,
