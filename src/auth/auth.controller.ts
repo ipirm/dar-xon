@@ -35,7 +35,8 @@ export class AuthController {
   @Recaptcha()
   @Post("registration/customer")
   registrationCustomer(
-    @Body() registrationCustomerDto: RegistrationCustomerDto
+    @Body() registrationCustomerDto: RegistrationCustomerDto,
+    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult
   ): Promise<any> {
     return this.auth.registrationCustomer(registrationCustomerDto);
   }
@@ -48,7 +49,6 @@ export class AuthController {
     @Body() registrationExecutorDto: RegistrationExecutorDto,
     @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult
   ): Promise<any> {
-    console.log(recaptchaResult);
     return this.auth.registrationExecutor(registrationExecutorDto);
   }
 
@@ -137,7 +137,8 @@ export class AuthController {
   @Post("login/:role")
   signIn(
     @Body() signInDto: SignInDto,
-    @Param("role") role: Role = Role.Customer
+    @Param("role") role: Role = Role.Customer,
+    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult
   ): Promise<any> {
     return this.auth.signIn(signInDto, role);
   }
