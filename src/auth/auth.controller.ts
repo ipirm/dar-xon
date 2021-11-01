@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { SignInDto } from "./dto/sign-in.dto";
@@ -46,9 +46,9 @@ export class AuthController {
   @Post("registration/executor")
   registrationExecutor(
     @Body() registrationExecutorDto: RegistrationExecutorDto,
-    @Req() req: Request
+    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult
   ): Promise<any> {
-    console.log(req.headers);
+    console.log(recaptchaResult);
     return this.auth.registrationExecutor(registrationExecutorDto);
   }
 
@@ -137,10 +137,8 @@ export class AuthController {
   @Post("login/:role")
   signIn(
     @Body() signInDto: SignInDto,
-    @Param("role") role: Role = Role.Customer,
-    @RecaptchaResult() recaptchaResult: GoogleRecaptchaValidationResult
+    @Param("role") role: Role = Role.Customer
   ): Promise<any> {
-    console.log(recaptchaResult)
     return this.auth.signIn(signInDto, role);
   }
 
