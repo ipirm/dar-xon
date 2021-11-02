@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { AppService } from "./app.service";
-import { ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 
 
 @ApiTags("Default")
@@ -16,6 +16,7 @@ export class AppController {
     type: String,
     example: "Какой то интесный текст"
   })
+  @ApiOperation({ summary: "Проверка на орфографические ошибки" })
   @Get("check-text")
   checkSentenceForError(
     @Query("search") search: string
