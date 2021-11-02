@@ -21,6 +21,7 @@ import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handleba
 import { RateLimiterModule } from "nestjs-rate-limiter";
 import { GoogleRecaptchaModule } from "@nestlab/google-recaptcha";
 import { IncomingMessage } from "http";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { IncomingMessage } from "http";
     ChatModule,
     ServeStaticModule.forRoot({ rootPath: `${process.cwd()}/public` }),
     ReviewModule,
+    HttpModule
   ],
   controllers: [AppController],
   providers: [AppService],
