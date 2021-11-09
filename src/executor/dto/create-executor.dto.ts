@@ -1,4 +1,4 @@
-import { IsString, Matches } from "class-validator";
+import { IsOptional, IsString, Matches } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 
@@ -60,15 +60,19 @@ export class CreateExecutorDto {
   @IsString()
   birthdate: string;
 
-  @ApiProperty({ type: "string", format: "binary" })
+  @ApiProperty({ type: "string", format: "binary", required: false })
+  @IsOptional()
   file_rose_ticket: { name: string, url: string };
 
-  @ApiProperty({ type: "string", format: "binary" })
+  @ApiProperty({ type: "string", format: "binary", required: false })
+  @IsOptional()
   file_passport: { name: string, url: string };
 
-  @ApiProperty({ type: "string", format: "binary" })
+  @ApiProperty({ type: "string", format: "binary", required: false })
+  @IsOptional()
   file_passport_2: { name: string, url: string };
 
-  @ApiProperty({ type: "string", format: "binary" })
+  @ApiProperty({ type: "string", format: "binary", required: false })
+  @IsOptional()
   avatar: any;
 }

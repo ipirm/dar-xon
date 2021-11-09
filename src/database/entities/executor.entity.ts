@@ -65,7 +65,7 @@ export class Executor extends BaseEntity {
   @Column({ type: "numeric", default: 5 })
   rating: number;
 
-  @Column({ select: true, nullable: true })
+  @Column({ select: false, nullable: true })
   password: string;
 
   @BeforeInsert()

@@ -28,7 +28,7 @@ export class Customer extends BaseEntity {
   @Column({ type: "varchar", nullable: true })
   phone: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: false, select: false })
   password: string;
 
   @BeforeInsert()

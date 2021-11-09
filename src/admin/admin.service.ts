@@ -109,7 +109,7 @@ export class AdminService {
     if (verified)
       data.andWhere("e.verified = :verified", { verified: verified });
 
-    data.select(["e.id", "e.fio", "e.createdAt", "e.avatar"]);
+    data.select(["e.id", "e.fio", "e.createdAt", "e.avatar", "e.city"]);
     data.orderBy("e.createdAt", "DESC");
     return paginate(data, { page, limit });
   }
@@ -153,8 +153,9 @@ export class AdminService {
 
   async getAllMails(page, limit): Promise<Pagination<Mail>> {
     const data = this.mail.createQueryBuilder("m")
-      .leftJoinAndSelect("m.customer", "customer")
-      .leftJoinAndSelect("m.executor", "executor");
+      .leftJoin("m.customer", "c")
+      .leftJoin("m.executor", "e")
+      .addSelect(["e.id", "e.fio", "e.createdAt", "e.avatar", "e.city", "c.id", "c.fio", "c.createdAt", "c.avatar", "c.city"])
     return await paginate(data, { page, limit });
   }
 
