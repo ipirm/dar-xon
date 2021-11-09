@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsString, Matches } from "class-validator";
+import { IsEmail, IsEnum, IsOptional, IsString, Matches } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { CustomerTypeEnum } from "../../enums/customerType.enum";
 import { ApiModelProperty } from "@nestjs/swagger/dist/decorators/api-model-property.decorator";
@@ -104,8 +104,10 @@ export class CreateCustomerDto {
   customer_type: CustomerTypeEnum;
 
   @ApiProperty({ type: "array", items: { type: "string", format: "binary" }, required: false })
+  @IsOptional()
   files?: any[];
 
   @ApiProperty({ type: "string", format: "binary" })
+  @IsOptional()
   avatar: any;
 }
