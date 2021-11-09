@@ -32,7 +32,7 @@ export class AuthController {
 
   @ApiOperation({ summary: "Зарегестироваться как заказчик" })
   @ApiCreatedResponse({ type: RegistrationCustomerDto })
-  @Recaptcha()
+  // @Recaptcha()
   @Post("registration/customer")
   registrationCustomer(
     @Body() registrationCustomerDto: RegistrationCustomerDto,
@@ -43,7 +43,7 @@ export class AuthController {
 
   @ApiOperation({ summary: "Зарегестироваться как исполнитель" })
   @ApiCreatedResponse({ type: RegistrationExecutorDto })
-  @Recaptcha()
+  // @Recaptcha()
   @Post("registration/executor")
   registrationExecutor(
     @Body() registrationExecutorDto: RegistrationExecutorDto,
@@ -133,7 +133,7 @@ export class AuthController {
   @ApiOperation({ summary: "Войти" })
   @ApiCreatedResponse({ type: SignInDto })
   @ApiParam({ name: "role", enum: Role })
-  @Recaptcha()
+  // @Recaptcha()
   @Post("login/:role")
   signIn(
     @Body() signInDto: SignInDto,
@@ -194,7 +194,7 @@ export class AuthController {
   @ApiOperation({ summary: "Сбросить пароль номер" })
   @ApiCreatedResponse({ type: PasswordPhoneDto })
   @ApiParam({ name: "role", enum: Role, example: Role.Executor })
-  @Recaptcha()
+  // @Recaptcha()
   @Post("confirm-new-password-phone/:role")
   confirmNewPasswordPhone(
     @Body() passwordPhoneDto: PasswordPhoneDto,
