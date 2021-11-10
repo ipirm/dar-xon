@@ -3,10 +3,10 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { config } from "aws-sdk";
 import { ValidationPipe } from "@nestjs/common";
-import { GoogleRecaptchaFilter } from "./filters/google.exception";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
 
   app.setGlobalPrefix("api");
   const options = new DocumentBuilder()
@@ -39,5 +39,6 @@ async function bootstrap() {
     console.log("Server started......." + port);
   });
 }
+
 
 bootstrap();

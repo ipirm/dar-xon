@@ -84,16 +84,12 @@ export class AuthService {
     if (role === Role.Customer)
       await this.customer.updateConfirmEmail(confirmEmailRequestDto.user_id, random);
 
-    return await this.mailerService.sendMail({
-      to: confirmEmailRequestDto.email,
-      from: "hello@tviser.agency",
-      subject: "Потвердите почту",
-      template: `${process.cwd()}/templates/confirmation`,
-      context: {
-        authCode: `${random}`,
-        email: confirmEmailRequestDto.email
-      }
-    });
+
+    return this.httpService.get(
+      `https://api.unisender.com/ru/api/sendEmail?format=json&api_key=${process.env.API_UNISENDER}&email=${confirmEmailRequestDto.email}&sender_name=1dar&sender_email=${process.env.SENDER_EMAIL}&subject=%D0%9F%D0%BE%D0%B4%D1%82%D0%B2%D0%B5%D1%80%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BF%D0%BE%D1%87%D1%82%D1%8B&body=%D0%92%D0%B0%D1%88%20%D0%BA%D0%BE%D0%B4%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8%3A%20${random}&list_id=1`)
+      .pipe(
+        map(response => response.data)
+      );
   }
 
   async confirmEmail(confirmEmailDto: ConfirmEmailDto, role: Role): Promise<any> {
