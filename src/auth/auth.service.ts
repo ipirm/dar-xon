@@ -170,27 +170,20 @@ export class AuthService {
 
   async requestNewPassword(emailRequestDto: EmailRequestDto, role: Role): Promise<any> {
     const random = Math.floor(100000 + Math.random() * 900000);
-    let user;
 
     if (role === Role.Customer)
-      user = await this.customer.requestNewPassword(emailRequestDto, random);
+      await this.customer.requestNewPassword(emailRequestDto, random);
 
     if (role === Role.Executor)
-      user = await this.executor.requestNewPassword(emailRequestDto, random);
+      await this.executor.requestNewPassword(emailRequestDto, random);
 
 
-    await this.mailerService.sendMail({
-      to: emailRequestDto.email,
-      from: "hello@tviser.agency",
-      subject: "Ваш код для подтверждения почты",
-      template: `${process.cwd()}/templates/confirmation`,
-      context: {
-        authCode: `${random}`,
-        email: emailRequestDto.email
-      }
-    });
+    return this.httpService.get(
+      `https://api.unisender.com/ru/api/sendEmail?format=json&api_key=${process.env.API_UNISENDER}&email=${emailRequestDto.email}&sender_name=1dar&sender_email=${process.env.SENDER_EMAIL}&subject=%D0%A1%D0%B1%D1%80%D0%BE%D1%81%D0%B8%D1%82%D1%8C%20%D0%BF%D0%B0%D1%80%D0%BE%D0%BB%D1%8C&body=%D0%92%D0%B0%D1%88%20%D0%BA%D0%BE%D0%B4%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D0%B8%3A%20${random}&list_id=1`)
+      .pipe(
+        map(response => response.data)
+      );
 
-    return user;
   }
 
   async confirmNewPassword(passwordDto: PasswordDto, role: Role): Promise<any> {
