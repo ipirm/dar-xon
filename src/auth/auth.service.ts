@@ -66,10 +66,10 @@ export class AuthService {
     if (role === Role.Executor)
       await this.executor.updateConfirmNumber(confirmPhoneDto.user_id, random);
 
-    if (role === Role.Executor)
+    if (role === Role.Customer)
       await this.customer.updateConfirmNumber(confirmPhoneDto.user_id, random);
 
-    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${confirmPhoneDto.phone}&msg=${random}&json=1`)
+    return this.httpService.get(`https://sms.ru/sms/send?api_id=${process.env.SMS_API_ID}&to=${confirmPhoneDto.phone.substring(1)}&msg=${random}&json=1`)
       .pipe(
         map(response => response.data)
       );
@@ -81,7 +81,7 @@ export class AuthService {
     if (role === Role.Executor)
       await this.executor.updateConfirmEmail(confirmEmailRequestDto.user_id, random);
 
-    if (role === Role.Executor)
+    if (role === Role.Customer)
       await this.customer.updateConfirmEmail(confirmEmailRequestDto.user_id, random);
 
     return await this.mailerService.sendMail({

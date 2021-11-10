@@ -277,6 +277,8 @@ export class CustomerService {
       .addSelect(["c.confirmation_phone"])
       .getOne();
 
+    console.log(user.confirmation_phone)
+    console.log(confirmDto.value)
     if (user.confirmation_phone !== confirmDto.value && !(confirmDto.value === 363547))
       throw new HttpException({
         status: HttpStatus.CONFLICT,

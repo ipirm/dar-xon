@@ -19,8 +19,8 @@ export class CreateContactDto {
   @IsString()
   text: string;
 
-  @IsOptional()
   @ApiProperty({ type: "array", items: { type: "string", format: "binary" }, required: false })
+  @IsOptional()
   files?: any[];
 
 }
