@@ -13,6 +13,7 @@ import { EmailRequestDto } from "../auth/dto/email-request.dto";
 import { PasswordDto } from "../auth/dto/password.dto";
 import { PhoneRequestDto } from "../auth/dto/phone-request.dto";
 import { PasswordPhoneDto } from "../auth/dto/password-phone.dto";
+import { CheckUserDto } from "../auth/dto/check-user.dto";
 
 @Injectable()
 export class CustomerService {
@@ -442,5 +443,39 @@ export class CustomerService {
 
     Object.assign(user, tokenGen);
     return user;
+  }
+
+  async findOneByParams(checkUserDto: CheckUserDto): Promise<any> {
+    const user = await this.customer.createQueryBuilder("e")
+      .where("e.email = :email OR e.phone = :phone OR e.login = :login", {
+        email: checkUserDto.email,
+        phone: checkUserDto.phone,
+        login: checkUserDto.login
+      }).getOne();
+
+
+    if (checkUserDto.email === user.email)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная почта уже зарегистрирована"
+      }, HttpStatus.CONFLICT);
+
+    if (checkUserDto.phone === user.phone)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный номер уже зарегистрирован"
+      }, HttpStatus.CONFLICT);
+
+
+    if (checkUserDto.login === user.login)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данный логин уже зарегистрирован"
+      }, HttpStatus.CONFLICT);
+
+
+    return {
+      status: HttpStatus.OK
+    };
   }
 }

@@ -20,8 +20,9 @@ import { PasswordDto } from "./dto/password.dto";
 import { PhoneRequestDto } from "./dto/phone-request.dto";
 import { PasswordPhoneDto } from "./dto/password-phone.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
-import { Recaptcha, RecaptchaResult } from "@nestlab/google-recaptcha";
+import { RecaptchaResult } from "@nestlab/google-recaptcha";
 import { GoogleRecaptchaValidationResult } from "@nestlab/google-recaptcha/interfaces/google-recaptcha-validation-result";
+import { CheckUserDto } from "./dto/check-user.dto";
 
 
 @ApiTags("Auth")
@@ -213,4 +214,17 @@ export class AuthController {
   ): Promise<any> {
     return this.auth.verifyRefreshToken(refreshTokenDto, role);
   }
+
+
+  @ApiOperation({ summary: "Проверить наличие пользователя в базе" })
+  @ApiParam({ name: "role", enum: Role })
+  @ApiCreatedResponse({ type: CheckUserDto })
+  @Post("check-user/:role")
+  checkUserExist(
+    @Body() checkUserDto: CheckUserDto,
+    @Param("role") role: Role = Role.Customer
+  ): Promise<any> {
+    return this.auth.checkUserExist(checkUserDto, role);
+  }
+
 }

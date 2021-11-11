@@ -17,7 +17,7 @@ export class CreateExecutorDto {
   phone: string;
 
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
-  @Matches(/^(?=.*[A-Z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/, { message: "1 заглавная буква, 1 символ, не менее 6 символов" })
+  @Matches(/^(?=.*[A-Z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&\/\ ]{6,}$/g, { message: "Пароль должен содержать большие и маленькие латинские буквы, специальные символы и быть не короче 8 символов" })
   password: string;
 
   @ApiProperty({ example: "Берлин", description: "Город", required: false })

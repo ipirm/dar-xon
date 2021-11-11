@@ -24,6 +24,7 @@ import { PasswordDto } from "./dto/password.dto";
 import { PhoneRequestDto } from "./dto/phone-request.dto";
 import { PasswordPhoneDto } from "./dto/password-phone.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
+import { CheckUserDto } from "./dto/check-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -243,4 +244,16 @@ export class AuthService {
     };
   }
 
+  async checkUserExist(checkUserDto: CheckUserDto, role: Role): Promise<any> {
+    let user: any;
+
+    if (role === Role.Customer)
+      user = await this.customer.findOneByParams(checkUserDto);
+
+    if (role === Role.Executor)
+      user = await this.executor.findOneByParams(checkUserDto);
+
+    return user;
+
+  }
 }
