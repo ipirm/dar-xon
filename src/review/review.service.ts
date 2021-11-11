@@ -33,7 +33,7 @@ export class ReviewService {
     if (review)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Вы уже осталвляли отзыв исполнителю"
+        error: "Вы уже оставляли отзыв исполнителю"
       }, HttpStatus.CONFLICT);
 
     const executor = await this.executor.createQueryBuilder("e")
