@@ -1,7 +1,7 @@
 export enum CustomerTypeTaskEnum {
-  Execution = "active",
+  Execution = "execution",
   Archive = "archive",
   All = "all",
   Consideration = "consideration",
-  Current ="current"
+  Current = "current"
 }
