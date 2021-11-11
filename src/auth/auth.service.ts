@@ -253,6 +253,9 @@ export class AuthService {
     if (role === Role.Executor)
       user = await this.executor.findOneByParams(checkUserDto);
 
+    if (role === Role.Admin)
+      user = await this.admin.findOneByParams(checkUserDto);
+
     return user;
 
   }

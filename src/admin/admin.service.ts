@@ -10,6 +10,7 @@ import { Customer } from "../database/entities/customer.entity";
 import { Role } from "../enums/roles.enum";
 import { Mail } from "../database/entities/mail.entity";
 import * as bcrypt from "bcrypt";
+import { CheckUserDto } from "../auth/dto/check-user.dto";
 
 @Injectable()
 export class AdminService {
@@ -175,5 +176,24 @@ export class AdminService {
 
     Object.assign(user, tokenGen);
     return user;
+  }
+
+  async findOneByParams(checkUserDto: CheckUserDto): Promise<any> {
+    const user = await this.admin.createQueryBuilder("e")
+      .where("e.email = :email OR e.phone = :phone OR e.login = :login", {
+        email: checkUserDto.email
+      }).getOne();
+
+
+    if (checkUserDto.email === user.email)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Данная почта уже зарегистрирована"
+      }, HttpStatus.CONFLICT);
+
+
+    return {
+      status: HttpStatus.OK
+    };
   }
 }
