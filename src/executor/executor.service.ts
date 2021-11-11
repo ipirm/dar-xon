@@ -232,13 +232,13 @@ export class ExecutorService {
     if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегестрирована"
+        error: "Данная почта уже зарегистрирована"
       }, HttpStatus.CONFLICT);
 
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегестрирован"
+        error: "Данный номер уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (data?.login === registrationExecutorDto.login)

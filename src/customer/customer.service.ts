@@ -54,19 +54,19 @@ export class CustomerService {
     if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегестрирована"
+        error: "Данная почта уже зарегистрирована"
       }, HttpStatus.CONFLICT);
 
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегестрирован"
+        error: "Данный номер уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (data?.login === createCustomerDto.login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный логин уже зарегестрирован"
+        error: "Данный логин уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (files) {
@@ -150,19 +150,19 @@ export class CustomerService {
     if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегестрирована"
+        error: "Данная почта уже зарегистрирована"
       }, HttpStatus.CONFLICT);
 
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегистрирован"
+        error: "Данный номер уже зарегистрирована"
       }, HttpStatus.CONFLICT);
 
     if (login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный логин уже зарегистрирован"
+        error: "Данный логин уже зарегистрирована"
       }, HttpStatus.CONFLICT);
 
     if (files) {
@@ -258,19 +258,19 @@ export class CustomerService {
     if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегестрирована"
+        error: "Данная почта уже зарегистрирована"
       }, HttpStatus.CONFLICT);
 
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегестрирован"
+        error: "Данный номер уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (data?.login === registrationCustomerDto.login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный логин уже зарегестрирован"
+        error: "Данный логин уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     return await this.customer.save(this.customer.create(registrationCustomerDto));
