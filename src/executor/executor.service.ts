@@ -53,19 +53,19 @@ export class ExecutorService {
     if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегестрирована"
+        error: "Данная почта уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегестрирован"
+        error: "Данный номер уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (data?.login === createExecutorDto.login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный логин уже зарегестрирован"
+        error: "Данный логин уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (files) {
@@ -106,11 +106,15 @@ export class ExecutorService {
           await this.executor.update(data.id, { email: null });
           await this.executor.update(id, { confirmed_email: false });
         }
+      }else{
+        await this.executor.update(id, { confirmed_email: false });
       }
     }
 
     if (createExecutorDto?.phone !== user.phone) {
+      console.log('phone')
       const data = await this.executor.findOne({ where: { phone: createExecutorDto.phone } });
+      console.log(data)
       if (data) {
         if (data.confirmed_phone) {
           phone = true;
@@ -118,6 +122,8 @@ export class ExecutorService {
           await this.executor.update(data.id, { phone: null });
           await this.executor.update(id, { confirmed_phone: false });
         }
+      }else{
+        await this.executor.update(id, { confirmed_phone: false });
       }
     }
 
@@ -131,19 +137,19 @@ export class ExecutorService {
     if (email)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегестрирована"
+        error: "Данная почта уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегестрирован"
+        error: "Данный номер уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный логин уже зарегестрирован"
+        error: "Данный логин уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (files) {

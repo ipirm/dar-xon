@@ -120,8 +120,11 @@ export class CustomerService {
           await this.customer.update(data.id, { email: null });
           await this.customer.update(id, { confirmed_email: false });
         }
+      } else {
+        await this.customer.update(id, { confirmed_email: false });
       }
     }
+
 
     if (createCustomerDto?.phone !== user.phone) {
       const data = await this.customer.findOne({ where: { phone: createCustomerDto.phone } });
@@ -132,6 +135,8 @@ export class CustomerService {
           await this.customer.update(data.id, { phone: null });
           await this.customer.update(id, { confirmed_phone: false });
         }
+      } else {
+        await this.customer.update(id, { confirmed_phone: false });
       }
     }
 
@@ -151,13 +156,13 @@ export class CustomerService {
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегестрирован"
+        error: "Данный номер уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный логин уже зарегестрирован"
+        error: "Данный логин уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (files) {
