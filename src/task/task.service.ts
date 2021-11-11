@@ -367,7 +367,7 @@ export class TaskService {
     }
 
     if (state === ExecutorTypeTaskEnum.Archive) {
-      data.andWhere("task.status = :archive", { started: "finished" });
+      data.andWhere("task.status = :archive", { archive: "finished" });
       data.andWhere("executor.id = :executor", { executor: user.id });
     }
 
@@ -449,7 +449,6 @@ export class TaskService {
     if (state === CustomerTypeTaskEnum.Execution) {
       data.andWhere("task.status = :started", { started: "started" });
     }
-
 
     if (state === CustomerTypeTaskEnum.Archive) {
       data.andWhere("task.status = :archive", { archive: "finished" });

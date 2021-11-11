@@ -27,9 +27,9 @@ async function bootstrap() {
     whitelist: true,
     forbidNonWhitelisted: true
   }));
-  // app.useGlobalFilters(new HttpExceptionFilter());
+
+  
   app.enableCors();
-  // app.useGlobalFilters( new GoogleRecaptchaFilter())
 
   SwaggerModule.setup("api", app, document);
   const port = process.env.PORT || 3000;

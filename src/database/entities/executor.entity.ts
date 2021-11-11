@@ -62,7 +62,7 @@ export class Executor extends BaseEntity {
   @Column({ nullable: true })
   site: string;
 
-  @Column({ type: "numeric", default: 5 })
+  @Column({ type: "numeric", default: 0 })
   rating: number;
 
   @Column({ select: false, nullable: true })
