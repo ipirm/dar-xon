@@ -12,6 +12,6 @@ export class PasswordPhoneDto {
   password: string;
 
   @ApiProperty({ example: "+994503190044", description: "Почта", required: false })
-  @IsString()
+  @Matches(/([+])\w+/g, { message: "Номер должен начинаться с символа '+'" })
   phone: string;
 }

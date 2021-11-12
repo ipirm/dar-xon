@@ -13,7 +13,7 @@ export class CreateExecutorDto {
   login: string;
 
   @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
-  @IsString()
+  @Matches(/([+])\w+/g, { message: "Номер должен начинаться с символа '+'" })
   phone: string;
 
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })

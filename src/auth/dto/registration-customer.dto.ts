@@ -10,7 +10,7 @@ export class RegistrationCustomerDto {
   email: string;
 
   @ApiProperty({ example: "+994503190044", description: "Номер", required: false })
-  @IsString()
+  @Matches(/([+])\w+/g, { message: "Номер должен начинаться с символа '+'" })
   phone: string;
 
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
