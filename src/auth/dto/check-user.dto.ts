@@ -12,6 +12,6 @@ export class CheckUserDto {
   email: string;
 
   @ApiProperty({ example: "+994503190044", description: "Номер", required: false })
-  @Matches(/([+])\w+/g, { message: "Номер должен начинаться с символа '+'" })
+  @IsString()
   phone: string;
 }

@@ -19,7 +19,7 @@ export class CreateCustomerDto {
   email: string;
 
   @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
-  @Matches(/([+])\w+/g, { message: "Номер должен начинаться с символа '+'" })
+  @IsString()
   phone: string;
 
   @ApiProperty({ example: "position", description: "Позиция", required: false })

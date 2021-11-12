@@ -8,6 +8,6 @@ export class RegistrationDto {
   email: string;
 
   @ApiProperty({ example: "79853633344", description: "Номер, Хардкод-смс: 123456", required: false })
-  @Matches(/([+])\w+/g, { message: "Номер должен начинаться с символа '+'" })
+  @IsString()
   phone: string;
 }

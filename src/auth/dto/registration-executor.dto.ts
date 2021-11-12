@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class RegistrationExecutorDto {
 
   @ApiProperty({ example: "79853633344", description: "Номер, Хардкод-смс: 123456", required: false })
-  @Matches(/([+])\w+/g, { message: "Номер должен начинаться с символа '+'" })
+  @IsString()
   phone: string;
 
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
