@@ -342,11 +342,11 @@ export class CustomerService {
         error: "Пользователь не найден"
       }, HttpStatus.CONFLICT);
 
-    if (!user.confirmed_email)
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Почта не подтверждена"
-      }, HttpStatus.CONFLICT);
+    // if (!user.confirmed_email)
+    //   throw new HttpException({
+    //     status: HttpStatus.CONFLICT,
+    //     error: "Почта не подтверждена"
+    //   }, HttpStatus.CONFLICT);
 
     await this.customer.update(user.id, { password_code: emailCode });
 
@@ -478,4 +478,5 @@ export class CustomerService {
       status: HttpStatus.OK
     };
   }
+
 }

@@ -227,4 +227,5 @@ export class AuthController {
     return this.auth.checkUserExist(checkUserDto, role);
   }
 
+
 }

@@ -23,4 +23,5 @@ export class AppController {
   ): Promise<any> {
     return this.app.checkSentenceForError(search);
   }
+
 }

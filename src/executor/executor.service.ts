@@ -315,11 +315,11 @@ export class ExecutorService {
         error: "Пользователь не найден"
       }, HttpStatus.CONFLICT);
 
-    if (!user.confirmed_email)
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Почта не подтверждена"
-      }, HttpStatus.CONFLICT);
+    // if (!user.confirmed_email)
+    //   throw new HttpException({
+    //     status: HttpStatus.CONFLICT,
+    //     error: "Почта не подтверждена"
+    //   }, HttpStatus.CONFLICT);
 
     await this.executor.update(user.id, { password_code: emailCode });
 
@@ -448,6 +448,8 @@ export class ExecutorService {
 
     return {
       status: HttpStatus.OK
-    }
+    };
   }
+
+
 }
