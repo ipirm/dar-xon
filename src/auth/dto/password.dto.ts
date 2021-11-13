@@ -8,7 +8,7 @@ export class PasswordDto {
   code: number;
 
   @ApiProperty({ example: "Ilham564/", description: "Пароль", required: false })
-  @Matches(/^(?=.*[A-Z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&\/\ ]{8,}$/g, { message: "Пароль должен содержать большие и маленькие латинские буквы, специальные символы и быть не короче 8 символов" })
+  @Matches(/^(?=.*[A-Z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&\/\ ]{8,}$/, { message: "Пароль должен содержать большие и маленькие латинские буквы, специальные символы и быть не короче 8 символов" })
   password: string;
 
   @ApiProperty({ example: "ilham.pirm@gmail.com", description: "Почта", required: false })
