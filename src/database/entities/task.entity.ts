@@ -18,7 +18,7 @@ export class Task extends BaseEntity {
   @Index({ fulltext: true })
   title: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 50000 })
   description: string;
 
   @Column({ nullable: true })

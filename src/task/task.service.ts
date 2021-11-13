@@ -132,18 +132,7 @@ export class TaskService {
         status: HttpStatus.FORBIDDEN,
         error: `Задачи с id не существует ${createResponseDto.task}`
       }, HttpStatus.FORBIDDEN);
-
-    if (task.status === TaskStatusEnum.Started)
-      throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
-        error: `Задача начата`
-      }, HttpStatus.FORBIDDEN);
-
-    if (task.status === TaskStatusEnum.Finished)
-      throw new HttpException({
-        status: HttpStatus.FORBIDDEN,
-        error: `Задача завершена`
-      }, HttpStatus.FORBIDDEN);
+    
 
     const response = await this.response.createQueryBuilder("r")
       .select(["r.id", "executor.id", "task.id"])
