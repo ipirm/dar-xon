@@ -346,7 +346,7 @@ export class TaskService {
     }
 
     if (started) {
-      data.andWhere("task.createdAt < :start_at", { start_at: started });
+      data.andWhere("task.createdAt > :start_at", { start_at: started });
     }
 
     if (criteria) {
@@ -430,7 +430,7 @@ export class TaskService {
     }
 
     if (started) {
-      data.andWhere("task.createdAt < :start_at", { start_at: started });
+      data.andWhere("task.createdAt > :start_at", { start_at: started });
     }
 
     if (criteria) {
