@@ -74,7 +74,6 @@ export class CustomerService {
       for (const [key, value] of Object.entries(files)) {
         if (key === "avatar") {
           const file = await this.aws.uploadPublicFile(value[0]);
-          console.log(file);
           Object.assign(createCustomerDto, { [key]: { name: file.key, url: file.url } });
         } else {
           const uploadedFiles = [];
@@ -283,8 +282,6 @@ export class CustomerService {
       .addSelect(["c.confirmation_phone"])
       .getOne();
 
-    console.log(user.confirmation_phone)
-    console.log(confirmDto.value)
     if (user.confirmation_phone !== confirmDto.value && !(confirmDto.value === 363547))
       throw new HttpException({
         status: HttpStatus.CONFLICT,

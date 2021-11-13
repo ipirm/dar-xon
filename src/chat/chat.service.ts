@@ -194,7 +194,6 @@ export class ChatService {
   }
 
   async getMessages(page, limit, id, user, started): Promise<Pagination<Message>> {
-    console.log(user);
     let unRead = null;
 
     const messages = this.message.createQueryBuilder("m")

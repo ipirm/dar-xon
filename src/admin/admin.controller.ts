@@ -26,6 +26,7 @@ import { hasRoles } from "../decorators/roles.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Mail } from "../database/entities/mail.entity";
+import { ApiImplicitParam } from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
 
 
 @ApiTags("Admin")
@@ -164,7 +165,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("customer/banned/:id")
   @ApiOperation({ summary: "Заблокировать заказчика" })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number
@@ -180,7 +181,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("executor/banned/:id")
   @ApiOperation({ summary: "Заблокировать исполнителя" })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number
@@ -196,7 +197,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("customer/banned/:id")
   @ApiOperation({ summary: "Раблокировать заказчика" })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number
@@ -212,7 +213,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("executor/banned/:id")
   @ApiOperation({ summary: "Раблокировать исполнителя" })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number
@@ -228,7 +229,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("customer/verify/:id")
   @ApiOperation({ summary: "Верефицировать заказчика" })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number
@@ -244,7 +245,7 @@ export class AdminController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put("executor/verify/:id")
   @ApiOperation({ summary: "Верефицировать исполнителя" })
-  @ApiImplicitQuery({
+  @ApiImplicitParam({
     name: "id",
     required: true,
     type: Number

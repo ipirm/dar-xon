@@ -113,9 +113,7 @@ export class ExecutorService {
     }
 
     if (createExecutorDto?.phone !== user.phone) {
-      console.log('phone')
       const data = await this.executor.findOne({ where: { phone: createExecutorDto.phone } });
-      console.log(data)
       if (data) {
         if (data.confirmed_phone) {
           phone = true;

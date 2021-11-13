@@ -25,7 +25,6 @@ export class RolesGuard implements CanActivate {
     if (hasRole()) {
       hasPermission = true;
     }
-    console.log(user)
     return user && hasPermission;
   }
 }

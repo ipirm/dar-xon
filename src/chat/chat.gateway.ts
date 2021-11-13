@@ -50,7 +50,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage("message")
   async handleMessage(@ConnectedSocket() socket: Socket, @MessageBody() data: any): Promise<any> {
-    console.log(data)
     let body;
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
     if (data.data.m_type === MessageType.Text) {
@@ -83,7 +82,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       throw new WsException("Invalid credentials.");
     }
     const message = await this.chat.saveMessage(body);
-    console.log(message)
     this.server.in("room-" + socket.handshake.query.chat_id).emit("message", message);
   }
 

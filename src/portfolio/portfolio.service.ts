@@ -58,8 +58,7 @@ export class PortfolioService {
   }
 
   async findOne(id: number, userId: number): Promise<Portfolio> {
-    console.log(id)
-    console.log(userId)
+
     const data = this.portfolio.createQueryBuilder("portfolio")
       .leftJoinAndSelect("portfolio.executor", "executor")
       .leftJoinAndSelect("portfolio.category", "category")

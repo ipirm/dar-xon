@@ -106,7 +106,6 @@ export class AuthService {
   }
 
   async confirmNumber(confirmDto: ConfirmDto, role: Role): Promise<any> {
-    console.log(confirmDto)
     let user: any = null;
 
     if (role === Role.Customer)

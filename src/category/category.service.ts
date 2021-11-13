@@ -47,7 +47,6 @@ export class CategoryService {
   }
 
   async updateCategory(id: number, createCategoryDto: CreateCategoryDto): Promise<UpdateResult> {
-    console.log(id);
     const cat = this.category.create({ name: createCategoryDto.name });
     if (createCategoryDto.parent) {
       const parent = await this.category.findOne(createCategoryDto.parent);

@@ -22,7 +22,6 @@ const handleSubmitNewMessage = () => {
 };
 
 socket.on("message", (data) => {
-  console.log(data);
   if (data.m_type === "text") {
     handleNewMessage(data.text);
   }
