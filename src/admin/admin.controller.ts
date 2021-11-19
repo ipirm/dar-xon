@@ -66,21 +66,47 @@ export class AdminController {
     type: String
   })
   @ApiImplicitQuery({
+    name: "date_before",
+    required: false,
+    type: String,
+    example: "2021-10-23T06:58:52.980Z"
+  })
+  @ApiImplicitQuery({
+    name: "date_after",
+    required: false,
+    type: String,
+    example: "2021-10-23T06:58:52.980Z"
+  })
+  @ApiImplicitQuery({
     name: "verified",
     required: false,
     type: Boolean
+  })
+  @ApiImplicitQuery({
+    name: "fullness_before",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "fullness_after",
+    required: false,
+    type: Number
   })
   @ApiParam({ name: "role", enum: Role })
   getListUsers(
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
-    @Query("banned") banned: boolean = false,
+    @Query("banned") banned: boolean,
     @Param("role") role: Role = Role.Executor,
-    @Query("search") search: number = null,
-    @Query("date") date: number = null,
-    @Query("verified") verified: boolean
+    @Query("search") search: number,
+    @Query("date") date: string,
+    @Query("verified") verified: boolean,
+    @Query("fullness_before") fullnessBefore: number,
+    @Query("fullness_after") fullnessAfter: number,
+    @Query("date_before") dateBefore: string,
+    @Query("date_after") dateAfter: string,
   ): Promise<Pagination<Admin>> {
-    return this.admin.getListUsers(page, limit, role, banned,search,date,verified);
+    return this.admin.getListUsers(page, limit, role, banned, search, date, verified, fullnessBefore, fullnessAfter,dateBefore,dateAfter);
   }
 
   @ApiBearerAuth()
@@ -195,7 +221,7 @@ export class AdminController {
   @ApiBearerAuth()
   @hasRoles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Put("customer/banned/:id")
+  @Put("customer/unbanned/:id")
   @ApiOperation({ summary: "Раблокировать заказчика" })
   @ApiImplicitParam({
     name: "id",
@@ -211,7 +237,7 @@ export class AdminController {
   @ApiBearerAuth()
   @hasRoles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Put("executor/banned/:id")
+  @Put("executor/unbanned/:id")
   @ApiOperation({ summary: "Раблокировать исполнителя" })
   @ApiImplicitParam({
     name: "id",
@@ -255,6 +281,39 @@ export class AdminController {
   ): Promise<UpdateResult> {
     return this.admin.updateExecutor(id);
   }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put("customer/unverify/:id")
+  @ApiOperation({ summary: "Разверефицировать заказчика" })
+  @ApiImplicitParam({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  updateVerifyCustomer(
+    @Param("id") id: number
+  ): Promise<UpdateResult> {
+    return this.admin.updateVerifyCustomer(id);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put("executor/unverify/:id")
+  @ApiOperation({ summary: "Разверефицировать исполнителя" })
+  @ApiImplicitParam({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  updateVerifyExecutor(
+    @Param("id") id: number
+  ): Promise<UpdateResult> {
+    return this.admin.updateVerifyExecutor(id);
+  }
+
 
   @ApiBearerAuth()
   @hasRoles(Role.Admin)
@@ -321,4 +380,14 @@ export class AdminController {
     return this.admin.deleteAdmin(id);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Delete("task/:id")
+  @ApiOperation({ summary: "Удалить задачу" })
+  deleteTask(
+    @Param("id") id: number
+  ): Promise<DeleteResult> {
+    return this.admin.deleteTask(id);
+  }
 }

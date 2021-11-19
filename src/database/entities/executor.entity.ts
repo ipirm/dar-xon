@@ -75,9 +75,12 @@ export class Executor extends BaseEntity {
 
   @BeforeUpdate()
   async generatePasswordHashUpdate(): Promise<void> {
-    if(this.password !== this.password)
+    if (this.password !== this.password)
       this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
+
+  @Column({ type: "integer", default: 0 })
+  fullness: number;
 
   @Column({ type: "integer", default: 10, select: false })
   salt: number;
@@ -125,6 +128,7 @@ export class Executor extends BaseEntity {
   forms: Mail[];
 
   @Column({ nullable: true })
+  @Index({ fulltext: true })
   city: string;
 
   @Column({
@@ -138,7 +142,6 @@ export class Executor extends BaseEntity {
 
   @Column({ default: null, select: false })
   password_code: number;
-
 
 
 }

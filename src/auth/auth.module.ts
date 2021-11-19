@@ -15,6 +15,7 @@ import { Admin } from "../database/entities/admin.entity";
 import { AdminService } from "../admin/admin.service";
 import { Mail } from "../database/entities/mail.entity";
 import { HttpModule } from "@nestjs/axios";
+import { Task } from "../database/entities/task.entity";
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { HttpModule } from "@nestjs/axios";
       signOptions: { expiresIn: "286400s" }
     }),
     HttpModule,
-    TypeOrmModule.forFeature([Customer, Executor, Admin, Mail]),
+    TypeOrmModule.forFeature([Customer, Executor, Admin, Mail,Task]),
     AwsModule
   ],
   providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard, AdminService],

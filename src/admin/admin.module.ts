@@ -7,10 +7,11 @@ import { AwsModule } from "../aws/aws.module";
 import { Executor } from "../database/entities/executor.entity";
 import { Customer } from "../database/entities/customer.entity";
 import { Mail } from "../database/entities/mail.entity";
+import { Task } from "../database/entities/task.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Admin, Executor, Customer,Mail]),
+    TypeOrmModule.forFeature([Admin, Executor, Customer, Mail, Task]),
     AwsModule
   ],
   controllers: [AdminController],

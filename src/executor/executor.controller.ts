@@ -43,7 +43,11 @@ export class ExecutorController {
     { name: "file_passport", maxCount: 1 },
     { name: "file_passport_2", maxCount: 1 },
     { name: "avatar", maxCount: 1 }
-  ]))
+  ], {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   @ApiCreatedResponse({ type: CreateExecutorDto })
   saveExecutor(
     @UploadedFiles() files: Express.Multer.File[],
@@ -74,7 +78,11 @@ export class ExecutorController {
     { name: "file_passport", maxCount: 1 },
     { name: "file_passport_2", maxCount: 1 },
     { name: "avatar", maxCount: 1 }
-  ]))
+  ], {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   updateExecutor(
     @Param("id") id: number,
     @Body() createExecutorDto: CreateExecutorDto,

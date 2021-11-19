@@ -94,15 +94,55 @@ export class CustomerService {
   }
 
   async getOne(id: number): Promise<Customer> {
-    let full: object = {};
     const user = await this.customer.findOne(id);
+    let full: object = {};
     for (const [key, value] of Object.entries(user)) {
       if (value !== null) {
-        Object.assign(full, { [key]: value });
+        if (key !== "files") {
+          if (typeof value === "string") {
+            if (value.length > 0) {
+              Object.assign(full, { [key]: value });
+            }
+          } else {
+            Object.assign(full, { [key]: value });
+          }
+        }
       }
     }
-    Object.assign(user, { fullness: Math.ceil(Object.entries(full).length / Object.entries(user).length * 100) });
-    return user;
+
+    await this.customer.update(id, { fullness: Math.ceil(Object.entries(full).length / (Object.entries(user).length - 2) * 100) });
+    return await this.customer.findOne(id, {
+      select: [
+        "id",
+        "fio",
+        "email",
+        "avatar",
+        "login",
+        "phone",
+        "fullness",
+        "company_name",
+        "company_address",
+        "company_real_address",
+        "position",
+        "sign",
+        "rights_no",
+        "rights_date",
+        "rights_expire",
+        "city",
+        "inn",
+        "ogrn",
+        "сhecking_account",
+        "corporate_account",
+        "bik",
+        "site",
+        "files",
+        "customer_type",
+        "confirmed_email",
+        "confirmed_phone",
+        "banned",
+        "verified"
+      ]
+    });
   }
 
   async updateCustomer(id: number, createCustomerDto: CreateCustomerDto, files: Express.Multer.File[]): Promise<UpdateResult> {
@@ -110,6 +150,15 @@ export class CustomerService {
     let email = false;
     let phone = false;
     let login = false;
+
+    for (const [key, value] of Object.entries(createCustomerDto)) {
+      if (user[key]?.length !== 0 && value?.length === 0) {
+        throw new HttpException({
+          status: HttpStatus.CONFLICT,
+          error: `Поле ${CustomerErrors[key]} не может быть пустым`
+        }, HttpStatus.CONFLICT);
+      }
+    }
 
     if (createCustomerDto?.email !== user.email) {
       const data = await this.customer.findOne({ where: { email: createCustomerDto.email } });
@@ -156,7 +205,7 @@ export class CustomerService {
     if (phone)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегистрирована"
+        error: "Данный номер уже зарегистрирован"
       }, HttpStatus.CONFLICT);
 
     if (login)
@@ -475,5 +524,6 @@ export class CustomerService {
       status: HttpStatus.OK
     };
   }
+
 
 }

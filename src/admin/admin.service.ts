@@ -11,6 +11,8 @@ import { Role } from "../enums/roles.enum";
 import { Mail } from "../database/entities/mail.entity";
 import * as bcrypt from "bcrypt";
 import { CheckUserDto } from "../auth/dto/check-user.dto";
+import { Task } from "../database/entities/task.entity";
+import { TaskStatusEnum } from "../enums/taskStatus.enum";
 
 @Injectable()
 export class AdminService {
@@ -18,6 +20,7 @@ export class AdminService {
     @InjectRepository(Admin) private readonly admin: Repository<Admin>,
     @InjectRepository(Executor) private readonly executor: Repository<Executor>,
     @InjectRepository(Customer) private readonly customer: Repository<Customer>,
+    @InjectRepository(Task) private readonly task: Repository<Task>,
     @InjectRepository(Mail) private readonly mail: Repository<Mail>,
     private readonly aws: AwsService
   ) {
@@ -72,6 +75,14 @@ export class AdminService {
     return await this.executor.update(id, { verified: true });
   }
 
+  async updateVerifyCustomer(id: number): Promise<UpdateResult> {
+    return await this.customer.update(id, { verified: false });
+  }
+
+  async updateVerifyExecutor(id: number): Promise<UpdateResult> {
+    return await this.executor.update(id, { verified: false });
+  }
+
   async bannedCustomer(id: number): Promise<UpdateResult> {
     return await this.customer.update(id, { banned: true });
   }
@@ -88,29 +99,48 @@ export class AdminService {
     return await this.executor.update(id, { banned: false });
   }
 
-  async getListUsers(page, limit, role: Role, banned: boolean, search, date, verified: boolean): Promise<Pagination<any>> {
+  async getListUsers(page, limit, role: Role, banned: boolean, search, date, verified: boolean, fullnessBefore, fullnessAfter, dateBefore, dateAfter): Promise<Pagination<any>> {
     let data: any = [];
     const searchText = decodeURI(search).toLowerCase();
     const dataText = decodeURI(date);
 
     if (role === Role.Executor) {
-      data = this.executor.createQueryBuilder("e").addSelect(["e.banned", "e.verified"]).where("e.banned = :banned", { banned: banned });
+      data = this.executor.createQueryBuilder("e").addSelect(["e.banned"]).where("e.banned = :banned", { banned: banned });
     }
 
     if (role === Role.Customer) {
-      data = this.customer.createQueryBuilder("e").addSelect(["e.banned", "e.verified"]).where("e.banned = :banned", { banned: banned });
+      data = this.customer.createQueryBuilder("e").addSelect(["e.banned"]).where("e.banned = :banned", { banned: banned });
     }
 
     if (date) {
       data.andWhere("e.createdAt = :date", { date: dataText });
     }
     if (search) {
-      data.andWhere("LOWER(e.fio) ILIKE :value", { value: `%${searchText}%` });
+      data.andWhere("(LOWER(e.fio) ILIKE :value OR LOWER(e.city) ILIKE :value)", { value: `%${searchText}%` });
     }
+
+    if (fullnessBefore && fullnessAfter) {
+      console.log("fafaf")
+      data.andWhere("(e.fullness BETWEEN :before AND :after)", {
+        before: fullnessBefore,
+        after: fullnessAfter
+      });
+    }
+
+    if (dateBefore && dateAfter) {
+      data.andWhere("(e.createdAt BETWEEN :beforeDate AND :afterDate)", {
+        beforeDate: decodeURI(dateBefore),
+        afterDate: decodeURI(dateAfter)
+      });
+    }
+
     if (verified)
       data.andWhere("e.verified = :verified", { verified: verified });
 
-    data.select(["e.id", "e.fio", "e.createdAt", "e.avatar", "e.city"]);
+    if (banned)
+      data.andWhere("e.banned = :banned", { banned: banned });
+
+    data.select(["e.id", "e.fio", "e.createdAt", "e.avatar", "e.city", "e.fullness"]);
     data.orderBy("e.createdAt", "DESC");
     return paginate(data, { page, limit });
   }
@@ -195,5 +225,9 @@ export class AdminService {
     return {
       status: HttpStatus.OK
     };
+  }
+
+  async deleteTask(id: number): Promise<DeleteResult> {
+    return await this.task.update(id, { status: TaskStatusEnum.Deleted });
   }
 }

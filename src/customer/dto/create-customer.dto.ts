@@ -18,7 +18,7 @@ export class CreateCustomerDto {
   @IsString()
   email: string;
 
-  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: true })
+  @ApiProperty({ example: "+7945642223", description: "Номер телефона", required: false })
   @IsString()
   phone: string;
 

@@ -36,6 +36,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.connectedUsers.push({ socketId: socket.id, online: true, id: decoded.id, role: decoded.role });
     console.log("connected");
     this.setOnline(socket);
+    this.setOnlineNew({ socketId: socket.id, online: true, id: decoded.id, role: decoded.role });
     // @ts-ignore
     if (socket.handshake.query.chat_id != 0)
       await this.onRoomJoin(socket, { data: socket.handshake.query.chat_id });
@@ -45,7 +46,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.connectedUsers = this.connectedUsers.filter(item => item?.socketId !== socket.id);
     console.log("disconnected");
     this.setOnline(socket);
-    this.onRoomLeave(socket, { data: socket.handshake.query.chat_id });
+    this.setOffline(this.connectedUsers.find(item => item?.socketId === socket.id));
+
+    // @ts-ignore
+    if (socket.handshake.query.chat_id != 0)
+      this.onRoomLeave(socket, { data: socket.handshake.query.chat_id });
   }
 
   @SubscribeMessage("message")
@@ -85,7 +90,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.server.in("room-" + socket.handshake.query.chat_id).emit("message", message);
   }
 
-
   @SubscribeMessage("join")
   async onRoomJoin(@ConnectedSocket() socket: Socket, @MessageBody() data: any) {
     const user = this.connectedUsers.find(i => i.socketId === socket.id);
@@ -111,4 +115,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     socket.broadcast.emit("onlineList", this.connectedUsers);
   }
 
+  setOnlineNew(data): void {
+    this.chat.setOnline(data);
+  }
+
+  setOffline(data): void {
+    this.chat.setOffline(data);
+  }
 }

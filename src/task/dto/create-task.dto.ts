@@ -20,7 +20,7 @@ export class CreateTaskDto {
   @ApiProperty({
     example: 1,
     description: "Категория id нужно посылать самую нижнию по иерархие категоирию",
-    required: true
+    required: false
   })
   category: any;
 
@@ -28,7 +28,7 @@ export class CreateTaskDto {
   @ApiProperty({
     example: 1,
     description: "Тип задачи",
-    required: true
+    required: false
   })
   task_type: any;
 

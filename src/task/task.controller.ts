@@ -123,7 +123,11 @@ export class TaskController {
   @ApiCreatedResponse({ type: CreateTaskDto })
   @hasRoles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseInterceptors(FilesInterceptor("files", 10))
+  @UseInterceptors(FilesInterceptor("files", 10, {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   @Post("")
   createTask(
     @Body() createTaskDto: CreateTaskDto,
@@ -138,17 +142,21 @@ export class TaskController {
   @ApiOperation({ summary: "Обновить задачу" })
   @ApiCreatedResponse({ type: CreateTaskDto })
   @ApiParam({ name: "id", example: 4, type: Number })
-  @hasRoles(Role.Customer)
+  @hasRoles(Role.Customer,Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseInterceptors(FilesInterceptor("files", 10))
+  @UseInterceptors(FilesInterceptor("files", 10, {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   @Put(":id")
   updateTask(
     @Body() createTaskDto: CreateTaskDto,
     @UserDecorator() user: any,
     @UploadedFiles() files: Array<Express.Multer.File>,
-    @Param("id") id: number,
-  ): Promise<Task> {
-    return this.task.updateTask(createTaskDto, user, files,id);
+    @Param("id") id: number
+  ): Promise<UpdateResult> {
+    return this.task.updateTask(createTaskDto, user, files, id);
   }
 
   @ApiBearerAuth()
@@ -349,11 +357,15 @@ export class TaskController {
     return this.task.findOne(id, user);
   }
 
+  @ApiBearerAuth()
+  @hasRoles(Role.Customer)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(":id")
   @ApiOperation({ summary: "Удалить задачу" })
   deleteCustomer(
-    @Param("id") id: number
+    @Param("id") id: number,
+    @UserDecorator() user: any
   ): Promise<DeleteResult> {
-    return this.task.deleteTask(id);
+    return this.task.deleteTask(id, user);
   }
 }

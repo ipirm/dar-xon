@@ -80,15 +80,49 @@ export class ExecutorService {
   }
 
   async getOne(id: number): Promise<Executor> {
-    let full: object = {};
     const user = await this.executor.findOne(id);
+    let full: object = {};
     for (const [key, value] of Object.entries(user)) {
-      if (value !== null) {
-        Object.assign(full, { [key]: value });
+      if (value !== null && key !== "file_rose_ticket" && key !== "file_passport" && key !== "file_passport_2") {
+        if (typeof value === "string") {
+          if (value.length > 0) {
+            Object.assign(full, { [key]: value });
+          }
+        } else {
+          Object.assign(full, { [key]: value });
+        }
       }
     }
-    Object.assign(user, { fullness: Math.ceil(Object.entries(full).length / Object.entries(user).length * 100) });
-    return user;
+    await this.executor.update(id, { fullness: Math.ceil(Object.entries(full).length / (Object.entries(user).length - 3) * 100) });
+
+    return await this.executor.findOne(id, {
+      select: [
+        "id",
+        "fio",
+        "phone",
+        "address",
+        "passport_series",
+        "passport_number",
+        "passport_issuer",
+        "passport_issued_at",
+        "birthdate",
+        "file_rose_ticket",
+        "file_passport",
+        "file_passport_2",
+        "login",
+        "avatar",
+        "about",
+        "email",
+        "site",
+        "rating",
+        "fullness",
+        "confirmed_email",
+        "confirmed_phone",
+        "banned",
+        "verified",
+        "city"
+      ]
+    });
   }
 
   async updateExecutor(id: number, createExecutorDto: CreateExecutorDto, files: Express.Multer.File[]): Promise<UpdateResult> {
@@ -97,6 +131,15 @@ export class ExecutorService {
     let phone = false;
     let login = false;
 
+
+    for (const [key, value] of Object.entries(createExecutorDto)) {
+      if (user[key]?.length !== 0 && value?.length === 0) {
+        throw new HttpException({
+          status: HttpStatus.CONFLICT,
+          error: `Поле ${ExecutorsErrors[key]} не может быть пустым`
+        }, HttpStatus.CONFLICT);
+      }
+    }
 
     if (createExecutorDto?.email !== user.email) {
       const data = await this.executor.findOne({ where: { email: createExecutorDto.email } });
@@ -107,7 +150,7 @@ export class ExecutorService {
           await this.executor.update(data.id, { email: null });
           await this.executor.update(id, { confirmed_email: false });
         }
-      }else{
+      } else {
         await this.executor.update(id, { confirmed_email: false });
       }
     }
@@ -448,6 +491,5 @@ export class ExecutorService {
       status: HttpStatus.OK
     };
   }
-
 
 }

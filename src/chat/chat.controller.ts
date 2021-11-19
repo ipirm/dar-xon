@@ -116,7 +116,11 @@ export class ChatController {
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileFieldsInterceptor([
     { name: "file", maxCount: 1 }
-  ]))
+  ], {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   @ApiOperation({ summary: "Отправка Файла в чат" })
   @ApiCreatedResponse({ type: CreateFileDto })
   saveFile(

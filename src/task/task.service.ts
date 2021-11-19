@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { Task } from "../database/entities/task.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { Repository, UpdateResult } from "typeorm";
 import { paginate, Pagination } from "nestjs-typeorm-paginate";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { AwsService } from "../aws/aws.service";
@@ -64,6 +64,7 @@ export class TaskService {
       .leftJoin("parent.parent", "parent1")
       .leftJoin("task.criteria", "criteria")
       .leftJoin("task.task_type", "task_type")
+      .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
     if (participantsCount) {
@@ -132,7 +133,7 @@ export class TaskService {
         status: HttpStatus.FORBIDDEN,
         error: `Задачи с id не существует ${createResponseDto.task}`
       }, HttpStatus.FORBIDDEN);
-    
+
 
     const response = await this.response.createQueryBuilder("r")
       .select(["r.id", "executor.id", "task.id"])
@@ -186,6 +187,7 @@ export class TaskService {
     const task = await this.task.createQueryBuilder("task")
       .select(["task.id", "created_by.id", "task.participants", "rs.id", "task.status"])
       .where("task.id = :id", { id: startTaskDto.task })
+      .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.responses", "rs")
       .leftJoinAndSelect("rs.executor", "ex")
@@ -242,6 +244,7 @@ export class TaskService {
     const task = await this.task.createQueryBuilder("task")
       .select(["task.id", "created_by.id", "task.status", "ex.id"])
       .where("task.id = :id", { id: finishTaskDto.task })
+      .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.executors", "ex")
       .getOne();
@@ -320,6 +323,7 @@ export class TaskService {
       .leftJoin("responses.executor", "executor1")
       .leftJoin("task.criteria", "criteria")
       .leftJoin("task.task_type", "task_type")
+      .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
 
     if (participantsCount) {
@@ -344,6 +348,7 @@ export class TaskService {
     if (cat) {
       data.andWhere("(category.id IN (:...cat) OR parent.id IN (:...cat) OR parent1.id IN (:...cat))", { cat: [...cat.split(",")] });
     }
+
 
     if (state === ExecutorTypeTaskEnum.Execution) {
       data.andWhere("task.status = :started", { started: "started" });
@@ -407,6 +412,7 @@ export class TaskService {
       .leftJoin("task.responses", "responses")
       .leftJoin("responses.executor", "executor")
       .leftJoin("task.task_type", "task_type")
+      .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .andWhere("created_by.id = :created_by", { created_by: user.id });
 
@@ -454,8 +460,24 @@ export class TaskService {
     return paginate(data, { page, limit });
   }
 
-  async deleteTask(id: number): Promise<DeleteResult> {
-    return await this.task.delete(id);
+  async deleteTask(id: number, user): Promise<UpdateResult> {
+    const task = await this.task.findOne(id, { relations: ["created_by"] });
+
+    if (!task)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Задачи с id не существует ${id}`
+      }, HttpStatus.FORBIDDEN);
+
+
+    if (task.created_by.id !== user.id)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `Вы не являетесь создателем задачи`
+      }, HttpStatus.FORBIDDEN);
+
+
+    return await this.task.update(id, { status: TaskStatusEnum.Deleted });
   }
 
   async findOne(id: number, user): Promise<any> {
@@ -502,6 +524,7 @@ export class TaskService {
       .leftJoin("responses.executor", "executor")
       .leftJoin("task.executors", "executors")
       .leftJoin("task.criteria", "criteria")
+      .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .getOne();
 
@@ -518,7 +541,7 @@ export class TaskService {
     return Object.assign(data, { chats: chat });
   }
 
-  async updateTask(createTaskDto, user, files, id): Promise<Task> {
+  async updateTask(createTaskDto, user, files, id): Promise<UpdateResult> {
     const images: any = [];
     if (files) {
       for (const value of files) {
@@ -531,9 +554,9 @@ export class TaskService {
     if (createTaskDto.criteria) {
       const criteria = await this.criteria.findByIds(createTaskDto.criteria.split(","));
       Object.assign(createTaskDto, { criteria: criteria });
-
     }
-    return await this.task.save({ id: id, ...createTaskDto });
+
+    return await this.task.update(id, { ...createTaskDto });
   }
 
 }

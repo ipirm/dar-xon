@@ -150,7 +150,7 @@ export class AuthService {
     return data;
   }
 
-  async contactUs(createContactDto: CreateContactDto, user, files): Promise<Mail> {
+  async contactUs(createContactDto: CreateContactDto, user, files): Promise<any> {
     const images: Array<any> = [];
     if (files) {
       for (const value of files) {
@@ -165,7 +165,29 @@ export class AuthService {
     if (user.role === Role.Executor) {
       Object.assign(createContactDto, { executor: user.id });
     }
-    return await this.contact.save(this.contact.create(createContactDto));
+
+    const contact = await this.contact.save(this.contact.create(createContactDto));
+
+    const sendFiles = `<br>${contact?.files?.map(i => i.url + `<br><br>`)}<br>`?.split(",")?.join(" ");
+
+    const body = `
+     Почта: ${contact.email}<br>
+     Фио: ${contact.fio}<br>
+     Тема: ${contact.theme}<br>
+     Текст: ${contact.text}<br>
+     Тип пользователя: ${user.role === Role.Customer ? "Заказчик" : "Исполнитель"} <br>
+     Файлы: ${sendFiles}
+    `;
+
+    const theme = "Форма Обратной Связи";
+    const sendTo = "Ivr@x-on.ru";
+
+    return this.httpService.get(
+      `https://api.unisender.com/ru/api/sendEmail?format=json&api_key=${process.env.API_UNISENDER}&email=${encodeURI(sendTo)}&sender_name=1dar&sender_email=${process.env.SENDER_EMAIL}&subject=${encodeURI(theme)}&body=${encodeURI(body)}&list_id=1`)
+      .pipe(
+        map(response => response.data)
+      );
+
   }
 
   async requestNewPassword(emailRequestDto: EmailRequestDto, role: Role): Promise<any> {

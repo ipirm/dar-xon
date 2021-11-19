@@ -24,7 +24,6 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { DeleteResult, UpdateResult } from "typeorm";
-import { ApiImplicitParam } from "@nestjs/swagger/dist/decorators/api-implicit-param.decorator";
 
 @ApiTags("Portfolio")
 @Controller("portfolio")
@@ -78,7 +77,11 @@ export class PortfolioController {
     { name: "image", maxCount: 1 },
     { name: "logo", maxCount: 1 },
     { name: "files", maxCount: 10 }
-  ]))
+  ], {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   @ApiCreatedResponse({ type: CreatePortfolioDto })
   savePortfolio(
     @UploadedFiles() files: Express.Multer.File[],
@@ -119,7 +122,11 @@ export class PortfolioController {
     { name: "image", maxCount: 1 },
     { name: "logo", maxCount: 1 },
     { name: "files", maxCount: 10 }
-  ]))
+  ], {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   updatePortfolio(
     @Param("id") id: number,
     @Body() createPortfolioDto: CreatePortfolioDto,

@@ -1,4 +1,4 @@
-import { BeforeUpdate, Column, Entity } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
 import { BaseEntity } from "./base.entity";
 import * as bcrypt from "bcrypt";
 
@@ -17,6 +17,11 @@ export class Admin extends BaseEntity {
 
   @Column({ select: false, nullable: true })
   password: string;
+
+  @BeforeInsert()
+  async generatePasswordHashInsert(): Promise<void> {
+    this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
+  }
 
   @BeforeUpdate()
   async generatePasswordHash(): Promise<void> {

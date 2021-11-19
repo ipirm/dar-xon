@@ -39,7 +39,11 @@ export class CustomerController {
   @Post("")
   @UseInterceptors(FileFieldsInterceptor([
     { name: "avatar", maxCount: 1 }
-  ]))
+  ], {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: "Создать заказчика" })
   @ApiCreatedResponse({ type: CreateCustomerDto })
@@ -68,7 +72,11 @@ export class CustomerController {
   @UseInterceptors(FileFieldsInterceptor([
     { name: "avatar", maxCount: 1 },
     { name: "files", maxCount: 10 }
-  ]))
+  ], {
+    limits: {
+      fileSize: 30000000
+    }
+  }))
   @ApiOperation({ summary: "Обновить заказчика" })
   @ApiCreatedResponse({ type: CreateCustomerDto })
   updateCustomer(

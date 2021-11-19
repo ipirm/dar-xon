@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ReviewService } from "./review.service";
 import { Review } from "../database/entities/review.entity";
@@ -12,6 +12,7 @@ import { CreateCommentDto } from "./dto/create-comment.dto";
 import { CommentExecutor } from "../database/entities/comment.entity";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
+import { DeleteResult } from "typeorm";
 
 
 @ApiTags("Review")
@@ -96,6 +97,59 @@ export class ReviewController {
     @Query("executor") executor: number,
     @UserDecorator() user: any
   ): Promise<Review> {
-    return this.review.checkForReview(executor,user);
+    return this.review.checkForReview(executor, user);
   }
+
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get("review")
+  @ApiOperation({ summary: "Получить все отзывы" })
+  @ApiImplicitQuery({
+    name: "page",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "limit",
+    required: false,
+    type: Number
+  })
+  @ApiImplicitQuery({
+    name: "with_comment",
+    required: false,
+    type: Boolean,
+    example: false
+  })
+  getReviews(
+    @Query("with_comment") withComment: boolean,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100
+  ): Promise<Pagination<Review>> {
+    return this.review.getReviews(withComment, page, limit);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Delete("review/:id")
+  @ApiOperation({ summary: "Удалить отзыв" })
+  deleteReview(
+    @Param("id") id: number
+  ): Promise<DeleteResult> {
+    return this.review.deleteReview(id);
+  }
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Delete("comment/:id")
+  @ApiOperation({ summary: "Удалить коментарий" })
+  deleteComment(
+    @Param("id") id: number
+  ): Promise<DeleteResult> {
+    return this.review.deleteComment(id);
+  }
+
 }

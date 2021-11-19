@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Review } from "../database/entities/review.entity";
-import { Repository } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
 import { CreateReviewDto } from "./dto/create-review.dto";
 import { Executor } from "../database/entities/executor.entity";
 import { CommentExecutor } from "../database/entities/comment.entity";
@@ -96,6 +96,38 @@ export class ReviewService {
       status: HttpStatus.OK,
       message: `Вы не оставляли отзыв ${executor} исполнителю`
     };
+  }
+
+  async deleteReview(id: number): Promise<DeleteResult> {
+    let rating: number = 0;
+    const review = await this.review.findOne(id);
+    const executor = await this.executor.createQueryBuilder("e")
+      .select(["e.id", "r.id", "r.rating"])
+      .leftJoin("e.reviews", "r")
+      .loadRelationCountAndMap("r.reviewsCount", "e.reviews", "reviewsCount")
+      .getOne();
+
+    executor.reviews.forEach((i) => {
+      rating += i.rating;
+    });
+
+    // @ts-ignore
+    await this.executor.update(createReviewDto.executor, { rating: (rating - review.rating) / parseInt(executor?.reviewsCount) });
+
+    return await this.review.delete(id);
+  }
+
+  async deleteComment(id: number): Promise<DeleteResult> {
+    return await this.review.delete(id);
+  }
+
+  async getReviews(withComment, page, limit): Promise<Pagination<Review>> {
+    const reviews = this.review.createQueryBuilder("r");
+
+    if (withComment)
+      reviews.leftJoinAndSelect("r.comments", "c");
+
+    return await paginate(reviews, { page, limit });
   }
 
 }

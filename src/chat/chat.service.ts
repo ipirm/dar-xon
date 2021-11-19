@@ -13,12 +13,15 @@ import { Role } from "../enums/roles.enum";
 import { MessagesReadCustomer } from "../database/entities/messages-read-customer.entity";
 import { WsException } from "@nestjs/websockets";
 import { ChatStatus } from "../enums/chatStatus";
+import { TaskStatusEnum } from "../enums/taskStatus.enum";
+import { Customer } from "../database/entities/customer.entity";
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectRepository(ChatRoom) private readonly chat: Repository<ChatRoom>,
     @InjectRepository(Executor) private readonly executor: Repository<Executor>,
+    @InjectRepository(Customer) private readonly customer: Repository<Customer>,
     @InjectRepository(Message) private readonly message: Repository<Message>,
     @InjectRepository(MessagesReadExecutor) private readonly messageReadExecutor: Repository<MessagesReadExecutor>,
     @InjectRepository(MessagesReadCustomer) private readonly messagesReadCustomer: Repository<MessagesReadCustomer>,
@@ -37,6 +40,7 @@ export class ChatService {
         "executors.avatar",
         "task.id",
         "task.title",
+        "task.status",
         "category.id",
         "category.name",
         "parent.id",
@@ -53,6 +57,7 @@ export class ChatService {
       .leftJoin("chat.customer", "customer")
       .leftJoin("chat.messages", "messages")
       .andWhere("(executors.id = :chh OR customer.id = :chh)", { chh: user.id })
+      .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
 
     if (status) {
       data.andWhere("chat.status = :st", { st: status });
@@ -93,7 +98,7 @@ export class ChatService {
 
     for (const value of chats.items) {
       let message = await this.message.createQueryBuilder("m")
-        .select(["m.id", "m.text", "m.createdAt", "executor.id", "executor.fio", "executor.avatar", "customer.id", "customer.fio", "customer.avatar"])
+        .select(["m.id", "m.text", "m.createdAt", "executor.id", "executor.fio", "executor.avatar", "executor.online", "customer.id", "customer.fio", "customer.avatar", "customer.online"])
         .leftJoin("m.chat", "c")
         .where("c.id = :id", { id: value.id })
         .leftJoin("m.executor", "executor")
@@ -150,8 +155,8 @@ export class ChatService {
       .andWhere("c.id = :id", { id: createMessageDto.chat })
       .getOne();
 
-    // if (room.status === ChatStatus.Archive)
-    //   throw new WsException("Чат архивирован");
+    if (room.status === ChatStatus.Archive)
+      throw new WsException("Чат архивирован");
 
     if (!room)
       throw new WsException("У вас нет доступа к чату");
@@ -185,7 +190,9 @@ export class ChatService {
         "e.rating",
         "c.id",
         "c.avatar",
-        "c.fio"
+        "c.fio",
+        "e.online",
+        "c.online"
       ])
       .where("m.id = :id", { id: message.id })
       .leftJoin("m.customer", "c")
@@ -207,9 +214,11 @@ export class ChatService {
         "executor.id",
         "executor.fio",
         "executor.avatar",
+        "executor.online",
         "customer.id",
         "customer.fio",
-        "customer.avatar"
+        "customer.avatar",
+        "customer.online"
       ])
       .leftJoin("m.chat", "chat")
       .leftJoin("m.executor", "executor")
@@ -323,5 +332,29 @@ export class ChatService {
     return {
       unReadCount: data
     };
+  }
+
+  async setOnline(data): Promise<any> {
+
+    if (data.role === Role.Executor) {
+      await this.executor.update(data.id, { online: true });
+    }
+
+    if (data.role === Role.Customer) {
+      await this.customer.update(data.id, { online: true });
+    }
+
+  }
+
+  async setOffline(data): Promise<any> {
+
+    if (data.role === Role.Executor) {
+      await this.executor.update(data.id, { online: false });
+    }
+
+    if (data.role === Role.Customer) {
+      await this.customer.update(data.id, { online: false });
+    }
+
   }
 }

@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { config } from "aws-sdk";
 import { ValidationPipe } from "@nestjs/common";
+import * as bodyParser from 'body-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,9 @@ async function bootstrap() {
     .setVersion("1.0")
     .build();
   const document = SwaggerModule.createDocument(app, options);
+
+  app.use(bodyParser.json({limit: '50mb'}));
+  app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
   config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
