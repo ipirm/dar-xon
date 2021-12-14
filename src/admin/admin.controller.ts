@@ -92,6 +92,16 @@ export class AdminController {
     required: false,
     type: Number
   })
+  @ApiImplicitQuery({
+    name: "confirmed_email",
+    required: false,
+    type: Boolean
+  })
+  @ApiImplicitQuery({
+    name: "confirmed_phone",
+    required: false,
+    type: Boolean
+  })
   @ApiParam({ name: "role", enum: Role })
   getListUsers(
     @Query("page") page: number = 1,
@@ -105,8 +115,10 @@ export class AdminController {
     @Query("fullness_after") fullnessAfter: number,
     @Query("date_before") dateBefore: string,
     @Query("date_after") dateAfter: string,
+    @Query("confirmed_email") confirmed_email: boolean,
+    @Query("confirmed_phone") confirmed_phone: boolean
   ): Promise<Pagination<Admin>> {
-    return this.admin.getListUsers(page, limit, role, banned, search, date, verified, fullnessBefore, fullnessAfter,dateBefore,dateAfter);
+    return this.admin.getListUsers(page, limit, role, banned, search, date, verified, fullnessBefore, fullnessAfter,dateBefore,dateAfter,confirmed_email,confirmed_phone);
   }
 
   @ApiBearerAuth()
@@ -356,7 +368,7 @@ export class AdminController {
     { name: "avatar", maxCount: 1 }
   ]))
   @ApiCreatedResponse({ type: CreateAdminDto })
-  @ApiImplicitQuery({
+  @ApiParam({
     name: "id",
     required: true,
     type: Number
@@ -366,6 +378,7 @@ export class AdminController {
     @Body() createAdminDto: CreateAdminDto,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<UpdateResult> {
+    console.log(id)
     return this.admin.updateAdmin(id, createAdminDto, files);
   }
 

@@ -66,6 +66,12 @@ export class TaskController {
     example: "2021-10-08T06:31:16.544Z"
   })
   @ApiQuery({
+    name: "finished",
+    required: false,
+    type: String,
+    example: "2021-10-08T06:31:16.544Z"
+  })
+  @ApiQuery({
     name: "criteria",
     required: false,
     type: String,
@@ -111,9 +117,10 @@ export class TaskController {
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
     @Query("task_type") taskType: string,
-    @Query("participants_count") participantsCount: Boolean
+    @Query("participants_count") participantsCount: Boolean,
+    @Query("finished") finished: string
   ): Promise<Pagination<Task>> {
-    return this.task.getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount);
+    return this.task.getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount,finished);
   }
 
 
@@ -192,6 +199,12 @@ export class TaskController {
     example: "2021-10-08T06:31:16.544Z"
   })
   @ApiQuery({
+    name: "finished",
+    required: false,
+    type: String,
+    example: "2021-10-08T06:31:16.544Z"
+  })
+  @ApiQuery({
     name: "criteria",
     required: false,
     type: String,
@@ -241,9 +254,10 @@ export class TaskController {
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
     @Query("task_type") taskType: string,
-    @Query("participants_count") participantsCount: Boolean
+    @Query("participants_count") participantsCount: Boolean,
+    @Query("finished") finished: string
   ): Promise<Pagination<Task>> {
-    return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
+    return this.task.getAllExecutorTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount,finished);
   }
 
   @ApiQuery({
@@ -260,6 +274,12 @@ export class TaskController {
   })
   @ApiQuery({
     name: "started",
+    required: false,
+    type: String,
+    example: "2021-10-08T06:31:16.544Z"
+  })
+  @ApiQuery({
+    name: "finished",
     required: false,
     type: String,
     example: "2021-10-08T06:31:16.544Z"
@@ -314,9 +334,10 @@ export class TaskController {
     @Query("criteria") criteria: string,
     @Query("cat") cat: string,
     @Query("task_type") taskType: string,
-    @Query("participants_count") participantsCount: Boolean
+    @Query("participants_count") participantsCount: Boolean,
+    @Query("finished") finished: string
   ): Promise<Pagination<Task>> {
-    return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount);
+    return this.task.getAllCustomerTasks(user, state, page, limit, search, started, criteria, cat, taskType, participantsCount,finished);
   }
 
   @ApiBearerAuth()

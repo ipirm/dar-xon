@@ -14,6 +14,7 @@ import { PasswordDto } from "../auth/dto/password.dto";
 import { PhoneRequestDto } from "../auth/dto/phone-request.dto";
 import { PasswordPhoneDto } from "../auth/dto/password-phone.dto";
 import { CheckUserDto } from "../auth/dto/check-user.dto";
+import { Role } from "../enums/roles.enum";
 
 @Injectable()
 export class CustomerService {
@@ -94,7 +95,32 @@ export class CustomerService {
   }
 
   async getOne(id: number): Promise<Customer> {
-    const user = await this.customer.findOne(id);
+    const user = await this.customer.findOne(id, {
+      select: [
+        "fio",
+        "email",
+        "avatar",
+        "login",
+        "phone",
+        "company_name",
+        "company_address",
+        "company_real_address",
+        "position",
+        "rights_no",
+        "rights_date",
+        "rights_expire",
+        "city",
+        "inn",
+        "ogrn",
+        "сhecking_account",
+        "corporate_account",
+        "bik",
+        "kpp",
+        "bank_name",
+        "site",
+        "files"
+      ]
+    });
     let full: object = {};
     for (const [key, value] of Object.entries(user)) {
       if (value !== null) {
@@ -109,6 +135,7 @@ export class CustomerService {
         }
       }
     }
+    console.log(full);
 
     await this.customer.update(id, { fullness: Math.ceil(Object.entries(full).length / (Object.entries(user).length - 2) * 100) });
     return await this.customer.findOne(id, {
@@ -140,7 +167,9 @@ export class CustomerService {
         "confirmed_email",
         "confirmed_phone",
         "banned",
-        "verified"
+        "verified",
+        "kpp",
+        "bank_name"
       ]
     });
   }
@@ -160,7 +189,7 @@ export class CustomerService {
       }
     }
 
-    if (createCustomerDto?.email !== user.email) {
+    if (createCustomerDto?.email && createCustomerDto?.email !== user.email) {
       const data = await this.customer.findOne({ where: { email: createCustomerDto.email } });
       if (data) {
         if (data.confirmed_email) {
@@ -175,7 +204,7 @@ export class CustomerService {
     }
 
 
-    if (createCustomerDto?.phone !== user.phone) {
+    if (createCustomerDto?.phone && createCustomerDto?.phone !== user.phone) {
       const data = await this.customer.findOne({ where: { phone: createCustomerDto.phone } });
       if (data) {
         if (data.confirmed_phone) {
@@ -281,42 +310,33 @@ export class CustomerService {
   }
 
   async registrationCustomer(registrationCustomerDto: RegistrationCustomerDto): Promise<Customer> {
-    let email = false;
-    let phone = false;
+    const phoneExist = await this.customer.findOne({ phone: registrationCustomerDto.phone });
+    const loginExist = await this.customer.findOne({ login: registrationCustomerDto.login });
+    const emailExist = await this.customer.findOne({ email: registrationCustomerDto.email });
 
-    let data = await this.customer.createQueryBuilder("customer")
-      .where("customer.email = :email OR customer.phone = :phone OR customer.login = :login", {
-        email: registrationCustomerDto.email,
-        phone: registrationCustomerDto.phone,
-        login: registrationCustomerDto.login
-      }).getOne();
-
-    if (data) {
-      if (data.confirmed_email) {
-        email = true;
+    if (phoneExist) {
+      if (phoneExist.confirmed_phone) {
+        throw new HttpException({
+          status: HttpStatus.CONFLICT,
+          error: "Данный номер уже зарегистрирован"
+        }, HttpStatus.CONFLICT);
       } else {
-        await this.customer.update(data.id, { email: null });
-      }
-      if (data.confirmed_phone) {
-        phone = true;
-      } else {
-        await this.customer.update(data.id, { phone: null });
+        await this.customer.update(phoneExist.id, { phone: null });
       }
     }
 
-    if (email)
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегистрирована"
-      }, HttpStatus.CONFLICT);
+    if (emailExist) {
+      if (emailExist.confirmed_email) {
+        throw new HttpException({
+          status: HttpStatus.CONFLICT,
+          error: "Данная почта уже зарегистрирована"
+        }, HttpStatus.CONFLICT);
+      } else {
+        await this.customer.update(emailExist.id, { email: null });
+      }
+    }
 
-    if (phone)
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегистрирован"
-      }, HttpStatus.CONFLICT);
-
-    if (data?.login === registrationCustomerDto.login)
+    if (loginExist?.login === registrationCustomerDto.login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
         error: "Данный логин уже зарегистрирован"
@@ -525,5 +545,15 @@ export class CustomerService {
     };
   }
 
+
+  async findOneOrFail(id, user): Promise<any> {
+    if (user.role === Role.Admin)
+      return await this.customer.findOne(id);
+
+    return await this.customer.createQueryBuilder("e")
+      .select(["e.online", "e.id", "e.fio", "e.phone", "e.avatar", "e.email", "e.site", "e.company_name", "e.city"])
+      .where("e.id = :id",{id: id})
+      .getOne();
+  }
 
 }

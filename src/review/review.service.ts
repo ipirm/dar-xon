@@ -17,7 +17,7 @@ export class ReviewService {
   ) {
   }
 
-  async saveOne(createReviewDto: CreateReviewDto, user): Promise<Review> {
+  async saveOne(createReviewDto: CreateReviewDto, user): Promise<any> {
     let rating: number = 0;
     const review = await this.review.createQueryBuilder("c")
       .select(["c.id", "task.id", "executor.id", "customer.id"])
@@ -39,20 +39,26 @@ export class ReviewService {
     const executor = await this.executor.createQueryBuilder("e")
       .select(["e.id", "r.id", "r.rating"])
       .leftJoin("e.reviews", "r")
+      .where("e.id = :id", { id: createReviewDto.executor })
       .loadRelationCountAndMap("r.reviewsCount", "e.reviews", "reviewsCount")
       .getOne();
+
 
     executor.reviews.forEach((i) => {
       rating += i.rating;
     });
 
+
+    rating = rating + createReviewDto.rating;
+
     // @ts-ignore
-    await this.executor.update(createReviewDto.executor, { rating: rating / parseInt(executor?.reviewsCount) });
+    await this.executor.update(createReviewDto.executor, { rating: (rating / (parseInt(executor?.reviewsCount) + 1)).toFixed(1) });
 
     Object.assign(createReviewDto, { customer: user.id });
-    return await this.review.save(this.review.create(createReviewDto));
+    console.log(createReviewDto);
+    await this.review.save(createReviewDto);
+    return null;
   }
-
 
   async saveReviewComment(createCommentDto: CreateCommentDto, user): Promise<CommentExecutor> {
     return await this.comment.save(this.comment.create(createCommentDto));
@@ -99,11 +105,17 @@ export class ReviewService {
   }
 
   async deleteReview(id: number): Promise<DeleteResult> {
+    console.log(id);
     let rating: number = 0;
-    const review = await this.review.findOne(id);
+    const review = await this.review.createQueryBuilder("r")
+      .where("r.id = :id", { id: id })
+      .leftJoinAndSelect("r.executor", "executor")
+      .getOne();
+
     const executor = await this.executor.createQueryBuilder("e")
       .select(["e.id", "r.id", "r.rating"])
       .leftJoin("e.reviews", "r")
+      .where("e.id = :id", { id: review.executor.id })
       .loadRelationCountAndMap("r.reviewsCount", "e.reviews", "reviewsCount")
       .getOne();
 
@@ -112,13 +124,22 @@ export class ReviewService {
     });
 
     // @ts-ignore
-    await this.executor.update(createReviewDto.executor, { rating: (rating - review.rating) / parseInt(executor?.reviewsCount) });
+    await this.executor.update(executor.id, { rating: (rating - review.rating) / (parseInt(executor?.reviewsCount) - 1) });
+
+    const comment = await this.comment.createQueryBuilder("c")
+      .select(["c.id", "review.id"])
+      .leftJoin("c.review", "review")
+      .where("review.id = :id", { id: id })
+      .getOne();
+
+    if (comment)
+      await this.comment.delete(comment.id);
 
     return await this.review.delete(id);
   }
 
   async deleteComment(id: number): Promise<DeleteResult> {
-    return await this.review.delete(id);
+    return await this.comment.delete(id);
   }
 
   async getReviews(withComment, page, limit): Promise<Pagination<Review>> {

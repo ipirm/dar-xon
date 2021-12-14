@@ -18,27 +18,33 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { ReviewModule } from "./review/review.module";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
-import { RateLimiterModule } from "nestjs-rate-limiter";
 import { GoogleRecaptchaModule } from "@nestlab/google-recaptcha";
 import { IncomingMessage } from "http";
 import { HttpModule } from "@nestjs/axios";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { StatusMonitorModule } from "nest-status-monitor";
+import * as statusMonitorConfig from "./utils/statusMonitorConfig.config";
 
 @Module({
   imports: [
-    RateLimiterModule,
+    StatusMonitorModule.setUp(statusMonitorConfig),
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10
+    }),
     ConfigModule.forRoot({
       envFilePath: ".env",
       isGlobal: true
     }),
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.yandex.ru',
+        host: "smtp.yandex.ru",
         port: 465,
         secure: true, // true for 465, false for other ports
         auth: {
-          user: 'hello@tviser.agency', // generated ethereal user
-          pass: 'ilham564', // generated ethereal password
-        },
+          user: "hello@tviser.agency", // generated ethereal user
+          pass: "ilham564" // generated ethereal password
+        }
       },
       template: {
         dir: `${process.cwd()}/templates/`,
@@ -71,6 +77,6 @@ import { HttpModule } from "@nestjs/axios";
     HttpModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}

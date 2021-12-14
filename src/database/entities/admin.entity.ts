@@ -25,6 +25,7 @@ export class Admin extends BaseEntity {
 
   @BeforeUpdate()
   async generatePasswordHash(): Promise<void> {
+    if (this.password !== this.password)
     this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(this.salt));
   }
 

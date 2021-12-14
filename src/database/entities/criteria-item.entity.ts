@@ -13,6 +13,6 @@ export class CriteriaItem extends BaseEntity {
   @ManyToOne(type => Criteria, e => e.items, { onDelete: "CASCADE" })
   criteria: Criteria;
 
-  @ManyToMany(() => Task, c => c.criteria)
+  @ManyToMany(() => Task, c => c.criteria,{cascade: true})
   tasks: Task[];
 }

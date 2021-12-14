@@ -3,5 +3,7 @@ export enum CustomerTypeTaskEnum {
   Archive = "archive",
   All = "all",
   Consideration = "consideration",
-  Current = "current"
+  Current = "current",
+  Deleted = "deleted"
 }
+

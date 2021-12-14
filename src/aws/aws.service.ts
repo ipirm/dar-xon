@@ -25,7 +25,7 @@ export class AwsService {
 
 
     return {
-      key: uploadResult.Key,
+      key: uploadResult.Key.split("/")[1],
       url: uploadResult.Location
     };
   }

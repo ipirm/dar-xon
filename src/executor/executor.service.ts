@@ -14,6 +14,7 @@ import { PasswordDto } from "../auth/dto/password.dto";
 import { PhoneRequestDto } from "../auth/dto/phone-request.dto";
 import { PasswordPhoneDto } from "../auth/dto/password-phone.dto";
 import { CheckUserDto } from "../auth/dto/check-user.dto";
+import { Role } from "../enums/roles.enum";
 
 @Injectable()
 export class ExecutorService {
@@ -80,7 +81,27 @@ export class ExecutorService {
   }
 
   async getOne(id: number): Promise<Executor> {
-    const user = await this.executor.findOne(id);
+    const user = await this.executor.findOne(id, {
+      select: [
+        "fio",
+        "phone",
+        "address",
+        "passport_series",
+        "passport_number",
+        "passport_issuer",
+        "passport_issued_at",
+        "birthdate",
+        "file_rose_ticket",
+        "file_passport",
+        "file_passport_2",
+        "login",
+        "avatar",
+        "about",
+        "email",
+        "site",
+        "city"
+      ]
+    });
     let full: object = {};
     for (const [key, value] of Object.entries(user)) {
       if (value !== null && key !== "file_rose_ticket" && key !== "file_passport" && key !== "file_passport_2") {
@@ -93,6 +114,8 @@ export class ExecutorService {
         }
       }
     }
+    console.log(full);
+
     await this.executor.update(id, { fullness: Math.ceil(Object.entries(full).length / (Object.entries(user).length - 3) * 100) });
 
     return await this.executor.findOne(id, {
@@ -140,8 +163,8 @@ export class ExecutorService {
         }, HttpStatus.CONFLICT);
       }
     }
-
-    if (createExecutorDto?.email !== user.email) {
+    if (createExecutorDto?.email && createExecutorDto?.email !== user.email) {
+      console.log("user.email");
       const data = await this.executor.findOne({ where: { email: createExecutorDto.email } });
       if (data) {
         if (data.confirmed_email) {
@@ -155,7 +178,8 @@ export class ExecutorService {
       }
     }
 
-    if (createExecutorDto?.phone !== user.phone) {
+    if (createExecutorDto?.phone && createExecutorDto?.phone !== user.phone) {
+      console.log("user.phone");
       const data = await this.executor.findOne({ where: { phone: createExecutorDto.phone } });
       if (data) {
         if (data.confirmed_phone) {
@@ -164,7 +188,7 @@ export class ExecutorService {
           await this.executor.update(data.id, { phone: null });
           await this.executor.update(id, { confirmed_phone: false });
         }
-      }else{
+      } else {
         await this.executor.update(id, { confirmed_phone: false });
       }
     }
@@ -248,42 +272,33 @@ export class ExecutorService {
   }
 
   async registrationExecutor(registrationExecutorDto: RegistrationExecutorDto): Promise<Executor> {
-    let email = false;
-    let phone = false;
+    const phoneExist = await this.executor.findOne({ phone: registrationExecutorDto.phone });
+    const loginExist = await this.executor.findOne({ login: registrationExecutorDto.login });
+    const emailExist = await this.executor.findOne({ email: registrationExecutorDto.email });
 
-    let data = await this.executor.createQueryBuilder("executor")
-      .where("executor.phone = :phone OR executor.login = :login", {
-        phone: registrationExecutorDto.phone,
-        login: registrationExecutorDto.login,
-        email: registrationExecutorDto.email
-      }).getOne();
-
-    if (data) {
-      if (data.confirmation_email) {
-        email = true;
+    if (phoneExist) {
+      if (phoneExist.confirmed_phone) {
+        throw new HttpException({
+          status: HttpStatus.CONFLICT,
+          error: "Данный номер уже зарегистрирован"
+        }, HttpStatus.CONFLICT);
       } else {
-        await this.executor.update(data.id, { email: null });
-      }
-      if (data.confirmation_phone) {
-        phone = true;
-      } else {
-        await this.executor.update(data.id, { phone: null });
+        await this.executor.update(phoneExist.id, { phone: null });
       }
     }
 
-    if (email)
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Данная почта уже зарегистрирована"
-      }, HttpStatus.CONFLICT);
+    if (emailExist) {
+      if (emailExist.confirmed_email) {
+        throw new HttpException({
+          status: HttpStatus.CONFLICT,
+          error: "Данная почта уже зарегистрирована"
+        }, HttpStatus.CONFLICT);
+      } else {
+        await this.executor.update(emailExist.id, { email: null });
+      }
+    }
 
-    if (phone)
-      throw new HttpException({
-        status: HttpStatus.CONFLICT,
-        error: "Данный номер уже зарегистрирован"
-      }, HttpStatus.CONFLICT);
-
-    if (data?.login === registrationExecutorDto.login)
+    if (loginExist?.login === registrationExecutorDto.login)
       throw new HttpException({
         status: HttpStatus.CONFLICT,
         error: "Данный логин уже зарегистрирован"
@@ -492,4 +507,15 @@ export class ExecutorService {
     };
   }
 
+  async findOneOrFail(id, user): Promise<any> {
+    if (user?.role === Role.Admin)
+      return await this.executor.findOne(id);
+
+    return await this.executor.createQueryBuilder("e")
+      .select(["e.online", "e.id", "e.fio", "e.phone", "e.about", "e.avatar", "e.email", "e.site", "e.rating", "e.city"])
+      .where("e.id = :id", { id: id })
+      .leftJoin("e.reviews", "r")
+      .loadRelationCountAndMap("e.reviewsCount", "e.reviews", "reviewsCount")
+      .getOne();
+  }
 }

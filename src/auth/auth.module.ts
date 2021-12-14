@@ -16,6 +16,8 @@ import { AdminService } from "../admin/admin.service";
 import { Mail } from "../database/entities/mail.entity";
 import { HttpModule } from "@nestjs/axios";
 import { Task } from "../database/entities/task.entity";
+import { ThrottleEmailGuard } from "./guards/throttle-email.guard";
+import { ThrottlePhoneGuard } from "./guards/throttle-phone.guard";
 
 @Module({
   imports: [
@@ -24,10 +26,10 @@ import { Task } from "../database/entities/task.entity";
       signOptions: { expiresIn: "286400s" }
     }),
     HttpModule,
-    TypeOrmModule.forFeature([Customer, Executor, Admin, Mail,Task]),
+    TypeOrmModule.forFeature([Customer, Executor, Admin, Mail, Task]),
     AwsModule
   ],
-  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard, AdminService],
+  providers: [AuthService, JwtStrategy, CustomerService, ExecutorService, RolesGuard, AdminService, ThrottleEmailGuard, ThrottlePhoneGuard],
   controllers: [AuthController]
 })
 export class AuthModule {}

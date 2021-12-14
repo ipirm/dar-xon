@@ -30,7 +30,7 @@ export class TaskService {
   ) {
   }
 
-  async getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount): Promise<Pagination<Task>> {
+  async getAll(state, page, limit, search, started, criteria, cat, taskType, participantsCount, finished): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
     const data = await this.task.createQueryBuilder("task")
       .select([
@@ -56,13 +56,21 @@ export class TaskService {
         "criteria.name",
         "task_type.id",
         "task_type.name",
-        "task.status"
+        "task.status",
+        "responses.id",
+        "executor.id",
+        "executor.avatar",
+        "executors.id",
+        "executors.avatar"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
       .leftJoin("category.parent", "parent")
       .leftJoin("parent.parent", "parent1")
       .leftJoin("task.criteria", "criteria")
+      .leftJoin("task.responses", "responses")
+      .leftJoin("responses.executor", "executor")
+      .leftJoin("task.executors", "executors")
       .leftJoin("task.task_type", "task_type")
       .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses");
@@ -76,7 +84,11 @@ export class TaskService {
       data.andWhere("task_type.id IN (:...tt)", { tt: [...taskType.split(",")] });
     }
     if (started) {
-      data.andWhere("task.createdAt > :start_at", { start_at: started });
+      data.andWhere("task.createdAt > :start_at", { start_at: decodeURI(started) });
+    }
+
+    if (finished) {
+      data.andWhere("task.createdAt < :finish", { finish: decodeURI(finished) });
     }
 
     if (criteria) {
@@ -103,7 +115,7 @@ export class TaskService {
     }
 
 
-    return paginate(data, { page, limit });
+    return paginate(data.orderBy("task.createdAt", "ASC"), { page, limit });
   }
 
   async createTask(createTaskDto: CreateTaskDto, user, files: Array<Express.Multer.File>): Promise<Task> {
@@ -278,7 +290,7 @@ export class TaskService {
     }));
   }
 
-  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat, taskType, participantsCount): Promise<Pagination<Task>> {
+  async getAllExecutorTasks(user, state: ExecutorTypeTaskEnum, page, limit, search, started, criteria, cat, taskType, participantsCount, finished): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -302,6 +314,7 @@ export class TaskService {
         "category.id",
         "category.name",
         "executor1.id",
+        "executor1.avatar",
         "criteria.id",
         "criteria.name",
         "task.status",
@@ -313,6 +326,7 @@ export class TaskService {
         "executor.rating",
         "task_type.id",
         "task_type.name"
+
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
@@ -339,7 +353,11 @@ export class TaskService {
     }
 
     if (started) {
-      data.andWhere("task.createdAt > :start_at", { start_at: started });
+      data.andWhere("task.createdAt > :start_at", { start_at: decodeURI(started) });
+    }
+
+    if (finished) {
+      data.andWhere("task.createdAt < :finish", { finish: decodeURI(finished) });
     }
 
     if (criteria) {
@@ -366,10 +384,10 @@ export class TaskService {
     }
 
 
-    return paginate(data, { page, limit });
+    return paginate(data.orderBy("task.createdAt", "ASC"), { page, limit });
   }
 
-  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search, started, criteria, cat, taskType,participantsCount): Promise<Pagination<Task>> {
+  async getAllCustomerTasks(user, state: CustomerTypeTaskEnum, page, limit, search, started, criteria, cat, taskType, participantsCount, finished): Promise<Pagination<Task>> {
     const searchText = decodeURI(search).toLowerCase();
 
     const data = await this.task.createQueryBuilder("task")
@@ -402,16 +420,19 @@ export class TaskService {
         "executor.fio",
         "executor.rating",
         "task_type.id",
-        "task_type.name"
+        "task_type.name",
+        "executor1.id",
+        "executor1.avatar"
       ])
       .leftJoin("task.created_by", "created_by")
       .leftJoin("task.category", "category")
-      .leftJoin("category.parent", "parent")
-      .leftJoin("parent.parent", "parent1")
+      .leftJoin("task.executors", "executor1")
+      .leftJoin("task.task_type", "task_type")
       .leftJoin("task.criteria", "criteria")
       .leftJoin("task.responses", "responses")
+      .leftJoin("category.parent", "parent")
+      .leftJoin("parent.parent", "parent1")
       .leftJoin("responses.executor", "executor")
-      .leftJoin("task.task_type", "task_type")
       .andWhere("task.status != :status", { status: TaskStatusEnum.Deleted })
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .andWhere("created_by.id = :created_by", { created_by: user.id });
@@ -425,7 +446,11 @@ export class TaskService {
     }
 
     if (started) {
-      data.andWhere("task.createdAt > :start_at", { start_at: started });
+      data.andWhere("task.createdAt > :start_at", { start_at: decodeURI(started) });
+    }
+
+    if (finished) {
+      data.andWhere("task.createdAt < :finish", { finish: decodeURI(finished) });
     }
 
     if (criteria) {
@@ -449,6 +474,10 @@ export class TaskService {
       data.andWhere("task.status = :archive", { archive: "finished" });
     }
 
+    if (state === CustomerTypeTaskEnum.Deleted) {
+      data.andWhere("task.status = :dl", { dl: "deleted" });
+    }
+
     if (state === CustomerTypeTaskEnum.Consideration) {
       data.andWhere("task.status = :started", { started: "created" });
     }
@@ -457,7 +486,7 @@ export class TaskService {
       data.andWhere("(task.status = :started OR task.status = :created)", { started: "started", created: "created" });
     }
 
-    return paginate(data, { page, limit });
+    return paginate(data.orderBy("task.createdAt", "ASC"), { page, limit });
   }
 
   async deleteTask(id: number, user): Promise<UpdateResult> {
@@ -528,6 +557,11 @@ export class TaskService {
       .loadRelationCountAndMap("task.responsesCount", "task.responses", "responses")
       .getOne();
 
+    if (!data)
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: "Задача не найдена"
+      }, HttpStatus.FORBIDDEN);
 
     const chat = await this.chat.createQueryBuilder("c")
       .select(["c.id", "cs.id", "ex.id", "ts.id", "c.status"])
@@ -541,22 +575,24 @@ export class TaskService {
     return Object.assign(data, { chats: chat });
   }
 
-  async updateTask(createTaskDto, user, files, id): Promise<UpdateResult> {
+  async updateTask(createTaskDto, user, files, id): Promise<any> {
+    const task = await this.task.findOne(id);
     const images: any = [];
-    if (files) {
+    if (files.length) {
       for (const value of files) {
         const file = await this.aws.uploadPublicFile(value);
         images.push({ url: file.url, name: file.key });
       }
       Object.assign(createTaskDto, { files: images });
+    } else {
+      Object.assign(createTaskDto, { files: task.files });
     }
-    Object.assign(createTaskDto, { created_by: user.id });
     if (createTaskDto.criteria) {
       const criteria = await this.criteria.findByIds(createTaskDto.criteria.split(","));
       Object.assign(createTaskDto, { criteria: criteria });
     }
-
-    return await this.task.update(id, { ...createTaskDto });
+    Object.assign(createTaskDto, { id: parseInt(id) });
+    return await this.task.save(createTaskDto);
   }
 
 }

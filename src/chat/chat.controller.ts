@@ -19,6 +19,9 @@ import { Message } from "../database/entities/message.entity";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { CreateFileDto } from "./dto/create-file.dto";
 import { ChatStatus } from "../enums/chatStatus";
+import { hasRoles } from "../decorators/roles.decorator";
+import { Role } from "../enums/roles.enum";
+import { RolesGuard } from "../auth/guards/roles.guard";
 
 @ApiTags("Chat")
 @Controller("chat")
@@ -112,7 +115,7 @@ export class ChatController {
   }
 
 
-  @Post("/upload-file")
+  @Post("upload-file")
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileFieldsInterceptor([
     { name: "file", maxCount: 1 }
@@ -139,5 +142,30 @@ export class ChatController {
     @UserDecorator() user: any
   ): Promise<any> {
     return this.chat.getUnreadCount(user);
+  }
+
+
+  @ApiBearerAuth()
+  @hasRoles(Role.Customer)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get("entrance")
+  @ApiOperation({ summary: "Открыть/Закрыть чат" })
+  @ApiImplicitQuery({
+    name: "entrance",
+    required: true,
+    type: Boolean,
+    example: false
+  })
+  @ApiImplicitQuery({
+    name: "chat_id",
+    required: true,
+    type: Number
+  })
+  changeChatState(
+    @Query("entrance") entrance: boolean = false,
+    @Query("chat_id") chat_id: number,
+    @UserDecorator() user: any
+  ): Promise<any> {
+    return this.chat.changeChatState(user, entrance, chat_id);
   }
 }

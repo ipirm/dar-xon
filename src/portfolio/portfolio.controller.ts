@@ -53,6 +53,13 @@ export class PortfolioController {
     type: Number
   })
   @ApiImplicitQuery({
+    name: "sponsors",
+    required: false,
+    description: "Спонсоры",
+    type: Number,
+    example: 0
+  })
+  @ApiImplicitQuery({
     name: "user_id",
     required: false,
     description: "ID Пользователя",
@@ -62,9 +69,10 @@ export class PortfolioController {
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
     @Query("user_id") userId: any,
-    @Query("cat") cat: number
+    @Query("cat") cat: number,
+    @Query("sponsors") sponsors: number
   ): Promise<Pagination<Portfolio>> {
-    return this.portfolio.getAll(page, limit, userId, cat);
+    return this.portfolio.getAll(page, limit, userId, cat, sponsors);
   }
 
   @ApiConsumes("multipart/form-data")
@@ -137,6 +145,9 @@ export class PortfolioController {
   }
 
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @hasRoles(Role.Executor, Role.Admin)
   @Delete(":id")
   @ApiOperation({ summary: "Удалить портфолио" })
   deleteExecutor(

@@ -37,17 +37,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     console.log("connected");
     this.setOnline(socket);
     this.setOnlineNew({ socketId: socket.id, online: true, id: decoded.id, role: decoded.role });
+  console.log(this.connectedUsers.find(item => item?.socketId === socket.id))
     // @ts-ignore
     if (socket.handshake.query.chat_id != 0)
       await this.onRoomJoin(socket, { data: socket.handshake.query.chat_id });
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket): void {
-    this.connectedUsers = this.connectedUsers.filter(item => item?.socketId !== socket.id);
     console.log("disconnected");
-    this.setOnline(socket);
     this.setOffline(this.connectedUsers.find(item => item?.socketId === socket.id));
-
+    this.connectedUsers = this.connectedUsers.filter(item => item?.socketId !== socket.id);
     // @ts-ignore
     if (socket.handshake.query.chat_id != 0)
       this.onRoomLeave(socket, { data: socket.handshake.query.chat_id });

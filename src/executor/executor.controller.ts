@@ -1,12 +1,30 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
+} from "@nestjs/common";
 import { ExecutorService } from "./executor.service";
-import { ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
 import { CreateExecutorDto } from "./dto/create-executor.dto";
 import { Executor } from "../database/entities/executor.entity";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { DeleteResult, UpdateResult } from "typeorm";
+import { CreateTaskDto } from "../task/dto/create-task.dto";
+import { hasRoles } from "../decorators/roles.decorator";
+import { Role } from "../enums/roles.enum";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { UserDecorator } from "../decorators/user.decorator";
 
 @ApiTags("Executor")
 @Controller("executor")
@@ -56,6 +74,8 @@ export class ExecutorController {
     return this.executor.saveExecutor(createExecutorDto, files);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get(":id")
   @ApiOperation({ summary: "Получить исполнителя по id" })
   @ApiImplicitQuery({
@@ -64,9 +84,10 @@ export class ExecutorController {
     type: Number
   })
   getOne(
-    @Param("id") id: number
+    @Param("id") id: number,
+    @UserDecorator() user:any
   ): Promise<Executor> {
-    return this.executor.getOne(id);
+    return this.executor.findOneOrFail(id,user);
   }
 
   @Put(":id")

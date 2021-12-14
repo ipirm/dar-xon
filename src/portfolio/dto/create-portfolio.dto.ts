@@ -21,8 +21,8 @@ export class CreatePortfolioDto {
   site: string;
 
   @IsString()
-  @ApiProperty({ example: true, description: "Спонсоры", default: "false", required: false })
-  sponsors: boolean;
+  @ApiProperty({ example: 0, description: "Спонсоры", default: 0, required: false })
+  sponsors: number;
 
   @IsDate()
   @Type(() => Date)

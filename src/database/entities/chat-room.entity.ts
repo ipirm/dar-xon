@@ -25,4 +25,7 @@ export class ChatRoom extends BaseEntity {
 
   @Column("enum", { enum: ChatStatus, default: ChatStatus.Active })
   status: ChatStatus;
+
+  @Column("boolean", { default: false })
+  entrance: boolean;
 }

@@ -15,8 +15,8 @@ export class Portfolio extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ default: false })
-  sponsors: boolean;
+  @Column({ default: 0 })
+  sponsors: number;
 
   @Column("simple-json", { default: null })
   image: { name: string, url: string };

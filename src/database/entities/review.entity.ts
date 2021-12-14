@@ -24,6 +24,6 @@ export class Review extends BaseEntity {
   @ManyToOne(type => Task, e => e.reviews, { onDelete: "CASCADE" })
   task: Task;
 
-  @OneToMany(type => CommentExecutor, c => c.review)
+  @OneToMany(type => CommentExecutor, c => c.review,{cascade: true})
   comments: CommentExecutor[];
 }

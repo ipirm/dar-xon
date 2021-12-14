@@ -45,7 +45,7 @@ export class PortfolioService {
     return await this.portfolio.save(this.portfolio.create(createPortfolioDto));
   }
 
-  async getAll(page, limit, userId, cat): Promise<Pagination<Portfolio>> {
+  async getAll(page, limit, userId, cat, sponsors): Promise<Pagination<Portfolio>> {
     const data = this.portfolio.createQueryBuilder("portfolio")
       .leftJoinAndSelect("portfolio.executor", "executor")
       .leftJoinAndSelect("portfolio.category", "category")
@@ -53,6 +53,9 @@ export class PortfolioService {
 
     if (cat)
       data.andWhere("category.id = :cat", { cat: cat });
+
+    if (sponsors)
+      data.andWhere("portfolio.sponsors = :sp", { sp: sponsors });
 
     return await paginate(data, { page, limit });
   }

@@ -12,7 +12,6 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import { CreateContactDto } from "./dto/create-contact.dto";
 import { Mail } from "../database/entities/mail.entity";
 import { ConfirmPhoneDto } from "./dto/confirm-phone.dto";
-import { RateLimit } from "nestjs-rate-limiter";
 import { ConfirmEmailRequestDto } from "./dto/confirm-email-request.dto";
 import { ConfirmEmailDto } from "./dto/confirm-email.dto";
 import { EmailRequestDto } from "./dto/email-request.dto";
@@ -23,6 +22,9 @@ import { RefreshTokenDto } from "./dto/refresh-token.dto";
 import { RecaptchaResult } from "@nestlab/google-recaptcha";
 import { GoogleRecaptchaValidationResult } from "@nestlab/google-recaptcha/interfaces/google-recaptcha-validation-result";
 import { CheckUserDto } from "./dto/check-user.dto";
+import { Throttle } from "@nestjs/throttler";
+import { ThrottleEmailGuard } from "./guards/throttle-email.guard";
+import { ThrottlePhoneGuard } from "./guards/throttle-phone.guard";
 
 
 @ApiTags("Auth")
@@ -57,12 +59,6 @@ export class AuthController {
   @ApiOperation({ summary: "Запросить подтверждения номера" })
   @ApiCreatedResponse({ type: ConfirmPhoneDto })
   @ApiParam({ name: "role", enum: Role, example: Role.Executor })
-  @RateLimit({
-    keyPrefix: "request-confirm",
-    points: 1,
-    duration: 60,
-    errorMessage: "Смс можно запрашивать не раньше чем раз в минуту"
-  })
   @Post("request-confirm-phone/:role")
   confirmRequestNumber(
     @Body() confirmPhoneDto: ConfirmPhoneDto,
@@ -74,6 +70,8 @@ export class AuthController {
   @ApiOperation({ summary: "Подтвердить номер" })
   @ApiCreatedResponse({ type: ConfirmDto })
   @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @UseGuards(ThrottlePhoneGuard)
+  @Throttle(1, 60)
   @Post("confirm-phone/:role")
   confirmNumber(
     @Body() confirmDto: ConfirmDto,
@@ -85,12 +83,6 @@ export class AuthController {
   @ApiOperation({ summary: "Запросить подтверждения почты" })
   @ApiCreatedResponse({ type: ConfirmEmailRequestDto })
   @ApiParam({ name: "role", enum: Role, example: Role.Executor })
-  @RateLimit({
-    keyPrefix: "request-confirm",
-    points: 1,
-    duration: 60,
-    errorMessage: "Смс можно запрашивать не раньше чем раз в минуту"
-  })
   @Post("request-confirm-email/:role")
   confirmRequestEmail(
     @Body() confirmEmailRequestDto: ConfirmEmailRequestDto,
@@ -102,6 +94,8 @@ export class AuthController {
   @ApiOperation({ summary: "Подтвердить почту" })
   @ApiCreatedResponse({ type: ConfirmEmailDto })
   @ApiParam({ name: "role", enum: Role, example: Role.Executor })
+  @UseGuards(ThrottleEmailGuard)
+  @Throttle(1, 60)
   @Post("confirm-email/:role")
   confirmEmail(
     @Body() confirmEmailDto: ConfirmEmailDto,

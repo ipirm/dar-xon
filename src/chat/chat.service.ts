@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ChatRoom } from "../database/entities/chat-room.entity";
@@ -15,6 +15,7 @@ import { WsException } from "@nestjs/websockets";
 import { ChatStatus } from "../enums/chatStatus";
 import { TaskStatusEnum } from "../enums/taskStatus.enum";
 import { Customer } from "../database/entities/customer.entity";
+import { Task } from "../database/entities/task.entity";
 
 @Injectable()
 export class ChatService {
@@ -23,6 +24,7 @@ export class ChatService {
     @InjectRepository(Executor) private readonly executor: Repository<Executor>,
     @InjectRepository(Customer) private readonly customer: Repository<Customer>,
     @InjectRepository(Message) private readonly message: Repository<Message>,
+    @InjectRepository(Task) private readonly task: Repository<Task>,
     @InjectRepository(MessagesReadExecutor) private readonly messageReadExecutor: Repository<MessagesReadExecutor>,
     @InjectRepository(MessagesReadCustomer) private readonly messagesReadCustomer: Repository<MessagesReadCustomer>,
     private readonly aws: AwsService
@@ -35,6 +37,7 @@ export class ChatService {
       .select([
         "chat.id",
         "chat.status",
+        "chat.entrance",
         "executors.id",
         "executors.fio",
         "executors.avatar",
@@ -94,11 +97,11 @@ export class ChatService {
       );
     }
 
-    const chats = await paginate(data, { page, limit });
+    const chats = await paginate(data.orderBy("chat.createdAt", "ASC"), { page, limit });
 
     for (const value of chats.items) {
       let message = await this.message.createQueryBuilder("m")
-        .select(["m.id", "m.text", "m.createdAt", "executor.id", "executor.fio", "executor.avatar", "executor.online", "customer.id", "customer.fio", "customer.avatar", "customer.online"])
+        .select(["m.id", "m.text", "m.createdAt", "executor.id", "executor.fio", "executor.avatar", "customer.id", "customer.fio", "customer.avatar"])
         .leftJoin("m.chat", "c")
         .where("c.id = :id", { id: value.id })
         .leftJoin("m.executor", "executor")
@@ -138,7 +141,7 @@ export class ChatService {
 
   async getOne(user, id: number): Promise<ChatRoom> {
     return await this.chat.createQueryBuilder("c")
-      .select(["c.id", "e.id", "b.id", "c.status"])
+      .select(["c.id", "e.id", "b.id", "c.status", "c.entrance"])
       .leftJoin("c.executors", "e")
       .leftJoin("c.customer", "b")
       .andWhere("(e.id = :exe OR b.id = :exe)", { exe: user.id })
@@ -190,9 +193,7 @@ export class ChatService {
         "e.rating",
         "c.id",
         "c.avatar",
-        "c.fio",
-        "e.online",
-        "c.online"
+        "c.fio"
       ])
       .where("m.id = :id", { id: message.id })
       .leftJoin("m.customer", "c")
@@ -214,11 +215,9 @@ export class ChatService {
         "executor.id",
         "executor.fio",
         "executor.avatar",
-        "executor.online",
         "customer.id",
         "customer.fio",
-        "customer.avatar",
-        "customer.online"
+        "customer.avatar"
       ])
       .leftJoin("m.chat", "chat")
       .leftJoin("m.executor", "executor")
@@ -255,13 +254,13 @@ export class ChatService {
       messages.leftJoin("m.read_by_customers", "rbc", "rbc.customer.id = :user", { user: user.id });
 
       unRead = await this.messagesReadCustomer.createQueryBuilder("m")
-        .select(["m.id", "message.id", "customer.id", "chat.id","m.read"])
+        .select(["m.id", "message.id", "customer.id", "chat.id", "m.read"])
         .leftJoin("m.message", "message")
         .leftJoin("message.chat", "chat")
         .andWhere("chat.id = :ch", { ch: id })
         .leftJoin("m.customer", "customer")
         .andWhere("customer.id = :user", { user: user.id })
-        .andWhere("m.read = :rd",{rd: false})
+        .andWhere("m.read = :rd", { rd: false })
         .getMany();
 
       for (const value of unRead) {
@@ -271,7 +270,18 @@ export class ChatService {
 
 
     const data = await paginate(messages, { page, limit });
+    const task = await this.task.createQueryBuilder("t")
+      .select(["t.id", "t.status", "c.id", "customer.id", "customer.online", "res.id", "executor.id", "executor.online"])
+      .leftJoin("t.rooms", "c", "c.id = :dd", { dd: id })
+      .leftJoin("t.created_by", "customer")
+      .leftJoin("t.responses", "res")
+      .leftJoin("res.executor", "executor")
+      .where("c.id = :id", { id: id })
+      .getOne();
+
+    console.log(task);
     Object.assign(data.meta, { timestamp: new Date() });
+    Object.assign(data, { task: task });
     return data;
   }
 
@@ -356,5 +366,28 @@ export class ChatService {
       await this.customer.update(data.id, { online: false });
     }
 
+  }
+
+  async changeChatState(user, entrance, id): Promise<any> {
+
+    const exist = await this.chat.createQueryBuilder("c")
+      .select(["c.id", "b.id"])
+      .leftJoin("c.customer", "b")
+      .getOne();
+
+    if (!exist)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Чат не найден"
+      }, HttpStatus.CONFLICT);
+
+    if (exist.customer.id !== user.id)
+      throw new HttpException({
+        status: HttpStatus.CONFLICT,
+        error: "Вы не являетесь создателем задачи"
+      }, HttpStatus.CONFLICT);
+
+
+    return  await this.chat.update(id, { entrance: entrance });
   }
 }

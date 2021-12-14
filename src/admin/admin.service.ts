@@ -99,7 +99,7 @@ export class AdminService {
     return await this.executor.update(id, { banned: false });
   }
 
-  async getListUsers(page, limit, role: Role, banned: boolean, search, date, verified: boolean, fullnessBefore, fullnessAfter, dateBefore, dateAfter): Promise<Pagination<any>> {
+  async getListUsers(page, limit, role: Role, banned: boolean, search, date, verified: boolean, fullnessBefore, fullnessAfter, dateBefore, dateAfter, confirmed_email, confirmed_phone): Promise<Pagination<any>> {
     let data: any = [];
     const searchText = decodeURI(search).toLowerCase();
     const dataText = decodeURI(date);
@@ -109,18 +109,18 @@ export class AdminService {
     }
 
     if (role === Role.Customer) {
-      data = this.customer.createQueryBuilder("e").addSelect(["e.banned"]).where("e.banned = :banned", { banned: banned });
+      console.log("customer");
+      data = this.customer.createQueryBuilder("e").addSelect(["e.banned", "e.company_name"]).where("e.banned = :banned", { banned: banned });
     }
 
     if (date) {
       data.andWhere("e.createdAt = :date", { date: dataText });
     }
     if (search) {
-      data.andWhere("(LOWER(e.fio) ILIKE :value OR LOWER(e.city) ILIKE :value)", { value: `%${searchText}%` });
+      data.andWhere("(LOWER(e.fio) ILIKE :value OR LOWER(e.city) ILIKE :value OR LOWER(e.email) ILIKE :value OR LOWER(e.login) ILIKE :value)", { value: `%${searchText}%` });
     }
 
     if (fullnessBefore && fullnessAfter) {
-      console.log("fafaf")
       data.andWhere("(e.fullness BETWEEN :before AND :after)", {
         before: fullnessBefore,
         after: fullnessAfter
@@ -140,7 +140,18 @@ export class AdminService {
     if (banned)
       data.andWhere("e.banned = :banned", { banned: banned });
 
-    data.select(["e.id", "e.fio", "e.createdAt", "e.avatar", "e.city", "e.fullness"]);
+    if (role === Role.Executor)
+      data.select(["e.id", "e.fio", "e.confirmed_phone", "e.confirmed_email", "e.banned", "e.login", "e.email", "e.createdAt", "e.avatar", "e.city", "e.fullness"]);
+
+    if (role === Role.Customer)
+      data.select(["e.id", "e.banned", "e.confirmed_phone", "e.confirmed_email", "e.fio", "e.login", "e.email", "e.createdAt", "e.avatar", "e.city", "e.fullness", "e.company_name"]);
+
+    if (confirmed_email)
+      data.andWhere("e.confirmed_email = :confirmed_email", { confirmed_email: confirmed_email });
+
+    if (confirmed_phone)
+      data.andWhere("e.confirmed_phone = :confirmed_phone", { confirmed_phone: confirmed_phone });
+
     data.orderBy("e.createdAt", "DESC");
     return paginate(data, { page, limit });
   }

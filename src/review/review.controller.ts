@@ -104,7 +104,7 @@ export class ReviewController {
   @ApiBearerAuth()
   @hasRoles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Get("review")
+  @Get("")
   @ApiOperation({ summary: "Получить все отзывы" })
   @ApiImplicitQuery({
     name: "page",
@@ -135,6 +135,10 @@ export class ReviewController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete("review/:id")
   @ApiOperation({ summary: "Удалить отзыв" })
+  @ApiParam({
+    name: "id",
+    type: Number
+  })
   deleteReview(
     @Param("id") id: number
   ): Promise<DeleteResult> {

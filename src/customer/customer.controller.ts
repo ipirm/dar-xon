@@ -1,5 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiConsumes, ApiCreatedResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CustomerService } from "./customer.service";
 import { ApiImplicitQuery } from "@nestjs/swagger/dist/decorators/api-implicit-query.decorator";
 import { Pagination } from "nestjs-typeorm-paginate";
@@ -7,6 +19,9 @@ import { DeleteResult, UpdateResult } from "typeorm";
 import { Customer } from "../database/entities/customer.entity";
 import { CreateCustomerDto } from "./dto/create-customer.dto";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { UserDecorator } from "../decorators/user.decorator";
+import { Executor } from "../database/entities/executor.entity";
 
 
 @ApiTags("Customer")
@@ -54,19 +69,6 @@ export class CustomerController {
     return this.customer.saveCustomer(createCustomerDto,files);
   }
 
-  @Get(":id")
-  @ApiOperation({ summary: "Получить заказчика по id" })
-  @ApiImplicitQuery({
-    name: "id",
-    required: true,
-    type: Number
-  })
-  getOne(
-    @Param("id") id: number
-  ): Promise<Customer> {
-    return this.customer.getOne(id);
-  }
-
   @Put(":id")
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileFieldsInterceptor([
@@ -94,5 +96,21 @@ export class CustomerController {
     @Param("id") id: number
   ): Promise<DeleteResult> {
     return this.customer.deleteCustomer(id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get(":id")
+  @ApiOperation({ summary: "Получить исполнителя по id" })
+  @ApiImplicitQuery({
+    name: "id",
+    required: true,
+    type: Number
+  })
+  getOne(
+    @Param("id") id: number,
+    @UserDecorator() user:any
+  ): Promise<Customer> {
+    return this.customer.findOneOrFail(id,user);
   }
 }

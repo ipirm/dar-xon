@@ -32,7 +32,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true
   }));
 
-  
+
   app.enableCors();
 
   SwaggerModule.setup("api", app, document);
